@@ -815,6 +815,9 @@
 	"panel.settings.home.feedback.description": " 喜欢这个应用程序吗？我们遗漏了什么？点击底部提交您的想法。",
 	"panel.settings.home.button.feedback.title": "提交反馈",
 	"panel.settings.home.button.feedback.hint": "",
+	"panel.settings.home.system.title": "System",
+	"panel.settings.home.system.switch_location.title": "Location",
+	"panel.settings.home.system.switch_bluetooth.title": "Bluetooth",
 
 	"panel.settings.privacy_center.label.title":"隐私中心",
 	"panel.settings.privacy_center.label.description":"个性化您的隐私和数据偏好.",

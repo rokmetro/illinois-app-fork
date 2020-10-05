@@ -23,6 +23,7 @@ import 'package:illinois/service/Connectivity.dart';
 import 'package:illinois/service/AppDateTime.dart';
 import 'package:illinois/service/FirebaseMessaging.dart';
 import 'package:illinois/service/FlexUI.dart';
+import 'package:illinois/service/LocationServices.dart';
 import 'package:illinois/service/Log.dart';
 import 'package:illinois/service/User.dart';
 import 'package:illinois/service/Localization.dart';
@@ -59,6 +60,7 @@ class _SettingsHomePanelState extends State<SettingsHomePanel> implements Notifi
   static BorderRadius _allRounding = BorderRadius.all(Radius.circular(5));
   
   String _versionName = "";
+  LocationServicesStatus _locationStatus;
 
   @override
   void initState() {
@@ -69,6 +71,7 @@ class _SettingsHomePanelState extends State<SettingsHomePanel> implements Notifi
       FlexUI.notifyChanged,
     ]);
     _loadVersionInfo();
+    _loadLoacationStatus();
 
     super.initState();
   }
@@ -116,6 +119,9 @@ class _SettingsHomePanelState extends State<SettingsHomePanel> implements Notifi
       }
       else if (code == 'notifications') {
         contentList.add(_buildNotifications());
+      }
+      else if (code == 'system'){
+        contentList.add(_buildSystem());
       }
       else if (code == 'privacy') {
         contentList.add(_buildPrivacy());
@@ -180,6 +186,7 @@ class _SettingsHomePanelState extends State<SettingsHomePanel> implements Notifi
       bottomNavigationBar: TabBarWidget(),
     );
   }
+
   //Privacy Center
   Widget _buildPrivacyCenterButton(){
     return GestureDetector(
@@ -605,6 +612,73 @@ class _SettingsHomePanelState extends State<SettingsHomePanel> implements Notifi
   void _onDiningSpecialsToggled() {
     Analytics.instance.logSelect(target: "Dining Specials");
     FirebaseMessaging().notifyDiningSpecials = !FirebaseMessaging().notifyDiningSpecials;
+  }
+
+  // System
+
+  void _loadLoacationStatus(){
+    LocationServices().status.then((value){
+      setState(() {
+        _locationStatus = value;
+      });
+    });
+  }
+
+  Widget _buildSystem() {
+    List<Widget> contentList = new List();
+
+    List<dynamic> codes = FlexUI()['settings.system'] ?? [];
+    for (int index = 0; index < codes.length; index++) {
+      String code = codes[index];
+      BorderRadius borderRadius = _borderRadiusFromIndex(index, codes.length);
+      if (code == 'location') {
+        contentList.add(ToggleRibbonButton(
+          toggled: _locationStatus == LocationServicesStatus.PermissionAllowed,
+          height: null,
+          borderRadius: borderRadius,
+          border: Border.all(color: Styles().colors.surfaceAccent, width: 0),
+          label: Localization().getStringEx("panel.settings.home.system.switch_location.title", "Location"),
+          onTap: _onLocationClicked,
+        ));
+      }
+      else if (code == 'bluetooth') {
+        contentList.add(ToggleRibbonButton(
+          height: null,
+          borderRadius: borderRadius,
+          border: Border.all(color: Styles().colors.surfaceAccent, width: 0),
+          label: Localization().getStringEx("panel.settings.home.system.switch_bluetooth.title", "Bluetooth"),
+          onTap: _onBluetoothClicked,
+        ));
+      }
+    }
+
+    return _OptionsSection(
+        title: Localization().getStringEx("panel.settings.home.system.title", "System"),
+        widgets: contentList);
+  }
+
+  void _onLocationClicked() {
+    Analytics.instance.logSelect(target: "Switch Location");
+    LocationServices().status.then((status){
+      if(status == LocationServicesStatus.ServiceDisabled){
+        LocationServices().requestService().then((newStatus){
+          if(newStatus == LocationServicesStatus.PermissionNotDetermined){
+            LocationServices.instance.requestPermission().then((LocationServicesStatus status) {
+              _loadLoacationStatus();
+            });
+          }
+        });
+      }
+      else if(status == LocationServicesStatus.PermissionNotDetermined){
+        LocationServices.instance.requestPermission().then((LocationServicesStatus status) {
+          _loadLoacationStatus();
+        });
+      }
+    });
+  }
+
+  void _onBluetoothClicked() {
+    Analytics.instance.logSelect(target: "Switch Bluetooth");
   }
 
   // Privacy

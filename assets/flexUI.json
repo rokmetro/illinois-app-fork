@@ -14,13 +14,14 @@
 		"browse.all": ["athletics", "saved", "safer", "dining", "events", "quick_polls", "wellness", "groups"],
 		"browse.content": ["privacy_center","settings", "my_illini", "laundry",  "illini_cash", "meal_plan", "parking", "feedback", "create_event", "create_stadium_poll", "state_farm_wayfinding"],
 
-		"settings": ["user_info", "connect", "customizations", "connected", "notifications", "privacy", "account", "feedback"],
+		"settings": ["user_info", "connect", "customizations", "connected", "notifications", "system", "privacy", "account", "feedback"],
 		"settings.connect": ["netid", "phone"],
 		"settings.customizations": ["roles", "interests", "food_filters" ],
 		"settings.connected": ["netid", "phone"],
 		"settings.connected.netid": ["info", "disconnect", "connect"],
 		"settings.connected.phone": ["info", "disconnect", "verify"],
 		"settings.notifications": ["reminders", "athletics_updates", "dining"],
+		"settings.system": ["location","bluetooth"],
 		"settings.privacy": ["edit", "statement"],
 		"settings.account": ["personal_info"],
 

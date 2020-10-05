@@ -815,6 +815,9 @@
     "panel.settings.home.feedback.description": "¿Estás disfrutando la aplicación? ¿Echando de menos algo? Toque en la parte inferior para enviar su idea",
     "panel.settings.home.button.feedback.title": "Enviar comentarios",
     "panel.settings.home.button.feedback.hint": "",
+    "panel.settings.home.system.title": "System",
+    "panel.settings.home.system.switch_location.title": "Location",
+    "panel.settings.home.system.switch_bluetooth.title": "Bluetooth",
 
     "panel.settings.privacy_center.label.title":"Centro de privacidad",
     "panel.settings.privacy_center.label.description":"Personalice sus preferencias de privacidad y datos.",
