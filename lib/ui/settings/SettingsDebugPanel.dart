@@ -33,6 +33,7 @@ import 'package:illinois/service/Storage.dart';
 import 'package:illinois/ui/events/CreateEventPanel.dart';
 import 'package:illinois/ui/settings/debug/HttpProxySettingsPanel.dart';
 import 'package:illinois/ui/settings/debug/MessagingPanel.dart';
+import 'package:illinois/ui/settings/debug/TestHtmlEditorPanel.dart';
 import 'package:illinois/ui/widgets/HeaderBar.dart';
 import 'package:illinois/ui/widgets/TabBarWidget.dart';
 import 'package:illinois/ui/widgets/RoundedButton.dart';
@@ -278,6 +279,16 @@ class _SettingsDebugPanelState extends State<SettingsDebugPanel> implements Noti
                             textColor: Styles().colors.fillColorPrimary,
                             borderColor: Styles().colors.fillColorPrimary,
                             onTap: _onTapClearVoting)),
+                    Padding(padding: EdgeInsets.only(top: 5), child: Container()),
+                    Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+                        child: RoundedButton(
+                            label: "Test Html Editor",
+                            backgroundColor: Styles().colors.background,
+                            fontSize: 16.0,
+                            textColor: Styles().colors.fillColorPrimary,
+                            borderColor: Styles().colors.fillColorPrimary,
+                            onTap: _onTapTestHtmlEditor)),
                     Padding(padding: EdgeInsets.only(top: 5), child: Container()),
                     Visibility(
                       visible: Config().configEnvironment == ConfigEnvironment.dev,
@@ -578,8 +589,12 @@ class _SettingsDebugPanelState extends State<SettingsDebugPanel> implements Noti
     }
   }
 
-  void _onTapCrash(){
+  void _onTapCrash() {
     FirebaseCrashlytics.instance.crash();
+  }
+
+  void _onTapTestHtmlEditor() {
+    Navigator.push(context, CupertinoPageRoute(builder: (context) => TestHtmlEditorPanel()));
   }
 
   // SettingsListenerMixin
