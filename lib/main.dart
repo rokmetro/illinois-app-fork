@@ -221,7 +221,9 @@ class _AppState extends State<App> implements NotificationsListener {
   @override
   void onNotification(String name, dynamic param) {
     if (name == Onboarding.notifyFinished) {
-      _finishOnboarding(param);
+      Future.delayed(Duration(milliseconds: 100), () {
+        _finishOnboarding(param);
+      });
     }
     else if (name == Config.notifyUpgradeRequired) {
       setState(() {
