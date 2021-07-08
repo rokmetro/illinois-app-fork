@@ -26,12 +26,15 @@ import 'package:illinois/service/Groups.dart';
 import 'package:illinois/service/Localization.dart';
 import 'package:illinois/service/Network.dart';
 import 'package:illinois/service/NotificationService.dart';
+import 'package:illinois/service/User.dart';
 import 'package:illinois/ui/events/CreateEventPanel.dart';
 import 'package:illinois/ui/explore/ExplorePanel.dart';
 import 'package:illinois/ui/groups/GroupAllEventsPanel.dart';
 import 'package:illinois/ui/groups/GroupMembershipRequestPanel.dart';
+import 'package:illinois/ui/groups/GroupSearchPanel.dart';
 import 'package:illinois/ui/groups/GroupWidgets.dart';
 import 'package:illinois/ui/widgets/ExpandableText.dart';
+import 'package:illinois/ui/widgets/FilterWidgets.dart';
 import 'package:illinois/ui/widgets/RibbonButton.dart';
 import 'package:illinois/ui/widgets/RoundedButton.dart';
 import 'package:illinois/ui/widgets/ScalableWidgets.dart';
@@ -48,6 +51,9 @@ import 'GroupSettingsPanel.dart';
 
 enum _DetailTab { Events, About }
 
+enum _FilterType { none, category, time, tags }
+enum _TagFilter { all, my }
+
 class GroupDetailPanel extends StatefulWidget {
 
   final String groupId;
@@ -59,6 +65,7 @@ class GroupDetailPanel extends StatefulWidget {
 }
 
 class _GroupDetailPanelState extends State<GroupDetailPanel> implements NotificationsListener {
+  final String _allCategoriesValue = Localization().getStringEx("panel.groups_home.label.all_categories", "All categories");
 
   Group              _group;
   bool               _loading = false;
@@ -69,7 +76,50 @@ class _GroupDetailPanelState extends State<GroupDetailPanel> implements Notifica
   List<Member>       _groupAdmins;
   Map<String, Event> _stepsEvents = Map<String, Event>();
 
-  _DetailTab       _currentTab = _DetailTab.Events;
+  _DetailTab          _currentTab = _DetailTab.Events;
+
+  bool                _filterVisible = false;
+  bool                _isFilterLoading = false;
+  String              _selectedCategory;
+  int                 _selectedEventTimeIndex;
+  List<String>        _categories;
+
+  _TagFilter          _selectedTagFilter = _TagFilter.all;
+  _FilterType         __activeFilterType = _FilterType.none;
+
+  final List<String> _filterEventTimeValues = [
+    Localization().getStringEx('panel.explore.filter.time.upcoming', 'Upcoming'),
+    Localization().getStringEx('panel.explore.filter.time.today', 'Today'),
+    Localization().getStringEx('panel.explore.filter.time.next_7_days', 'Next 7 days'),
+    Localization().getStringEx('panel.explore.filter.time.this_weekend', 'This Weekend'),
+    Localization().getStringEx('panel.explore.filter.time.this_month', 'Next 30 days'),
+  ];
+
+  bool get _hasActiveFilter {
+    return _activeFilterType != _FilterType.none;
+  }
+
+  _FilterType get _activeFilterType {
+    return __activeFilterType;
+  }
+
+  set _activeFilterType(_FilterType value) {
+    if (__activeFilterType != value) {
+      __activeFilterType = value;
+      setState(() {});
+    }
+  }
+
+  List<dynamic> get _activeFilterList {
+    switch (_activeFilterType) {
+      case _FilterType.category:
+        return _categories;
+      case _FilterType.tags:
+        return _TagFilter.values;
+      default:
+        return null;
+    }
+  }
 
   bool get _isMember {
     if(_group?.members?.isNotEmpty ?? false){
@@ -114,12 +164,24 @@ class _GroupDetailPanelState extends State<GroupDetailPanel> implements Notifica
     return _isAdmin;
   }
 
+  static String _tagFilterToDisplayString(_TagFilter tagFilter) {
+    switch (tagFilter) {
+      case _TagFilter.all:
+        return Localization().getStringEx('panel.groups_home.filter.tag.all.label', 'All Tags');
+      case _TagFilter.my:
+        return Localization().getStringEx('panel.groups_home.filter.tag.my.label', 'My Tags');
+      default:
+        return null;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     NotificationService().subscribe(this, [Groups.notifyUserMembershipUpdated, Groups.notifyGroupCreated, Groups.notifyGroupUpdated, Groups.notifyGroupEventsUpdated]);
     _loadGroup();
     _loadEvents();
+    _loadFilters();
   }
 
   @override
@@ -162,6 +224,63 @@ class _GroupDetailPanelState extends State<GroupDetailPanel> implements Notifica
         });
       }
     });
+  }
+
+  Future<void> _loadFilters() async{
+    setState(() {
+      _isFilterLoading = true;
+    });
+    List<String> categories = [];
+    categories.add(_allCategoriesValue);
+    List<String> groupCategories = await Groups().loadCategories();
+    if (AppCollection.isCollectionNotEmpty(groupCategories)) {
+      categories.addAll(groupCategories);
+    }
+    _categories = categories;
+    _selectedCategory = _allCategoriesValue;
+
+    setState(() {
+      _isFilterLoading = false;
+    });
+  }
+
+  int _getSelectedEventTimeIndex() {
+    return (_selectedEventTimeIndex != null && _selectedEventTimeIndex >=0) ? _selectedEventTimeIndex : 0;
+  }
+
+  EventTimeFilter _getSelectedEventTimePeriod() {
+    int index = _getSelectedEventTimeIndex();
+    switch (index) {
+      case 0: // 'Upcoming':
+        return EventTimeFilter.upcoming;
+      case 1: // 'Today':
+        return EventTimeFilter.today;
+      case 2: // 'Next 7 days':
+        return EventTimeFilter.next7Day;
+      case 3: // 'This Weekend':
+        return EventTimeFilter.thisWeekend;
+      case 4: //'Next 30 days':
+        return EventTimeFilter.next30Days;
+      default:
+        return EventTimeFilter.upcoming;
+    }
+  }
+
+  List<String> _getSelectedEventTags(List<ExploreFilter> selectedFilterList) {
+    if (selectedFilterList == null || selectedFilterList.isEmpty) {
+      return null;
+    }
+    for (ExploreFilter selectedFilter in selectedFilterList) {
+      if (selectedFilter.type == ExploreFilterType.event_tags) {
+        int index = selectedFilter.firstSelectedIndex;
+        if (index == 0) {
+          return null; //All Tags
+        } else { //My tags
+          return User().getTags();
+        }
+      }
+    }
+    return null;
   }
 
   void _cancelMembershipRequest() {
@@ -305,20 +424,166 @@ class _GroupDetailPanelState extends State<GroupDetailPanel> implements Notifica
       }
     }
 
-    return Column(children: <Widget>[
-        Expanded(
-          child: SingleChildScrollView(
-            scrollDirection: Axis.vertical,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: content,
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Column(children: <Widget>[
+            Expanded(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.vertical,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: content,
+                ),
+              ),
             ),
-          ),
+            _buildMembershipRequest(),
+            _buildCancelMembershipRequest(),
+          ],
         ),
-        _buildMembershipRequest(),
-        _buildCancelMembershipRequest(),
+        _buildFilterLookupsContent(),
       ],
     );
+  }
+
+  Widget _buildFilterButtons() {
+    bool hasCategories = AppCollection.isCollectionNotEmpty(_categories);
+    return _isFilterLoading
+        ? Container()
+        : Container(
+      width: double.infinity,
+      color: Styles().colors.white,
+      child: Padding(
+        padding: const EdgeInsets.only(left: 6, right: 16, bottom: 13),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Visibility(visible: hasCategories, child: FilterSelectorWidget(
+                label: _selectedCategory,
+                hint: "",
+                active: (_activeFilterType == _FilterType.category),
+                visible: true,
+                onTap: (){
+                  Analytics.instance.logSelect(target: "GroupFilter - Category");
+                  setState(() {
+                    _activeFilterType = (_activeFilterType != _FilterType.category) ? _FilterType.category : _FilterType.none;
+                  });
+                }
+            )),
+            Visibility(visible: hasCategories, child: Container(width: 8)),
+            /*FilterSelectorWidget(
+                label: _time,
+                hint: "",
+                active: (_activeFilterType == _FilterType.category),
+                visible: true,
+                onTap: (){
+                  Analytics.instance.logSelect(target: "GroupFilter - Event time");
+                  setState(() {
+                    _activeFilterType = (_activeFilterType != _FilterType.category) ? _FilterType.category : _FilterType.none;
+                  });
+                }
+            ),*/
+            Container(width: 8),
+            FilterSelectorWidget(
+                label: AppString.getDefaultEmptyString(value: _tagFilterToDisplayString(_selectedTagFilter)),
+                hint: "",
+                active: (_activeFilterType == _FilterType.tags),
+                visible: true,
+                onTap: (){
+                  Analytics.instance.logSelect(target: "GroupFilter - Tags");
+                  setState(() {
+                    _activeFilterType = (_activeFilterType != _FilterType.tags) ? _FilterType.tags : _FilterType.none;
+                  });
+                }
+            ),
+
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilterContent() {
+    return _buildFilterContentEx(
+        itemCount: _activeFilterList?.length ?? 0,
+        itemBuilder: (context, index) {
+          return FilterListItemWidget(
+              label: AppString.getDefaultEmptyString(value: _getFilterItemLabel(index)),
+              selected: _isFilterItemSelected(index),
+              onTap: ()=> _onTapFilterEntry(_activeFilterList[index]),
+              selectedIconRes: "images/checkbox-selected.png",
+              unselectedIconRes: "images/oval-orange.png"
+          );
+        }
+    );
+  }
+
+  bool _isFilterItemSelected(int filterListIndex) {
+    if (AppCollection.isCollectionEmpty(_activeFilterList) || filterListIndex >= _activeFilterList.length) {
+      return false;
+    }
+    switch (_activeFilterType) {
+      case _FilterType.category:
+        return (_selectedCategory == _activeFilterList[filterListIndex]);
+      case _FilterType.tags:
+        return (_selectedTagFilter == _activeFilterList[filterListIndex]);
+      default:
+        return false;
+    }
+  }
+
+  String _getFilterItemLabel(int filterListIndex) {
+    if (AppCollection.isCollectionEmpty(_activeFilterList) || filterListIndex >= _activeFilterList.length) {
+      return null;
+    }
+    switch (_activeFilterType) {
+      case _FilterType.category:
+        return _activeFilterList[filterListIndex];
+      case _FilterType.time:
+        return _filterEventTimeValues[_getSelectedEventTimeIndex()];
+      case _FilterType.tags:
+        return _tagFilterToDisplayString(_activeFilterList[filterListIndex]);
+      default:
+        return null;
+    }
+  }
+
+  Widget _buildFilterContentEx({@required int itemCount, @required IndexedWidgetBuilder itemBuilder}){
+
+    return Semantics(child:Padding(
+        padding: EdgeInsets.only(left: 16, right: 16, top: 0, bottom: 40),
+        child: Semantics(child:Container(
+          decoration: BoxDecoration(
+            color: Styles().colors.fillColorSecondary,
+            borderRadius: BorderRadius.circular(5.0),
+          ),
+          child: Padding(
+            padding: EdgeInsets.only(top: 2),
+            child: Container(
+              color: Colors.white,
+              child: ListView.separated(
+                shrinkWrap: true,
+                separatorBuilder: (context, index) => Divider(
+                  height: 1,
+                  color: Styles().colors.fillColorPrimaryTransparent03,
+                ),
+                itemCount: itemCount,
+                itemBuilder: itemBuilder,
+              ),
+            ),
+          ),
+        ))));
+  }
+
+
+  Widget _buildFilterLookupsContent(){
+    return _activeFilterType != _FilterType.none
+      ? Column(
+      children: [
+        Expanded(child: _buildFilterContent())
+      ],
+    ) : Container();
   }
 
   Widget _buildImageHeader(){
@@ -552,6 +817,8 @@ class _GroupDetailPanelState extends State<GroupDetailPanel> implements Notifica
   Widget _buildEvents() {
     List<Widget> content = [];
 
+    content.add(_buildFilterButtons());
+
     if (_isAdmin) {
       content.add(_buildAdminEventOptions());
     }
@@ -741,6 +1008,16 @@ class _GroupDetailPanelState extends State<GroupDetailPanel> implements Notifica
             ],
           )
           : Container();
+  }
+
+  Widget _buildDimmedContainer() {
+    return BlockSemantics(child:GestureDetector(
+        onTap: (){
+          setState(() {
+            _activeFilterType = _FilterType.none;
+          });
+        },
+        child: Container(color: Color(0x99000000))));
   }
 
   Widget _buildConfirmationDialog(
@@ -968,6 +1245,26 @@ class _GroupDetailPanelState extends State<GroupDetailPanel> implements Notifica
   void _onTapBrowseEvents(){
     Analytics().logSelect(target: "Browse Events");
     Navigator.push(context, MaterialPageRoute(builder: (context) => ExplorePanel(browseGroupId: _group?.id, initialFilter: ExploreFilter(type: ExploreFilterType.event_time, selectedIndexes: {0/*Upcoming*/} ),)));
+  }
+
+  void _onTapFilterEntry(dynamic entry) {
+    String analyticsTarget;
+    switch (_activeFilterType) {
+      case _FilterType.category:
+        _selectedCategory = entry;
+        analyticsTarget = "CategoryFilter";
+        break;
+      case _FilterType.tags:
+        _selectedTagFilter = entry;
+        analyticsTarget = "TagFilter";
+        break;
+      default:
+        break;
+    }
+    Analytics.instance.logSelect(target: "$analyticsTarget: $entry");
+    setState(() {
+      _activeFilterType = _FilterType.none;
+    });
   }
 
   bool get _canCreateEvent{
