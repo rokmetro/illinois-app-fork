@@ -6,7 +6,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 ### Changed
+- Show Visit website and Registration buttons underneath each other [#483](https://github.com/rokwire/illinois-app/issues/483).
+- Prompt before exit without Save when creating/updating group events [#485](https://github.com/rokwire/illinois-app/issues/485).
+### Fixed
+- Fixed typo in "Choose a group you’re an admin" message [#479](https://github.com/rokwire/illinois-app/issues/479).
+- Fixed favorite button in group event card [#476](https://github.com/rokwire/illinois-app/issues/476).
+- Fixed pending members count in Group detail panel [#481](https://github.com/rokwire/illinois-app/issues/481).
+
+## [2.5.8] - 2021-07-08
+### Changed
+- GroupsDetailPanel: move admin event buttons to the bottomSheet menu [#470](https://github.com/rokwire/illinois-app/issues/470).
 - Cafe Credits to Dining Dollars - missed one spot [#453](https://github.com/rokwire/illinois-app/issues/453).
+- Check for return value of update group event.
+### Added
+- Added header bar to Polls widget in Home panel [#472](https://github.com/rokwire/illinois-app/issues/472).
+### Fixed
+- Support both "registrationUrl" and "registrationURL" for Event.registrationUrl [#468](https://github.com/rokwire/illinois-app/issues/468).
 
 ## [2.5.7] - 2021-07-07
 ### Fixed

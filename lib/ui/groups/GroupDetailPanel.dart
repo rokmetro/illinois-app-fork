@@ -15,7 +15,6 @@
  */
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:illinois/model/Event.dart';
 import 'package:illinois/model/Groups.dart';
@@ -167,12 +166,18 @@ class _GroupDetailPanelState extends State<GroupDetailPanel> implements Notifica
   static String _tagFilterToDisplayString(_TagFilter tagFilter) {
     switch (tagFilter) {
       case _TagFilter.all:
-        return Localization().getStringEx('panel.groups_home.filter.tag.all.label', 'All Tags');
+        return Localization().getStringEx(
+            'panel.groups_home.filter.tag.all.label', 'All Tags');
       case _TagFilter.my:
-        return Localization().getStringEx('panel.groups_home.filter.tag.my.label', 'My Tags');
+        return Localization().getStringEx(
+            'panel.groups_home.filter.tag.my.label', 'My Tags');
       default:
         return null;
     }
+  }
+
+  bool get _canAddEvent {
+    return _isAdmin;
   }
 
   @override
@@ -627,7 +632,16 @@ class _GroupDetailPanelState extends State<GroupDetailPanel> implements Notifica
     }
 
     int pendingCount = _group?.pendingCount ?? 0;
-    String pendingMembers = _group.currentUserIsAdmin && pendingCount > 0 ? sprintf(Localization().getStringEx("panel.group_detail.pending_members.count.format", "%s Pending Members"),[membersCount]) : "";
+    String pendingMembers;
+    if (_group.currentUserIsAdmin && pendingCount > 0) {
+      pendingMembers = pendingCount > 1 ?
+        sprintf(Localization().getStringEx("panel.group_detail.pending_members.count.format", "%s Pending Members"), [pendingCount]) :
+        Localization().getStringEx("panel.group_detail.pending_members.count.one", "1 Pending Member");
+    }
+    else {
+      pendingMembers = "";
+    }
+
     if(_isMember){
       if(_isAdmin){
         commands.add(RibbonButton(
@@ -819,9 +833,9 @@ class _GroupDetailPanelState extends State<GroupDetailPanel> implements Notifica
 
     content.add(_buildFilterButtons());
 
-    if (_isAdmin) {
-      content.add(_buildAdminEventOptions());
-    }
+//    if (_isAdmin) {
+//      content.add(_buildAdminEventOptions());
+//    }
 
     if (AppCollection.isCollectionNotEmpty(_groupEvents)) {
       for (GroupEvent groupEvent in _groupEvents) {
@@ -861,7 +875,7 @@ class _GroupDetailPanelState extends State<GroupDetailPanel> implements Notifica
     ]);
   }
 
-  Widget _buildAdminEventOptions(){
+  /*Widget _buildAdminEventOptions(){
     bool haveEvents = _groupEvents?.isNotEmpty ?? false;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -919,7 +933,7 @@ class _GroupDetailPanelState extends State<GroupDetailPanel> implements Notifica
         ],)
       ),
     );
-  }
+  }*/
 
   Widget _buildAbout() {
     String description = _group?.description ?? '';
@@ -1144,7 +1158,27 @@ class _GroupDetailPanelState extends State<GroupDetailPanel> implements Notifica
                                   positiveButtonLabel: Localization().getStringEx('dialog.yes.title', 'Yes'),
                                   negativeButtonLabel: Localization().getStringEx('dialog.no.title', 'No'),
                                   onPositiveTap: _onTapDeleteDialog)).then((value) => Navigator.pop(context));
-                        }))
+                        })),
+                Visibility(
+                    visible: _canAddEvent,
+                    child: RibbonButton(
+                        height: null,
+                        leftIcon: "images/icon-edit.png",
+                        label: Localization().getStringEx("panel.group_detail.button.group.add_event.title", "Add public event"),
+                        onTap: (){
+                          Navigator.pop(context);
+                          _onTapBrowseEvents();
+                        })),
+                Visibility(
+                    visible: _canAddEvent,
+                    child: RibbonButton(
+                        height: null,
+                        leftIcon: "images/icon-edit.png",
+                        label: Localization().getStringEx("panel.group_detail.button.group.create_event.title", "Create group event"),
+                        onTap: (){
+                          Navigator.pop(context);
+                          _onTapCreateEvent();
+                        })),
               ]));
         });
   }
@@ -1265,10 +1299,6 @@ class _GroupDetailPanelState extends State<GroupDetailPanel> implements Notifica
     setState(() {
       _activeFilterType = _FilterType.none;
     });
-  }
-
-  bool get _canCreateEvent{
-    return true; //TBD
   }
 }
 
