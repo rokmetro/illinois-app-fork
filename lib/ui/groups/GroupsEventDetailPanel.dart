@@ -41,20 +41,18 @@ class GroupEventDetailPanel extends StatefulWidget{
 }
 
 class _GroupEventDetailsPanelState extends State<GroupEventDetailPanel> with NotificationsListener{
-  List<Group> _adminGroups;
+  List<Group> _adminGroups = [];
   Event _event;
-
   Group _currentlySelectedGroup;
-  List<Group> _linkedGroups;
 
   @override
   void initState() {
     _event = widget.event;
-    _linkedGroups = []; //TBD preload if necessary
     Groups().loadGroups(myGroups: true).then((groups) {
-      setState(() {
-        _adminGroups = groups;
-      });
+      if(groups?.isNotEmpty ?? false){
+        _adminGroups = groups.where((group) => group?.currentUserIsAdmin)?.toList() ?? [];
+      }
+      setState(() {});
     });
 
     NotificationService().subscribe(this, [Groups.notifyGroupEventsUpdated]);
@@ -74,16 +72,18 @@ class _GroupEventDetailsPanelState extends State<GroupEventDetailPanel> with Not
         leading: HeaderBackButton(),
         actions: [
           _buildFavoritesButton(),
-          Semantics(
-              label: Localization().getStringEx('panel.groups_event_detail.button.options.title', 'Options'),
-              button: true,
-              excludeSemantics: true,
-              child: IconButton(
-                icon: Image.asset(
-                  'images/groups-more-inactive.png',
-                ),
-                onPressed:_onOptionsTap,
-              ))
+          Visibility(
+            visible: !_isPrivateGroupEvent,
+            child: Semantics(
+                label: Localization().getStringEx('panel.groups_event_detail.button.options.title', 'Options'),
+                button: true,
+                excludeSemantics: true,
+                child: IconButton(
+                  icon: Image.asset(
+                    'images/groups-more-inactive.png',
+                  ),
+                  onPressed:_onOptionsTap,
+              )))
         ],
       ),
       backgroundColor: Styles().colors.background,
@@ -500,7 +500,7 @@ class _GroupEventDetailsPanelState extends State<GroupEventDetailPanel> with Not
   }
 
   void _onOptionsTap(){
-    if(_event?.isGroupPrivate ?? false){
+    if(_isPrivateGroupEvent){
       return;
     }
 
@@ -570,9 +570,7 @@ class _GroupEventDetailsPanelState extends State<GroupEventDetailPanel> with Not
                   textColor: Styles().colors.fillColorPrimary,
                   onTap: (){
                     setState(() {
-                      //TBD proper add and update
                       if(_currentlySelectedGroup!=null) {
-                        _linkedGroups.add(_currentlySelectedGroup);
                         Log.d("Selected group: $_currentlySelectedGroup");
                         AppToast.show(
                             Localization().getStringEx('panel.groups_event_detail.label.link_result',  "Event has been linked to")+ _currentlySelectedGroup?.title??"");
@@ -590,6 +588,8 @@ class _GroupEventDetailsPanelState extends State<GroupEventDetailPanel> with Not
   }
 
   bool get isFavorite => User().isFavorite(_event);
+
+  bool get _isPrivateGroupEvent => _event?.isGroupPrivate ?? false;
 
   @override
   void onNotification(String name, param) {
