@@ -160,22 +160,18 @@ class ExploreService /* with Service */ {
     return null;
   }
 
-  Future<List<Event>> loadEventsByIds(Set<String> eventIds) async {
+  Future<List<Event>> loadEventsByIds({Set<String> eventIds, EventTimeFilter timeFilter, String category, Set<String> tags, int limit = 3}) async {
     if(_enabled) {
       if (AppCollection.isCollectionEmpty(eventIds)) {
         Log.i('Missing event ids param');
         return null;
       }
-      StringBuffer idsBuffer = StringBuffer();
-      eventIds.forEach((eventId) {
-        idsBuffer.write('id=$eventId&');
-      });
-      String idsQueryParam = idsBuffer.toString().substring(0, (idsBuffer.length - 1)); //Remove & at last position
-      EventTimeFilter upcomingFilter = EventTimeFilter.upcoming;
-      String timeQueryParams = _constructEventTimeFilterParams(upcomingFilter);
-      String dateTimeQueryParam = '&$timeQueryParams';
+
       http.Response response;
-      String queryParameters = '?$idsQueryParam$dateTimeQueryParam';
+      String queryParameters = _buildEventsQueryParametersEx(eventIds, null, null, timeFilter, [category].toSet(), tags, null, limit);
+      if(category != null){
+        queryParameters += '';
+      }
       try {
         response = (Config().eventsUrl != null) ? await Network().get(
             '${Config().eventsUrl}$queryParameters', auth: _userOrAppAuth, headers: _stdEventsHeaders) : null;
@@ -187,7 +183,7 @@ class ExploreService /* with Service */ {
       String responseBody = response?.body;
       if ((response != null) && (response.statusCode == 200)) {
         List<dynamic> jsonList = AppJson.decode(responseBody);
-        List<Event> events = await _buildEvents(eventsJsonList: jsonList, excludeRecurringEvents: false, eventFilter: upcomingFilter);
+        List<Event> events = await _buildEvents(eventsJsonList: jsonList, excludeRecurringEvents: false, eventFilter: timeFilter);
         return events;
       } else {
         Log.e('Failed to load events by ids');
@@ -294,8 +290,19 @@ class ExploreService /* with Service */ {
   }
 
   String _buildEventsQueryParameters(String searchText, Core.LocationData locationData, EventTimeFilter eventTimeFilter, Set<String> categories, Set<String> tags, int recurrenceId, int limit) {
+    return _buildEventsQueryParametersEx(null, searchText, locationData, eventTimeFilter, categories, tags, recurrenceId, limit);
+  }
+
+  String _buildEventsQueryParametersEx(Set<String> ids, String searchText, Core.LocationData locationData, EventTimeFilter eventTimeFilter, Set<String> categories, Set<String> tags, int recurrenceId, int limit) {
 
     String queryParameters = "";
+
+    /// IDs
+    if(AppCollection.isCollectionNotEmpty(ids)) {
+      ids.forEach((eventId) {
+        queryParameters += 'id=$eventId&';
+      });
+    }
 
     /// Search text
     if(AppString.isStringNotEmpty(searchText)){

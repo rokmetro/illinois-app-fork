@@ -228,7 +228,7 @@ class _SavedPanelState extends State<SavedPanel> implements NotificationsListene
       setState(() {
         _progress++;
       });
-      ExploreService().loadEventsByIds(favoriteEventIds).then((List<Event> events) {
+      ExploreService().loadEventsByIds(eventIds: favoriteEventIds).then((List<Event> events) {
         setState(() {
           _progress--;
           _events = _buildFilteredItems(events, favoriteEventIds);

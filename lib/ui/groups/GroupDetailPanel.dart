@@ -30,7 +30,6 @@ import 'package:illinois/ui/events/CreateEventPanel.dart';
 import 'package:illinois/ui/explore/ExplorePanel.dart';
 import 'package:illinois/ui/groups/GroupAllEventsPanel.dart';
 import 'package:illinois/ui/groups/GroupMembershipRequestPanel.dart';
-import 'package:illinois/ui/groups/GroupSearchPanel.dart';
 import 'package:illinois/ui/groups/GroupWidgets.dart';
 import 'package:illinois/ui/widgets/ExpandableText.dart';
 import 'package:illinois/ui/widgets/FilterWidgets.dart';
@@ -77,7 +76,6 @@ class _GroupDetailPanelState extends State<GroupDetailPanel> implements Notifica
 
   _DetailTab          _currentTab = _DetailTab.Events;
 
-  bool                _filterVisible = false;
   bool                _isFilterLoading = false;
   String              _selectedCategory;
   int                 _selectedEventTimeIndex;
@@ -94,10 +92,6 @@ class _GroupDetailPanelState extends State<GroupDetailPanel> implements Notifica
     Localization().getStringEx('panel.explore.filter.time.this_month', 'Next 30 days'),
   ];
 
-  bool get _hasActiveFilter {
-    return _activeFilterType != _FilterType.none;
-  }
-
   _FilterType get _activeFilterType {
     return __activeFilterType;
   }
@@ -113,6 +107,8 @@ class _GroupDetailPanelState extends State<GroupDetailPanel> implements Notifica
     switch (_activeFilterType) {
       case _FilterType.category:
         return _categories;
+      case _FilterType.time:
+        return _filterEventTimeValues;
       case _FilterType.tags:
         return _TagFilter.values;
       default:
@@ -218,7 +214,13 @@ class _GroupDetailPanelState extends State<GroupDetailPanel> implements Notifica
     setState(() {
       _updatingEvents = true;
     });
-    Groups().loadEvents(widget.groupId, limit: 3).then((Map<int, List<GroupEvent>> eventsMap) {
+
+    Groups().loadEvents(widget.groupId,
+        limit: 3,
+        category: _selectedCategory,
+        tags: _getSelectedEventTags(),
+        timeFilter: _getSelectedEventTimePeriod()
+      ).then((Map<int, List<GroupEvent>> eventsMap) {
       if (mounted) {
         setState(() {
           bool hasEventsMap = AppCollection.isCollectionNotEmpty(eventsMap?.values);
@@ -271,19 +273,9 @@ class _GroupDetailPanelState extends State<GroupDetailPanel> implements Notifica
     }
   }
 
-  List<String> _getSelectedEventTags(List<ExploreFilter> selectedFilterList) {
-    if (selectedFilterList == null || selectedFilterList.isEmpty) {
-      return null;
-    }
-    for (ExploreFilter selectedFilter in selectedFilterList) {
-      if (selectedFilter.type == ExploreFilterType.event_tags) {
-        int index = selectedFilter.firstSelectedIndex;
-        if (index == 0) {
-          return null; //All Tags
-        } else { //My tags
-          return User().getTags();
-        }
-      }
+  List<String> _getSelectedEventTags() {
+    if (_selectedTagFilter == _TagFilter.my) {
+      return User().getTags();
     }
     return null;
   }
@@ -455,58 +447,69 @@ class _GroupDetailPanelState extends State<GroupDetailPanel> implements Notifica
     bool hasCategories = AppCollection.isCollectionNotEmpty(_categories);
     return _isFilterLoading
         ? Container()
-        : Container(
-      width: double.infinity,
+        : Row(
+          children: [
+            Expanded(
+              child: Container(
       color: Styles().colors.white,
-      child: Padding(
-        padding: const EdgeInsets.only(left: 6, right: 16, bottom: 13),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Visibility(visible: hasCategories, child: FilterSelectorWidget(
-                label: _selectedCategory,
-                hint: "",
-                active: (_activeFilterType == _FilterType.category),
-                visible: true,
-                onTap: (){
-                  Analytics.instance.logSelect(target: "GroupFilter - Category");
-                  setState(() {
-                    _activeFilterType = (_activeFilterType != _FilterType.category) ? _FilterType.category : _FilterType.none;
-                  });
-                }
-            )),
-            Visibility(visible: hasCategories, child: Container(width: 8)),
-            /*FilterSelectorWidget(
-                label: _time,
-                hint: "",
-                active: (_activeFilterType == _FilterType.category),
-                visible: true,
-                onTap: (){
-                  Analytics.instance.logSelect(target: "GroupFilter - Event time");
-                  setState(() {
-                    _activeFilterType = (_activeFilterType != _FilterType.category) ? _FilterType.category : _FilterType.none;
-                  });
-                }
-            ),*/
-            Container(width: 8),
-            FilterSelectorWidget(
-                label: AppString.getDefaultEmptyString(value: _tagFilterToDisplayString(_selectedTagFilter)),
-                hint: "",
-                active: (_activeFilterType == _FilterType.tags),
-                visible: true,
-                onTap: (){
-                  Analytics.instance.logSelect(target: "GroupFilter - Tags");
-                  setState(() {
-                    _activeFilterType = (_activeFilterType != _FilterType.tags) ? _FilterType.tags : _FilterType.none;
-                  });
-                }
-            ),
+      child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 12, right: 6, bottom: 13),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    Visibility(visible: hasCategories, child: FilterSelectorWidget(
+                        label: _selectedCategory,
+                        hint: "",
+                        active: (_activeFilterType == _FilterType.category),
+                        visible: true,
+                        onTap: (){
+                          Analytics.instance.logSelect(target: "GroupFilter - Category");
+                          setState(() {
+                            _activeFilterType = (_activeFilterType != _FilterType.category) ? _FilterType.category : _FilterType.none;
+                          });
+                          _loadEvents();
+                        }
+                    )),
+                    Visibility(visible: hasCategories, child: Container(width: 8)),
+                    FilterSelectorWidget(
+                        label: _filterEventTimeValues[_getSelectedEventTimeIndex()],
+                        hint: "",
+                        active: (_activeFilterType == _FilterType.time),
+                        visible: true,
+                        onTap: (){
+                          Analytics.instance.logSelect(target: "GroupFilter - Event time");
+                          setState(() {
+                            _activeFilterType = (_activeFilterType != _FilterType.time) ? _FilterType.time : _FilterType.none;
+                          });
+                          _loadEvents();
+                        }
+                    ),
+                    Container(width: 8),
+                    FilterSelectorWidget(
+                        label: AppString.getDefaultEmptyString(value: _tagFilterToDisplayString(_selectedTagFilter)),
+                        hint: "",
+                        active: (_activeFilterType == _FilterType.tags),
+                        visible: true,
+                        onTap: (){
+                          Analytics.instance.logSelect(target: "GroupFilter - Tags");
+                          setState(() {
+                            _activeFilterType = (_activeFilterType != _FilterType.tags) ? _FilterType.tags : _FilterType.none;
+                          });
+                          _loadEvents();
+                        }
+                    ),
 
-          ],
-        ),
+                  ],
+                ),
+              ),
       ),
-    );
+    ),
+            ),
+          ],
+        );
   }
 
   Widget _buildFilterContent() {
@@ -531,6 +534,8 @@ class _GroupDetailPanelState extends State<GroupDetailPanel> implements Notifica
     switch (_activeFilterType) {
       case _FilterType.category:
         return (_selectedCategory == _activeFilterList[filterListIndex]);
+      case _FilterType.time:
+        return (_selectedEventTimeIndex == filterListIndex);
       case _FilterType.tags:
         return (_selectedTagFilter == _activeFilterList[filterListIndex]);
       default:
@@ -546,7 +551,7 @@ class _GroupDetailPanelState extends State<GroupDetailPanel> implements Notifica
       case _FilterType.category:
         return _activeFilterList[filterListIndex];
       case _FilterType.time:
-        return _filterEventTimeValues[_getSelectedEventTimeIndex()];
+        return _filterEventTimeValues[filterListIndex];
       case _FilterType.tags:
         return _tagFilterToDisplayString(_activeFilterList[filterListIndex]);
       default:
@@ -584,11 +589,17 @@ class _GroupDetailPanelState extends State<GroupDetailPanel> implements Notifica
 
   Widget _buildFilterLookupsContent(){
     return _activeFilterType != _FilterType.none
-      ? Column(
-      children: [
-        Expanded(child: _buildFilterContent())
-      ],
-    ) : Container();
+      ? Stack(
+        children: [
+          _buildDimmedContainer(),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildFilterContent()
+            ],
+          ),
+        ],
+      ) : Container();
   }
 
   Widget _buildImageHeader(){
@@ -829,9 +840,7 @@ class _GroupDetailPanelState extends State<GroupDetailPanel> implements Notifica
   }
 
   Widget _buildEvents() {
-    List<Widget> content = [];
-
-    content.add(_buildFilterButtons());
+    List<Widget> eventsList = [];
 
 //    if (_isAdmin) {
 //      content.add(_buildAdminEventOptions());
@@ -839,10 +848,10 @@ class _GroupDetailPanelState extends State<GroupDetailPanel> implements Notifica
 
     if (AppCollection.isCollectionNotEmpty(_groupEvents)) {
       for (GroupEvent groupEvent in _groupEvents) {
-        content.add(GroupEventCard(groupEvent: groupEvent, group: _group, isAdmin: _isAdmin));
+        eventsList.add(GroupEventCard(groupEvent: groupEvent, group: _group, isAdmin: _isAdmin));
       }
       
-      content.add(Padding(
+      eventsList.add(Padding(
           padding: EdgeInsets.only(top: 16),
           child: ScalableSmallRoundedButton(
               label: Localization().getStringEx("panel.group_detail.button.all_events.title", 'See all events'),
@@ -864,7 +873,19 @@ class _GroupDetailPanelState extends State<GroupDetailPanel> implements Notifica
         SectionTitlePrimary(
             title: Localization().getStringEx("panel.group_detail.label.upcoming_events", 'Upcoming Events') + ' ($_allEventsCount)',
             iconPath: 'images/icon-calendar.png',
-            children: content)
+            contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 0),
+            children: [Column(
+              children: [
+                _buildFilterButtons(),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    children: eventsList,
+                  ),
+
+                )
+              ],
+            )])
       ]),
       _updatingEvents
           ? Center(
@@ -874,66 +895,6 @@ class _GroupDetailPanelState extends State<GroupDetailPanel> implements Notifica
           : Container()
     ]);
   }
-
-  /*Widget _buildAdminEventOptions(){
-    bool haveEvents = _groupEvents?.isNotEmpty ?? false;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 17),
-        decoration: BoxDecoration(
-            color: Styles().colors.white,
-            boxShadow: [BoxShadow(color: Styles().colors.blackTransparent018, spreadRadius: 2.0, blurRadius: 6.0, offset: Offset(2, 2))],
-            borderRadius: BorderRadius.all(Radius.circular(8))
-        ),
-        child: Column(children: [
-          haveEvents? Container():
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                Text(Localization().getStringEx("panel.group_detail.label.upcoming_events.empty", "No upcoming events"), style: TextStyle(fontFamily: Styles().fontFamilies.extraBold, fontSize: 20, color: Styles().colors.textBackground, ), textAlign: TextAlign.left,),
-                Container(height: 8,),
-                Text(Localization().getStringEx("panel.group_detail.label.upcoming_events.hint", "Create a new event or share an existing event with your members. "), style: TextStyle(fontFamily: Styles().fontFamilies.regular, fontSize: 16, color: Styles().colors.textBackground, )),
-                Container(height: 16,),
-              ],),
-          Row(
-            children: [
-              Expanded(child:
-                ScalableRoundedButton(
-                    label: Localization().getStringEx("panel.group_detail.button.browse.title",  "Browse"),
-                    backgroundColor: Styles().colors.white,
-                    textColor: Styles().colors.fillColorPrimary,
-                    fontFamily: Styles().fontFamilies.bold,
-                    fontSize: 16,
-                    borderColor: Styles().colors.fillColorSecondary,
-                    borderWidth: 2,
-                    onTap:_onTapBrowseEvents
-                ),
-              ),
-              Visibility(
-                visible: _canCreateEvent,
-                child: Container(width: 16,)),
-              Visibility(
-                visible: _canCreateEvent,
-                child: Expanded(child:
-                  ScalableRoundedButton(
-                    label:  Localization().getStringEx("panel.group_detail.button.create_event.title",  "Create event"),
-                    backgroundColor: Styles().colors.white,
-                    textColor: Styles().colors.fillColorPrimary,
-                    fontFamily: Styles().fontFamilies.bold,
-                    fontSize: 16,
-                    borderColor: Styles().colors.fillColorSecondary,
-                    borderWidth: 2,
-                    rightIcon: Image.asset('images/icon-add-20x18.png'),
-                    onTap: _onTapCreateEvent,),
-                )
-              )
-            ],
-          ),
-        ],)
-      ),
-    );
-  }*/
 
   Widget _buildAbout() {
     String description = _group?.description ?? '';
@@ -1086,7 +1047,7 @@ class _GroupDetailPanelState extends State<GroupDetailPanel> implements Notifica
         }
       }
 
-      ExploreService().loadEventsByIds(stepEventIds).then((List<Event> events){
+      ExploreService().loadEventsByIds(eventIds: stepEventIds).then((List<Event> events){
         if (mounted) {
           setState(() {
             _applyStepEvents(events);
@@ -1287,6 +1248,10 @@ class _GroupDetailPanelState extends State<GroupDetailPanel> implements Notifica
       case _FilterType.category:
         _selectedCategory = entry;
         analyticsTarget = "CategoryFilter";
+        break;
+      case _FilterType.time:
+        _selectedEventTimeIndex = _filterEventTimeValues.indexOf(entry);
+        analyticsTarget = "EventTimeFilter";
         break;
       case _FilterType.tags:
         _selectedTagFilter = entry;

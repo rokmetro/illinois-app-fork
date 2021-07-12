@@ -93,7 +93,7 @@ class ExplorePanel extends StatefulWidget {
   }
 
   static Future<void> presentDetailPanel(BuildContext context, {String eventId}) async {
-    List<Event> events = (eventId != null) ? await ExploreService().loadEventsByIds(Set.from([eventId])) : null;
+    List<Event> events = (eventId != null) ? await ExploreService().loadEventsByIds(eventIds: Set.from([eventId])) : null;
     Event event = ((events != null) && (0 < events.length)) ? events.first : null;
     //Explore explore = (eventId != null) ? await ExploreService().getEventById(eventId) : null;
     //Event event = (explore is Event) ? explore : null;
