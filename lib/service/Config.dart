@@ -398,6 +398,7 @@ class Config with Service implements NotificationsListener {
   }
 
   String get appCanonicalId {
+    return "edu.illinois.rokwire";
     if (_appCanonicalId == null) {
       _appCanonicalId = appId;
       
