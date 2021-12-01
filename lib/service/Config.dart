@@ -293,6 +293,8 @@ class Config with Service implements NotificationsListener {
   }
 
   String get appPlatformId {
+    return "edu.illinois.rokwire.android";
+
     if (_appPlatformId == null) {
       _appPlatformId = appId;
 
