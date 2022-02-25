@@ -1,11 +1,9 @@
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:illinois/service/Analytics.dart';
-import 'package:illinois/service/BluetoothServices.dart';
-import 'package:illinois/service/LocationServices.dart';
+import 'package:rokwire_plugin/service/location_services.dart';
 import 'package:illinois/service/Onboarding2.dart';
-import 'package:illinois/service/Styles.dart';
+import 'package:rokwire_plugin/service/styles.dart';
 
 class Onboarding2PermissionsPanel extends StatefulWidget{
   @override
@@ -23,57 +21,34 @@ class _Onboarding2PermissionsPanelState extends State <Onboarding2PermissionsPan
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Styles().colors.background,
+        backgroundColor: Styles().colors!.background,
     );
   }
 
   void _requestLocation(BuildContext context) async {
-    Analytics.instance.logSelect(target: 'Share My locaiton') ;
-    await LocationServices.instance.status.then((LocationServicesStatus status){
-      if (status == LocationServicesStatus.ServiceDisabled) {
-        LocationServices.instance.requestService();
+    Analytics().logSelect(target: 'Share My locaiton') ;
+    await LocationServices().status.then((LocationServicesStatus? status){
+      if (status == LocationServicesStatus.serviceDisabled) {
+        LocationServices().requestService();
       }
-      else if (status == LocationServicesStatus.PermissionNotDetermined) {
-        LocationServices.instance.requestPermission().then((LocationServicesStatus status) {
+      else if (status == LocationServicesStatus.permissionNotDetermined) {
+        LocationServices().requestPermission().then((LocationServicesStatus? status) {
           //Next
-          _showBluetoothPermissionDialog();
+          _goNext();
         });
       }
-      else if (status == LocationServicesStatus.PermissionDenied) {
+      else if (status == LocationServicesStatus.permissionDenied) {
         //Denied  - request again
-        LocationServices.instance.requestPermission().then((LocationServicesStatus status) {
+        LocationServices().requestPermission().then((LocationServicesStatus? status) {
           //Next
-          _showBluetoothPermissionDialog();
+          _goNext();
         });
       }
-      else if (status == LocationServicesStatus.PermissionAllowed) {
+      else if (status == LocationServicesStatus.permissionAllowed) {
         //Next()
-        _showBluetoothPermissionDialog();
+        _goNext();
       }
     });
-  }
-
-  _showBluetoothPermissionDialog(){
-    Analytics.instance.logSelect(target: 'Enable Bluetooth') ;
-
-    BluetoothStatus authStatus = BluetoothServices().status;
-    if (authStatus == BluetoothStatus.PermissionNotDetermined) {
-      BluetoothServices().requestStatus().then((_){
-       //Next
-        _goNext();
-      });
-    }
-    else if (authStatus == BluetoothStatus.PermissionDenied) {
-      //Denied - ask again
-      BluetoothServices().requestStatus().then((_){
-        //Next
-        _goNext();
-      });
-    }
-    else if (authStatus == BluetoothStatus.PermissionAllowed) {
-     //Next
-      _goNext();
-    }
   }
 
   void _goNext(){

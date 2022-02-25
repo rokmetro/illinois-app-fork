@@ -16,19 +16,18 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:illinois/model/Auth2.dart';
+import 'package:rokwire_plugin/model/auth2.dart';
 import 'package:illinois/model/sport/SportDetails.dart';
-import 'package:illinois/service/Auth2.dart';
-import 'package:illinois/service/Connectivity.dart';
-import 'package:illinois/service/NotificationService.dart';
+import 'package:rokwire_plugin/service/auth2.dart';
+import 'package:illinois/utils/AppUtils.dart';
+import 'package:rokwire_plugin/service/connectivity.dart';
+import 'package:rokwire_plugin/service/notification_service.dart';
 import 'package:illinois/service/Sports.dart';
-import 'package:illinois/service/Localization.dart';
+import 'package:rokwire_plugin/service/localization.dart';
 import 'package:illinois/service/Analytics.dart';
 import 'package:illinois/ui/athletics/AthleticsSportItemWidget.dart';
 import 'package:illinois/ui/athletics/AthleticsTeamPanel.dart';
-import 'package:illinois/utils/Utils.dart';
-import 'package:illinois/service/Styles.dart';
+import 'package:rokwire_plugin/service/styles.dart';
 
 typedef void SportsTapListener (String  sport);
 class AthleticsTeamsWidget extends StatefulWidget {
@@ -43,12 +42,12 @@ class AthleticsTeamsWidget extends StatefulWidget {
 
 class AthleticsTeamsWidgetState extends State<AthleticsTeamsWidget>
     implements NotificationsListener {
-  List<SportDefinition> _menSports;
-  List<SportDefinition> _womenSports;
-  Set<String> _preferredSports;
+  List<SportDefinition>? _menSports;
+  List<SportDefinition>? _womenSports;
+  Set<String>? _preferredSports;
 
-  List<SportDefinition> get menSports => _menSports;
-  List<SportDefinition> get womenSports => _womenSports;
+  List<SportDefinition>? get menSports => _menSports;
+  List<SportDefinition>? get womenSports => _womenSports;
 
   @override
   void initState() {
@@ -90,7 +89,7 @@ class AthleticsTeamsWidgetState extends State<AthleticsTeamsWidget>
             Container(
               decoration: BoxDecoration(
                   border:
-                  Border.all(color: Styles().colors.surfaceAccent, width: 1)),
+                  Border.all(color: Styles().colors!.surfaceAccent!, width: 1)),
               child: Column(
                 children: buildSportList(_menSports),
               ),
@@ -102,7 +101,7 @@ class AthleticsTeamsWidgetState extends State<AthleticsTeamsWidget>
             Container(
                 decoration: BoxDecoration(
                     border: Border.all(
-                        color: Styles().colors.surfaceAccent, width: 1)),
+                        color: Styles().colors!.surfaceAccent!, width: 1)),
                 child: Column(
                   children: buildSportList(_womenSports),
                 )),
@@ -112,13 +111,13 @@ class AthleticsTeamsWidgetState extends State<AthleticsTeamsWidget>
     );
   }
 
-  List<Widget> buildSportList(List<SportDefinition> sports) {
+  List<Widget> buildSportList(List<SportDefinition>? sports) {
     List<Widget> widgetList = [];
     if (sports != null && sports.isNotEmpty) {
       for (SportDefinition sport in sports) {
         if (widgetList.isNotEmpty) {
           widgetList.add(Divider(
-            color: Styles().colors.surfaceAccent,
+            color: Styles().colors!.surfaceAccent,
             height: 1,
           ));
         }
@@ -127,7 +126,7 @@ class AthleticsTeamsWidgetState extends State<AthleticsTeamsWidget>
             showChevron: widget.handleLabelClick,
             label: sport.customName,
             checkMarkVisibility: Auth2().privacyMatch(3),
-            selected: _preferredSports != null && _preferredSports.contains(sport.shortName),
+            selected: _preferredSports != null && _preferredSports!.contains(sport.shortName),
             onLabelTap: () =>
             (widget.handleLabelClick
                 ? _onTapAthleticsSportLabel(context, sport)
@@ -144,7 +143,7 @@ class AthleticsTeamsWidgetState extends State<AthleticsTeamsWidget>
     String menSelectClearImageKey = allMenSelected ? "images/icon-x-orange-small.png" : "images/icon-check-simple.png";
     return Container(
       decoration: BoxDecoration(
-          color: Styles().colors.fillColorPrimary,
+          color: Styles().colors!.fillColorPrimary,
           borderRadius: BorderRadius.only(
               topLeft: Radius.circular(4),
               topRight: Radius.circular(4))),
@@ -167,7 +166,7 @@ class AthleticsTeamsWidgetState extends State<AthleticsTeamsWidget>
                   textAlign: TextAlign.left,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                      fontFamily: Styles().fontFamilies.bold,
+                      fontFamily: Styles().fontFamilies!.bold,
                       color: Colors.white,
                       fontSize: 14,
                       letterSpacing: 1.0),
@@ -182,14 +181,14 @@ class AthleticsTeamsWidgetState extends State<AthleticsTeamsWidget>
                     ", "+ Localization().getStringEx("toggle_button.status.checkbox", "checkbox"),
                 child: GestureDetector(
                   onTap: () {
-                    Analytics.instance.logSelect(target: "Sport Label Tap: MEN'S SPORTS");
+                    Analytics().logSelect(target: "Sport Label Tap: MEN'S SPORTS");
                     AppSemantics.announceCheckBoxStateChange(context, !allMenSelected,
                         Localization().getStringEx("widget.athletics_teams.label.men_sports.title", "MEN'S SPORTS"));// with ! because we announce before the actual state change
                     Auth2().prefs?.toggleSportInterests(Sports.switchAllSports(_menSports, _preferredSports, !allMenSelected));
                   },
                   child: Row(children: <Widget>[
                     Text(Localization().getStringEx(menSelectClearTextKey, ''),
-                      style: TextStyle(fontSize: 16, color: Colors.white, fontFamily: Styles().fontFamilies.medium),), Padding(padding: EdgeInsets.symmetric(horizontal: 8),child: Image.asset(menSelectClearImageKey),)
+                      style: TextStyle(fontSize: 16, color: Colors.white, fontFamily: Styles().fontFamilies!.medium),), Padding(padding: EdgeInsets.symmetric(horizontal: 8),child: Image.asset(menSelectClearImageKey),)
                   ],),),),)
           ],
         ),
@@ -203,7 +202,7 @@ class AthleticsTeamsWidgetState extends State<AthleticsTeamsWidget>
     String womenSelectClearImageKey = allWomenSelected ? "images/icon-x-orange-small.png" : "images/icon-check-simple.png";
     return Container(
       decoration: BoxDecoration(
-          color: Styles().colors.fillColorPrimary,
+          color: Styles().colors!.fillColorPrimary,
           borderRadius: BorderRadius.only(
               topLeft: Radius.circular(4),
               topRight: Radius.circular(4))),
@@ -226,7 +225,7 @@ class AthleticsTeamsWidgetState extends State<AthleticsTeamsWidget>
                   textAlign: TextAlign.left,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                      fontFamily: Styles().fontFamilies.bold,
+                      fontFamily: Styles().fontFamilies!.bold,
                       color: Colors.white,
                       fontSize: 14,
                       letterSpacing: 1.0),
@@ -241,14 +240,14 @@ class AthleticsTeamsWidgetState extends State<AthleticsTeamsWidget>
                     ", "+ Localization().getStringEx("toggle_button.status.checkbox", "checkbox"),
                 child: GestureDetector(
                   onTap: () {
-                    Analytics.instance.logSelect(target: "Sport Label Tap: WOMEN'S SPORTS");
+                    Analytics().logSelect(target: "Sport Label Tap: WOMEN'S SPORTS");
                     AppSemantics.announceCheckBoxStateChange(context, !allWomenSelected,
                         Localization().getStringEx("widget.athletics_teams.label.women_sports.title", "WOMEN'S SPORTS"));// with ! because we announce before the actual state change
                     Auth2().prefs?.toggleSportInterests(Sports.switchAllSports(_womenSports, _preferredSports, !allWomenSelected));
                   },
                   child: Row(children: <Widget>[
                     Text(Localization().getStringEx(womenSelectClearTextKey, ''),
-                      style: TextStyle(fontSize: 16, color: Colors.white, fontFamily: Styles().fontFamilies.medium),), Padding(padding: EdgeInsets.symmetric(horizontal: 8),
+                      style: TextStyle(fontSize: 16, color: Colors.white, fontFamily: Styles().fontFamilies!.medium),), Padding(padding: EdgeInsets.symmetric(horizontal: 8),
                       child: Image.asset(womenSelectClearImageKey),)
                   ],),),),)
           ],
@@ -258,7 +257,7 @@ class AthleticsTeamsWidgetState extends State<AthleticsTeamsWidget>
   }
 
   void _onTapAthleticsSportLabel(BuildContext context, SportDefinition sport) {
-    Analytics.instance.logSelect(target: "Sport Label Tap: "+sport.name);
+    Analytics().logSelect(target: "Sport Label Tap: "+sport.name!);
     if (Connectivity().isNotOffline) {
       Navigator.push(context,
           CupertinoPageRoute(builder: (context) => AthleticsTeamPanel(sport)));
@@ -269,8 +268,8 @@ class AthleticsTeamsWidgetState extends State<AthleticsTeamsWidget>
   }
 
   void _onTapAthleticsSportCheck(BuildContext context, SportDefinition sport) {
-    Analytics.instance.logSelect(target: "Sport Check Tap: "+sport.name);
-    AppSemantics.announceCheckBoxStateChange(context, _preferredSports?.contains(sport.shortName) ?? false, sport?.customName);
+    Analytics().logSelect(target: "Sport Check Tap: "+sport.name!);
+    AppSemantics.announceCheckBoxStateChange(context, _preferredSports?.contains(sport.shortName) ?? false, sport.customName);
     Auth2().prefs?.toggleSportInterest(sport.shortName);
   }
 

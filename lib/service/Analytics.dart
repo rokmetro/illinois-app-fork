@@ -15,51 +15,42 @@
  */
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:http/http.dart' as Http;
-import 'package:illinois/model/Auth2.dart';
-import 'package:illinois/model/GeoFence.dart';
-import 'package:illinois/model/Poll.dart';
-import 'package:illinois/service/AppNavigation.dart';
-import 'package:illinois/service/Auth2.dart';
-import 'package:illinois/service/Config.dart';
-import 'package:illinois/service/Connectivity.dart';
-import 'package:illinois/service/GeoFence.dart';
-import 'package:illinois/service/Network.dart';
-import 'package:illinois/service/NotificationService.dart';
-import 'package:illinois/service/Service.dart';
-import 'package:location/location.dart';
+import 'package:rokwire_plugin/service/groups.dart';
+import 'package:rokwire_plugin/service/polls.dart';
+import 'package:rokwire_plugin/model/auth2.dart';
+import 'package:rokwire_plugin/model/geo_fence.dart';
+import 'package:rokwire_plugin/service/app_navigation.dart';
+import 'package:rokwire_plugin/service/connectivity.dart';
+import 'package:rokwire_plugin/service/geo_fence.dart';
+import 'package:rokwire_plugin/service/network.dart';
+import 'package:rokwire_plugin/service/notification_service.dart';
+import 'package:rokwire_plugin/service/service.dart';
+import 'package:rokwire_plugin/service/app_livecycle.dart';
+import 'package:rokwire_plugin/service/location_services.dart';
+import 'package:rokwire_plugin/service/analytics.dart' as rokwire;
 
-import 'package:sqflite/sqflite.dart';
-import 'package:path/path.dart';
-import 'package:package_info/package_info.dart';
-import 'package:device_info/device_info.dart';
-import 'package:uuid/uuid.dart';
+import 'package:rokwire_plugin/model/poll.dart';
+import 'package:rokwire_plugin/model/group.dart';
+import 'package:illinois/ext/Group.dart';
+import 'package:illinois/service/Auth2.dart';
 
 import 'package:illinois/main.dart';
 import 'package:illinois/service/NativeCommunicator.dart';
-import 'package:illinois/service/AppLivecycle.dart';
-import 'package:illinois/service/LocationServices.dart';
 import 'package:illinois/ui/RootPanel.dart';
 
-class Analytics with Service implements NotificationsListener {
+import 'package:uuid/uuid.dart';
+import 'package:notification_permissions/notification_permissions.dart' as Notifications;
+import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart';
 
-  // Database Data
 
-  static const String   _databaseName         = "analytics.db";
-  static const int      _databaseVersion      = 1;
-  static const String   _databaseTable        = "events";
-  static const String   _databaseColumn       = "packet";
-  static const String   _databaseRowID        = "rowid";
-  static const int      _databaseMaxPackCount = 64;
-  static const Duration _timerTick            = const Duration(milliseconds: 100);
-  
+
+class Analytics extends rokwire.Analytics implements NotificationsListener {
+
   // Log Data
 
   // Standard (shared) Attributes
@@ -198,6 +189,7 @@ class Analytics with Service implements NotificationsListener {
   static const String   LogAuthAction                      = "action";
   static const String   LogAuthLoginNetIdActionName        = "login_netid";
   static const String   LogAuthLoginPhoneActionName        = "login_phone";
+  static const String   LogAuthLoginEmailActionName        = "login_email";
   static const String   LogAuthLogoutActionName            = "logout";
   static const String   LogAuthResult                      = "result";
 
@@ -239,57 +231,62 @@ class Analytics with Service implements NotificationsListener {
 
   // Data
 
-  Database             _database;
-  Timer                _timer;
-  bool                 _inTimer = false;
-  
-  String               _currentPageName;
-  Map<String, dynamic> _currentPageAttributes;
-  PackageInfo          _packageInfo;
-  AndroidDeviceInfo    _androidDeviceInfo;
-  IosDeviceInfo        _iosDeviceInfo;
-  String               _appId;
-  String               _appVersion;
-  String               _osVersion;
-  String               _deviceModel;
-  ConnectivityStatus   _connectionStatus;
-  String               _connectionName;
-  String               _locationServices;
-  String               _notificationServices;
-  String               _sessionUuid;
-  String               _accessibilityState;
-  List<dynamic>        _userRoles;
+  String?               _currentPageName;
+  Map<String, dynamic>? _currentPageAttributes;
+  String?               _connectionName;
+  String?               _locationServices;
+  String?               _notificationServices;
+  String?               _sessionUuid;
+  String?               _accessibilityState;
+  List<dynamic>?        _userRoles;
   
 
-  // Singletone Instance
+  // Singletone Factory
 
-  Analytics._internal();
-  static final Analytics _instance = Analytics._internal();
+  @protected
+  Analytics.internal() : super.internal();
 
-  factory Analytics() {
-    return _instance;
-  }
-  
-  static Analytics get instance {
-    return _instance;
-  }
+  factory Analytics() => ((rokwire.Analytics.instance is Analytics) ? (rokwire.Analytics.instance as Analytics) : (rokwire.Analytics.instance = Analytics.internal()));
 
-  // Initialization
+  // Service
 
   @override
   void createService() {
+    super.createService();
     NotificationService().subscribe(this, [
-      Connectivity.notifyStatusChanged,
       AppLivecycle.notifyStateChanged,
       AppNavigation.notifyEvent,
       LocationServices.notifyStatusChanged,
+      
       Auth2UserPrefs.notifyRolesChanged,
+      Auth2UserPrefs.notifyFavoriteChanged,
+      Auth2.notifyLoginSucceeded,
+      Auth2.notifyLoginFailed,
+      Auth2.notifyLogout,
       Auth2.notifyPrefsChanged,
       Auth2.notifyUserDeleted,
+      
+      Network.notifyHttpResponse,
+      
       NativeCommunicator.notifyMapRouteStart,
       NativeCommunicator.notifyMapRouteFinish,
-      NativeCommunicator.notifyGeoFenceRegionsEnter,
-      NativeCommunicator.notifyGeoFenceRegionsExit,
+      
+      GeoFence.notifyRegionEnter,
+      GeoFence.notifyRegionExit,
+      
+      Polls.notifyLifecycleCreate,
+      Polls.notifyLifecycleOpen,
+      Polls.notifyLifecycleClose,
+      Polls.notifyLifecycleVote,
+
+      Groups.notifyGroupMembershipRequested,
+      Groups.notifyGroupMembershipCanceled,
+      Groups.notifyGroupMembershipQuit,
+      Groups.notifyGroupMembershipApproved,
+      Groups.notifyGroupMembershipRejected,
+      Groups.notifyGroupMembershipRemoved,
+      Groups.notifyGroupMembershipSwitchToAdmin,
+      Groups.notifyGroupMembershipSwitchToMember,
     ]);
 
   }
@@ -297,118 +294,57 @@ class Analytics with Service implements NotificationsListener {
   @override
   Future<void> initService() async {
 
-    await _initDatabase();
-    _initTimer();
-    
-    _updateConnectivity();
+    await super.initService();
+
     _updateLocationServices();
     _updateNotificationServices();
     _updateUserRoles();
     _updateSessionUuid();
-
-    PackageInfo.fromPlatform().then((PackageInfo packageInfo) {
-      _packageInfo = packageInfo;
-      _appId = _packageInfo?.packageName;
-      _appVersion = "${_packageInfo?.version}+${_packageInfo?.buildNumber}";
-    });
-
-    if (defaultTargetPlatform == TargetPlatform.android) {
-      DeviceInfoPlugin().androidInfo.then((AndroidDeviceInfo androidDeviceInfo) {
-        _androidDeviceInfo = androidDeviceInfo;
-        _deviceModel = _androidDeviceInfo.model;
-        _osVersion = _androidDeviceInfo.version.release;
-      });
-    }
-    else if (defaultTargetPlatform == TargetPlatform.iOS) {
-      DeviceInfoPlugin().iosInfo.then((IosDeviceInfo iosDeviceInfo) {
-        _iosDeviceInfo = iosDeviceInfo;
-        _deviceModel = _iosDeviceInfo.model;
-        _osVersion = _iosDeviceInfo.systemVersion;
-      });
-    }
-  
-    if (_database != null) {
-      await super.initService();
-    }
-    else {
-      throw ServiceError(
-        source: this,
-        severity: ServiceErrorSeverity.nonFatal,
-        title: 'Analytics Initialization Failed',
-        description: 'Failed to create analytics database.',
-      );
-    }
   }
 
   @override
   void destroyService() {
     NotificationService().unsubscribe(this);
-
-    _closeDatabase();
-    _closeTimer();
+    super.destroyService();
   }
 
   @override
   Set<Service> get serviceDependsOn {
-    return Set.from([Config(), Auth2(), LocationServices(), Connectivity() ]);
-  }
-
-  // Database
-
-  Future<void> _initDatabase() async {
-    if (_database == null) {
-      String databasePath = await getDatabasesPath();
-      String databaseFile = join(databasePath, _databaseName);
-      _database = await openDatabase(databaseFile, version: _databaseVersion, onCreate: (db, version) {
-        return db.execute("CREATE TABLE IF NOT EXISTS $_databaseTable($_databaseColumn TEXT NOT NULL)",);
-      });
-    }
-  }
-
-  void _closeDatabase() {
-    if (_database != null) {
-      _database.close();
-      _database = null;
-    }
-  }
-
-  // Timer
-
-  void _initTimer() {
-      if (_timer == null) {
-        //Log.d("Analytics: awake");
-        _timer = Timer.periodic(_timerTick, _onTimer);
-        _inTimer = false;
-      }
-  }
-
-  void _closeTimer() {
-    if (_timer != null) {
-      //Log.d("Analytics: asleep");
-      _timer.cancel();
-      _timer = null;
-    }
-    _inTimer = false;
+    Set<Service> services = super.serviceDependsOn;
+    services.addAll([Auth2(), LocationServices()]);
+    return services;
   }
 
   // NotificationsListener
 
   @override
   void onNotification(String name, dynamic param) {
-    if (name == Connectivity.notifyStatusChanged) {
-      _applyConnectivityStatus(param);
-    }
-    else if (name == LocationServices.notifyStatusChanged) {
-      _applyLocationServicesStatus(param);
-    }
-    else if (name == AppLivecycle.notifyStateChanged) {
+    super.onNotification(name, param);
+    
+    if (name == AppLivecycle.notifyStateChanged) {
       _onAppLivecycleStateChanged(param);
     }
     else if (name == AppNavigation.notifyEvent) {
       _onAppNavigationEvent(param);
     }
+    else if (name == LocationServices.notifyStatusChanged) {
+      _applyLocationServicesStatus(param);
+    }
+    
     else if (name == Auth2UserPrefs.notifyRolesChanged) {
       _updateUserRoles();
+    }
+    else if (name == Auth2UserPrefs.notifyFavoriteChanged) {
+      logFavorite(param);
+    }
+    else if (name == Auth2.notifyLoginSucceeded) {
+      logAuth(loginType: param, result: true);
+    }
+    else if (name == Auth2.notifyLoginFailed) {
+      logAuth(loginType: param, result: false);
+    }
+    else if (name == Auth2.notifyLogout) {
+      logAuth(action: Analytics.LogAuthLogoutActionName);
     }
     else if (name == Auth2.notifyPrefsChanged) {
       _updateUserRoles();
@@ -417,37 +353,79 @@ class Analytics with Service implements NotificationsListener {
       _updateSessionUuid();
       _updateUserRoles();
     }
+    
+    else if (name == Network.notifyHttpResponse) {
+      logHttpResponse(param);
+    }
+    
     else if (name == NativeCommunicator.notifyMapRouteStart) {
       logMapRoute(action: LogMapRouteStartActionName, params: param);
     }
     else if (name == NativeCommunicator.notifyMapRouteFinish) {
       logMapRoute(action: LogMapRouteFinishActionName, params: param);
     }
-    else if (name == NativeCommunicator.notifyGeoFenceRegionsEnter) {
+    
+    else if (name == GeoFence.notifyRegionEnter) {
       logGeoFenceRegion(action: LogGeoFenceRegionEnterActionName, regionId: param);
     }
-    else if (name == NativeCommunicator.notifyGeoFenceRegionsExit) {
+    else if (name == GeoFence.notifyRegionExit) {
       logGeoFenceRegion(action: LogGeoFenceRegionExitActionName, regionId: param);
+    }
+    
+    else if (name == Polls.notifyLifecycleCreate) {
+      logPoll(param, LogPollCreateActionName);
+    }
+    else if (name == Polls.notifyLifecycleOpen) {
+      logPoll(param, LogPollOpenActionName);
+    }
+    else if (name == Polls.notifyLifecycleClose) {
+      logPoll(param, LogPollCloseActionName);
+    }
+    else if (name == Polls.notifyLifecycleVote) {
+      logPoll(param, LogPollVoteActionName);
+    }
+
+    else if (name == Groups.notifyGroupMembershipRequested) {
+      logGroup(action: LogGroupMembershipRequested, attributes: (param as Group).analyticsAttributes);
+    }
+    else if (name == Groups.notifyGroupMembershipCanceled) {
+      logGroup(action: LogGroupMembershipRequestCanceled, attributes: (param as Group).analyticsAttributes);
+    }
+    else if (name == Groups.notifyGroupMembershipQuit) {
+      logGroup(action: LogGroupMembershipQuit, attributes: (param as Group).analyticsAttributes);
+    }
+    else if (name == Groups.notifyGroupMembershipApproved) {
+      logGroup(action: LogGroupMembershipApproved, attributes: (param as Group).analyticsAttributes);
+    }
+    else if (name == Groups.notifyGroupMembershipRejected) {
+      logGroup(action: LogGroupMembershipRejected, attributes: (param as Group).analyticsAttributes);
+    }
+    else if (name == Groups.notifyGroupMembershipRemoved) {
+      logGroup(action: LogGroupMembershipRemoved, attributes: (param as Group).analyticsAttributes);
+    }
+    else if (name == Groups.notifyGroupMembershipSwitchToAdmin) {
+      logGroup(action: LogGroupMembershipSwitchToAdmin, attributes: (param as Group).analyticsAttributes);
+    }
+    else if (name == Groups.notifyGroupMembershipSwitchToMember) {
+      logGroup(action: LogGroupMembershipSwitchToMember, attributes: (param as Group).analyticsAttributes);
     }
   }
 
   // Connectivity
 
-  void _updateConnectivity() {
-    _applyConnectivityStatus(Connectivity().status);
-}
-
-  void _applyConnectivityStatus(ConnectivityStatus status) {
-    _connectionName = _connectivityStatusToString(_connectionStatus = status);
+  @override
+  void applyConnectivityStatus(ConnectivityStatus? status) {
+    super.applyConnectivityStatus(status);
+    _connectionName = _connectivityStatusToString(super.connectionStatus);
   }
 
-  static String _connectivityStatusToString(ConnectivityStatus result) {
-    return result?.toString()?.substring("ConnectivityStatus.".length);
+  static String? _connectivityStatusToString(ConnectivityStatus? result) {
+    return result?.toString().substring("ConnectivityStatus.".length);
   }
   
   // App Livecycle Service
   
-  void _onAppLivecycleStateChanged(AppLifecycleState state) {
+  void _onAppLivecycleStateChanged(AppLifecycleState? state) {
 
     if (state == AppLifecycleState.paused) {
       logLivecycle(name: LogLivecycleEventBackground);
@@ -466,7 +444,7 @@ class Analytics with Service implements NotificationsListener {
   // App Naviagtion Service
 
   void _onAppNavigationEvent(Map<String, dynamic> param) {
-    AppNavigationEvent event = param[AppNavigation.notifyParamEvent];
+    AppNavigationEvent? event = param[AppNavigation.notifyParamEvent];
     if (event == AppNavigationEvent.push) {
       _logRoute(param[AppNavigation.notifyParamRoute]);
     }
@@ -481,9 +459,9 @@ class Analytics with Service implements NotificationsListener {
     }
   }
 
-  void _logRoute(Route route) {
+  void _logRoute(Route? route) {
 
-    WidgetBuilder builder;
+    WidgetBuilder? builder;
     if (route is CupertinoPageRoute) {
       builder = route.builder;
     }
@@ -493,21 +471,21 @@ class Analytics with Service implements NotificationsListener {
     else {
       // _ModalBottomSheetRoute presented by showModalBottomSheet
       try { builder = (route as dynamic).builder; }
-      catch(e) { print(e?.toString()); }
+      catch(e) { print(e.toString()); }
     }
 
     if (builder != null) {
-      Widget panel = builder(null);
+      Widget? panel = (App.instance?.homeContext != null) ? builder(App.instance?.homeContext) : null;
       if (panel != null) {
         
         if (panel is RootPanel) {
-          Widget tabPanel = App.instance?.panelState?.rootPanel?.panelState?.currentTabPanel;
+          Widget? tabPanel = App.instance?.panelState?.rootPanel?.panelState?.currentTabPanel;
           if (tabPanel != null) {
             panel = tabPanel;
           }
         }
         
-        String panelName;
+        String? panelName;
         if (panel is AnalyticsPageName) {
           panelName = (panel as AnalyticsPageName).analyticsPageName;
         }
@@ -515,7 +493,7 @@ class Analytics with Service implements NotificationsListener {
           panelName = panel.runtimeType.toString();
         }
 
-        Map<String, dynamic> panelAttributes;
+        Map<String, dynamic>? panelAttributes;
         if (panel is AnalyticsPageAttributes) {
           panelAttributes = (panel as AnalyticsPageAttributes).analyticsPageAttributes;
         }
@@ -528,26 +506,27 @@ class Analytics with Service implements NotificationsListener {
   // Location Services
 
   void _updateLocationServices() {
-    LocationServices.instance.status.then((LocationServicesStatus locationServicesStatus) {
+    LocationServices().status.then((LocationServicesStatus? locationServicesStatus) {
       _applyLocationServicesStatus(locationServicesStatus);
     });
   }
 
-  void _applyLocationServicesStatus(LocationServicesStatus locationServicesStatus) {
+  void _applyLocationServicesStatus(LocationServicesStatus? locationServicesStatus) {
     switch (locationServicesStatus) {
-      case LocationServicesStatus.ServiceDisabled:          _locationServices = "disabled"; break;
-      case LocationServicesStatus.PermissionNotDetermined:  _locationServices = "not_determined"; break;
-      case LocationServicesStatus.PermissionDenied:         _locationServices = "denied"; break;
-      case LocationServicesStatus.PermissionAllowed:        _locationServices = "allowed"; break;
+      case LocationServicesStatus.serviceDisabled:          _locationServices = "disabled"; break;
+      case LocationServicesStatus.permissionNotDetermined:  _locationServices = "not_determined"; break;
+      case LocationServicesStatus.permissionDenied:         _locationServices = "denied"; break;
+      case LocationServicesStatus.permissionAllowed:        _locationServices = "allowed"; break;
+      default: break;
     }
   }
 
-  Map<String, dynamic> get _location {
-    LocationData location = Auth2().privacyMatch(3) ? LocationServices().lastLocation : null;
+  Map<String, dynamic>? get _location {
+    Position? location = Auth2().privacyMatch(3) ? LocationServices().lastLocation : null;
     return (location != null) ? {
       'latitude': location.latitude,
       'longitude': location.longitude,
-      'timestamp': (location.time * 1000).toInt(),
+      'timestamp': location.timestamp?.millisecondsSinceEpoch,
     } : null;
   }
   
@@ -559,14 +538,9 @@ class Analytics with Service implements NotificationsListener {
   }
 
   void _updateNotificationServices() {
-    // Android does not need for permission for user notifications
-    if (Platform.isAndroid) {
-      _notificationServices = 'enabled';
-    } else if (Platform.isIOS) {
-      NativeCommunicator().queryNotificationsAuthorization("query").then((NotificationsAuthorizationStatus authorizationStatus) {
-        _notificationServices = (authorizationStatus == NotificationsAuthorizationStatus.Allowed) ? 'enabled' : "not_enabled";
-      });
-    }
+    Notifications.NotificationPermissions.getNotificationPermissionStatus().then((Notifications.PermissionStatus status) {
+      _notificationServices = (status == Notifications.PermissionStatus.granted) ? 'enabled' : "not_enabled";
+    });
   }
 
   // Sesssion Uuid
@@ -577,11 +551,11 @@ class Analytics with Service implements NotificationsListener {
 
   // Accessibility
 
-  bool get accessibilityState {
+  bool? get accessibilityState {
     return (_accessibilityState != null) ? (true.toString() == _accessibilityState) : null;
   }
 
-  set accessibilityState(bool value) {
+  set accessibilityState(bool? value) {
     _accessibilityState = (value != null) ? value.toString() : null;
   }
 
@@ -591,80 +565,11 @@ class Analytics with Service implements NotificationsListener {
     _userRoles = UserRole.setToJson(Auth2().prefs?.roles);
   }
 
-  // Packets Processing
-  
-  Future<int> _savePacket(String packet) async {
-    if ((packet != null) && (_database != null)) {
-      int result = await _database.insert(_databaseTable, { _databaseColumn : packet });
-      //Log.d("Analytics: scheduled packet #$result $packet");
-      _initTimer();
-      return result;
-    }
-    return -1;
-  }
-
-  void _onTimer(_) {
-    
-    if ((_database != null) && !_inTimer && (_connectionStatus != ConnectivityStatus.none)) {
-      _inTimer = true;
-      
-      _database.rawQuery("SELECT $_databaseRowID, $_databaseColumn FROM $_databaseTable ORDER BY $_databaseRowID LIMIT $_databaseMaxPackCount").then((List<Map<String, dynamic>> records) {
-        if ((records != null) && (0 < records.length)) {
-
-          String packets = '', rowIDs = '';
-          for (Map<String, dynamic> record in records) {
-
-            if (0 < packets.length)
-              packets += ',';
-            packets += '${record[_databaseColumn]}';
-
-            if (0 < rowIDs.length)
-              rowIDs += ',';
-            rowIDs += '${record[_databaseRowID]}';
-          }
-          packets = '[' + packets + ']';
-          rowIDs = '(' + rowIDs + ')';
-
-          _sendPacket(packets).then((bool success) {
-            if (success) {
-              _database.execute("DELETE FROM $_databaseTable WHERE $_databaseRowID in $rowIDs").then((_){
-                //Log.d("Analytics: sent packets $rowIDs");
-                _inTimer = false;
-              });
-            }
-            else {
-              //Log.d("Analytics: failed to send packets $rowIDs");
-              _inTimer = false;
-            }
-          });
-        }
-        else {
-          _closeTimer();
-        }
-      });
-    }
-  }
-
-  Future<bool>_sendPacket(String packet) async {
-    if (packet != null) {
-      try {
-        //TMP: Temporarly use NetworkAuth.ApiKey auth until logging service gets updated to acknowledge the new Core BB token.
-        //TBD: Remove this when logging service gets updated.
-        final response = await Network().post(Config().loggingUrl, body: packet, headers: { "Accept": "application/json", "Content-type":"application/json" }, auth: NetworkAuth.ApiKey /* NetworkAuth.Auth2 */, sendAnalytics: false);
-        return (response != null) && ((response.statusCode == 200) || (response.statusCode == 201));
-      }
-      catch (e) {
-        print(e.toString());
-        return false;
-      }
-    }
-    return false;
-  }
-
   // Public Accessories
 
-  void logEvent(Map<String, dynamic> event, { List<String> defaultAttributes = DefaultAttributes}) {
-    if ((event != null) && Auth2().privacyMatch(2)) {
+  @override
+  void logEvent(Map<String, dynamic> event, { List<String> defaultAttributes = DefaultAttributes, int? timestamp }) {
+    if (Auth2().privacyMatch(2)) {
       
       event[LogEventPageName] = _currentPageName;
 
@@ -672,27 +577,29 @@ class Analytics with Service implements NotificationsListener {
         LogEvent:            event,
       };
 
+      DateTime nowUtc = DateTime.now().toUtc();
+
       for (String attributeName in defaultAttributes) {
         if (attributeName == LogStdTimestampName) {
-          analyticsEvent[LogStdTimestampName] = DateTime.now().toUtc().toIso8601String();
+          analyticsEvent[LogStdTimestampName] = nowUtc.toIso8601String();
         }
         else if (attributeName == LogStdAppIdName) {
-          analyticsEvent[LogStdAppIdName] = _appId;
+          analyticsEvent[LogStdAppIdName] = super.appId;
         }
         else if (attributeName == LogStdAppVersionName) {
-          analyticsEvent[LogStdAppVersionName] = _appVersion;
+          analyticsEvent[LogStdAppVersionName] = super.appVersion;
         }
         else if (attributeName == LogStdOSName) {
           analyticsEvent[LogStdOSName] = Platform.operatingSystem;
         }
         else if (attributeName == LogStdOSVersionName) {
-          analyticsEvent[LogStdOSVersionName] = _osVersion; // Platform.operatingSystemVersion;
+          analyticsEvent[LogStdOSVersionName] = super.osVersion; // Platform.operatingSystemVersion;
         }
         else if (attributeName == LogStdLocaleName) {
           analyticsEvent[LogStdLocaleName] = Platform.localeName;
         }
         else if (attributeName == LogStdDeviceModelName) {
-          analyticsEvent[LogStdDeviceModelName] = _deviceModel;
+          analyticsEvent[LogStdDeviceModelName] = super.deviceModel;
         }
         else if (attributeName == LogStdConnectionName) {
           analyticsEvent[LogStdConnectionName] = _connectionName;
@@ -722,40 +629,36 @@ class Analytics with Service implements NotificationsListener {
           analyticsEvent[LogStdAccessibilityName] = _accessibilityState;
         }
         else if(attributeName == LogStdAuthCardRoleName){
-          analyticsEvent[LogStdAuthCardRoleName] = Auth2()?.authCard?.role;
+          analyticsEvent[LogStdAuthCardRoleName] = Auth2().authCard?.role;
         }
         else if(attributeName == LogStdAuthCardStudentLevel){
-          analyticsEvent[LogStdAuthCardStudentLevel] = Auth2()?.authCard?.studentLevel;
+          analyticsEvent[LogStdAuthCardStudentLevel] = Auth2().authCard?.studentLevel;
         }
       }
 
-      String packet = json.encode(analyticsEvent);
-      if (packet != null) {
-        print('Analytics: $packet');
-        _savePacket(packet);
-      }
+      super.logEvent(analyticsEvent, timestamp: timestamp ?? nowUtc.millisecondsSinceEpoch);
     }
   }
 
-  void logLivecycle({String name}) {
+  void logLivecycle({String? name}) {
     logEvent({
       LogEventName          : LogLivecycleEventName,
       LogLivecycleName      : name,
     });
   }
 
-  String get currentPageName {
+  String? get currentPageName {
     return _currentPageName;
   }
 
-  Map<String, dynamic> get currentPageAttributes {
+  Map<String, dynamic>? get currentPageAttributes {
     return _currentPageAttributes;
   }
 
-  void logPage({String name,  Map<String, dynamic> attributes}) {
+  void logPage({String? name,  Map<String, dynamic>? attributes}) {
 
     // Update Current page name
-    String previousPageName = _currentPageName;
+    String? previousPageName = _currentPageName;
     _currentPageName        = name;
     _currentPageAttributes  = attributes;
 
@@ -775,7 +678,7 @@ class Analytics with Service implements NotificationsListener {
     logEvent(event);
   }
 
-  void logSelect({String target,  Map<String, dynamic> attributes}) {
+  void logSelect({String? target,  Map<String, dynamic>? attributes}) {
 
     // Build event data
     Map<String, dynamic> event = {
@@ -792,7 +695,7 @@ class Analytics with Service implements NotificationsListener {
     logEvent(event);
   }
 
-  void logAlert({String text, String selection, Map<String, dynamic> attributes}) {
+  void logAlert({String? text, String? selection, Map<String, dynamic>? attributes}) {
     // Build event data
     Map<String, dynamic> event = {
       LogEventName          : LogAlertEventName,
@@ -809,27 +712,45 @@ class Analytics with Service implements NotificationsListener {
     logEvent(event);
   }
 
-  void logHttpResponse(Http.BaseResponse response, {String requestMethod, String requestUrl}) {
-    Map<String, dynamic> httpResponseEvent = {
-      LogEventName                    : LogHttpResponseEventName,
-      LogHttpRequestUrlName           : requestUrl,
-      LogHttpRequestMethodName        : requestMethod,
-      LogHttpResponseCodeName         : response?.statusCode
-    };
-    logEvent(httpResponseEvent);
+  void logHttpResponse(dynamic param) {
+
+    Map<String, dynamic>? httpResponseEvent;
+    if (param is BaseResponse) {
+      httpResponseEvent = {
+        LogEventName                    : LogHttpResponseEventName,
+        LogHttpRequestUrlName           : param.request?.url.toString(),
+        LogHttpRequestMethodName        : param.request?.method,
+        LogHttpResponseCodeName         : param.statusCode,
+      };
+    }
+    else if (param is Map) {
+      httpResponseEvent = {
+        LogEventName                    : LogHttpResponseEventName,
+        LogHttpRequestUrlName           : param[Network.notifyHttpRequestUrl],
+        LogHttpRequestMethodName        : param[Network.notifyHttpRequestMethod],
+        LogHttpResponseCodeName         : param[Network.notifyHttpResponseCode],
+      };
+    }
+
+    if (httpResponseEvent != null) {
+      logEvent(httpResponseEvent);
+    }
   }
 
-  void logFavorite(Favorite favorite, bool on) {
+  void logFavorite(Favorite? favorite, [bool? on]) {
+    if (on == null) {
+      on = Auth2().isFavorite(favorite);
+    }
     logEvent({
       LogEventName          : LogFavoriteEventName,
-      LogFavoriteActionName : (on != null) ? (on ? LogFavoriteOnActionName : LogFavoriteOffActionName) : null,
+      LogFavoriteActionName : on ? LogFavoriteOnActionName : LogFavoriteOffActionName,
       LogFavoriteTypeName   : favorite?.favoriteKey,
       LogFavoriteIdName     : favorite?.favoriteId,
       LogFavoriteTitleName  : favorite?.favoriteTitle,
     });
   }
 
-  void logPoll(Poll poll, String action) {
+  void logPoll(Poll? poll, String action) {
     logEvent({
       LogEventName          : LogPollEventName,
       LogPollActionName     : action,
@@ -838,7 +759,7 @@ class Analytics with Service implements NotificationsListener {
     });
   }
 
-  void logMapRoute({String action, Map<String, dynamic> params}) {
+  void logMapRoute({String? action, required Map<String, dynamic> params}) {
     
     logEvent({
       LogEventName             : LogMapRouteEventName,
@@ -857,7 +778,7 @@ class Analytics with Service implements NotificationsListener {
     logMapDisplay(action: LogMapDisplayHideActionName);
   }
 
-  void logMapDisplay({String action}) {
+  void logMapDisplay({String? action}) {
     
     logEvent({
       LogEventName             : LogMapDisplayEventName,
@@ -865,10 +786,10 @@ class Analytics with Service implements NotificationsListener {
     });
   }
 
-  void logGeoFenceRegion({String action, String regionId}) {
+  void logGeoFenceRegion({String? action, String? regionId}) {
 
-    Map<String, GeoFenceRegion> regions = GeoFence().regions;
-    GeoFenceRegion region = (regions != null) ? regions[regionId] : null;
+    Map<String, GeoFenceRegion?>? regions = GeoFence().regions;
+    GeoFenceRegion? region = (regions != null) ? regions[regionId] : null;
     
     logEvent({
       LogEventName             : LogGeoFenceRegionEventName,
@@ -880,7 +801,7 @@ class Analytics with Service implements NotificationsListener {
     });
   }
 
-  void logIlliniCash({String action, Map<String, dynamic> attributes}) {
+  void logIlliniCash({String? action, Map<String, dynamic>? attributes}) {
     Map<String, dynamic> event = {
       LogEventName           : LogIllniCashEventName,
       LogIllniCashAction     : action,
@@ -891,21 +812,36 @@ class Analytics with Service implements NotificationsListener {
     logEvent(event);
   }
 
-  void logAuth({String action, bool result, Map<String, dynamic> attributes}) {
-    Map<String, dynamic> event = {
-      LogEventName           : LogAuthEventName,
-      LogAuthAction          : action,
-    };
-    if (result != null) {
-      event[LogAuthResult] = result;
+  void logAuth({String? action, Auth2LoginType? loginType, bool? result, Map<String, dynamic>? attributes}) {
+    
+    if ((action == null) && (loginType != null)) {
+      switch(loginType) {
+        case Auth2LoginType.oidc:
+        case Auth2LoginType.oidcIllinois: action = LogAuthLoginNetIdActionName; break;
+        case Auth2LoginType.phone:
+        case Auth2LoginType.phoneTwilio:  action = LogAuthLoginPhoneActionName; break;
+        case Auth2LoginType.email:        action = LogAuthLoginEmailActionName; break;
+        case Auth2LoginType.apiKey:
+        case Auth2LoginType.anonymous:    break;
+      }
     }
-    if (attributes != null) {
-      event.addAll(attributes);
+
+    if (action != null) {
+      Map<String, dynamic> event = {
+        LogEventName           : LogAuthEventName,
+        LogAuthAction          : action,
+      };
+      if (result != null) {
+        event[LogAuthResult] = result;
+      }
+      if (attributes != null) {
+        event.addAll(attributes);
+      }
+      logEvent(event);
     }
-    logEvent(event);
   }
 
-  void logGroup({String action, Map<String, dynamic> attributes}) {
+  void logGroup({String? action, Map<String, dynamic>? attributes}) {
     Map<String, dynamic> event = {
       LogEventName           : LogGroupEventName,
       LogGroupAction         : action,
@@ -919,9 +855,9 @@ class Analytics with Service implements NotificationsListener {
 
 
 abstract class AnalyticsPageName {
-  String get analyticsPageName;
+  String? get analyticsPageName;
 }
 
 abstract class AnalyticsPageAttributes {
-  Map<String, dynamic> get analyticsPageAttributes;
+  Map<String, dynamic>? get analyticsPageAttributes;
 }

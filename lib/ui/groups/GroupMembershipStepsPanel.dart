@@ -17,22 +17,24 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:illinois/model/Event.dart';
-import 'package:illinois/model/Groups.dart';
+import 'package:rokwire_plugin/model/event.dart';
+import 'package:rokwire_plugin/model/group.dart';
 import 'package:illinois/service/Analytics.dart';
-import 'package:illinois/service/ExploreService.dart';
-import 'package:illinois/service/Groups.dart';
-import 'package:illinois/service/Localization.dart';
+import 'package:rokwire_plugin/service/events.dart';
+import 'package:rokwire_plugin/service/groups.dart';
+import 'package:illinois/ext/Event.dart';
+import 'package:rokwire_plugin/service/localization.dart';
 import 'package:illinois/ui/groups/GroupFindEventPanel.dart';
 import 'package:illinois/ui/groups/GroupWidgets.dart';
 import 'package:illinois/ui/widgets/HeaderBar.dart';
-import 'package:illinois/ui/widgets/RoundedButton.dart';
+import 'package:rokwire_plugin/ui/widgets/rounded_button.dart';
 import 'package:illinois/ui/widgets/TabBarWidget.dart';
-import 'package:illinois/utils/Utils.dart';
-import 'package:illinois/service/Styles.dart';
+import 'package:illinois/utils/AppUtils.dart';
+import 'package:rokwire_plugin/utils/utils.dart';
+import 'package:rokwire_plugin/service/styles.dart';
 
 class GroupMembershipStepsPanel extends StatefulWidget {
-  final List<GroupMembershipStep> steps;
+  final List<GroupMembershipStep>? steps;
 
   GroupMembershipStepsPanel({this.steps});
 
@@ -42,9 +44,9 @@ class GroupMembershipStepsPanel extends StatefulWidget {
 }
 
 class _GroupMembershipStepsPanelState extends State<GroupMembershipStepsPanel> {
-  List<GroupMembershipStep> _steps;
-  List<FocusNode> _focusNodes;
-  List<TextEditingController> _controllers;
+  late List<GroupMembershipStep> _steps;
+  List<FocusNode>? _focusNodes;
+  List<TextEditingController>? _controllers;
   Map<String, Event> _events = Map<String, Event>();
 
   @override
@@ -57,30 +59,34 @@ class _GroupMembershipStepsPanelState extends State<GroupMembershipStepsPanel> {
     _focusNodes = [];
     _controllers = [];
     Set<String> eventIds = Set<String>();
-    for (GroupMembershipStep step in _steps) {
-      _controllers.add(TextEditingController(text: step.description ?? ''));
-      _focusNodes.add(FocusNode());
+    for (GroupMembershipStep? step in _steps) {
+      _controllers!.add(TextEditingController(text: step!.description ?? ''));
+      _focusNodes!.add(FocusNode());
       if (step.eventIds != null) {
-        eventIds.addAll(step.eventIds);
+        eventIds.addAll(step.eventIds!);
       }
     }
 
     if (0 < eventIds.length) {
-      ExploreService().loadEventsByIds(eventIds).then((List<Event> events) {
+      Events().loadEventsByIds(eventIds).then((List<Event>? events) {
         if (events != null) {
           for (Event event in events) {
-            _events[event.id] = event;
+            if (event.id != null) {
+              _events[event.id!] = event;
+            }
           }
           if (mounted) {
             setState(() {});
           }
         }
       });
-      Groups().loadEvents(null).then((Map<int, List<GroupEvent>> eventsMap) {
-        List<GroupEvent> events = AppCollection.isCollectionNotEmpty(eventsMap?.values) ? eventsMap.values.first : null;
-        if (AppCollection.isCollectionNotEmpty(events)) {
-          for (Event event in events) {
-            _events[event.id] = event;
+      Groups().loadEvents(null).then((Map<int, List<GroupEvent>>? eventsMap) {
+        List<GroupEvent>? events = CollectionUtils.isNotEmpty(eventsMap?.values) ? eventsMap!.values.first : null;
+        if (CollectionUtils.isNotEmpty(events)) {
+          for (Event event in events!) {
+            if (event.id != null) {
+              _events[event.id!] = event;
+            }
           }
           if (mounted) {
             setState(() {});
@@ -95,12 +101,12 @@ class _GroupMembershipStepsPanelState extends State<GroupMembershipStepsPanel> {
 
   @override
   void dispose() {
-    for (TextEditingController controller in _controllers) {
+    for (TextEditingController controller in _controllers!) {
       controller.dispose();
     }
     _controllers = null;
 
-    for (FocusNode focusNode in _focusNodes) {
+    for (FocusNode focusNode in _focusNodes!) {
       focusNode.dispose();
     }
     _focusNodes = null;
@@ -111,16 +117,9 @@ class _GroupMembershipStepsPanelState extends State<GroupMembershipStepsPanel> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: SimpleHeaderBarWithBack(
-        context: context,
-        backIconRes: 'images/icon-circle-close.png',
-        titleWidget: Text(Localization().getStringEx("panel.membership_request.label.title", 'Membership Steps'),
-          style: TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontFamily: Styles().fontFamilies.extraBold,
-              letterSpacing: 1.0),
-        ),
+      appBar: HeaderBar(
+        leadingAsset: 'images/icon-circle-close.png',
+        title: Localization().getStringEx("panel.membership_request.label.title", 'Membership Steps'),
       ),
       body: Column(
         children: <Widget>[
@@ -138,7 +137,7 @@ class _GroupMembershipStepsPanelState extends State<GroupMembershipStepsPanel> {
           _buildSubmit(),
         ],
       ),
-      backgroundColor: Styles().colors.background,
+      backgroundColor: Styles().colors!.background,
       bottomNavigationBar: TabBarWidget(),
     );
   }
@@ -150,10 +149,10 @@ class _GroupMembershipStepsPanelState extends State<GroupMembershipStepsPanel> {
           children:<Widget>[
             Row(children: <Widget>[
               Padding(padding: EdgeInsets.only(right: 4), child: Image.asset('images/campus-tools-blue.png')),
-              Text(Localization().getStringEx("panel.membership_request.button.add_steps.title", 'Add Steps'), style: TextStyle(fontFamily: Styles().fontFamilies.bold, fontSize: 16, color: Styles().colors.fillColorPrimary),),
+              Text(Localization().getStringEx("panel.membership_request.button.add_steps.title", 'Add Steps'), style: TextStyle(fontFamily: Styles().fontFamilies!.bold, fontSize: 16, color: Styles().colors!.fillColorPrimary),),
             ],),
             Padding(padding: EdgeInsets.only(top: 8), child:
-              Text(Localization().getStringEx("panel.membership_request.label.steps.description", 'Share the steps someone will need to take to become a member of your group.'), style: TextStyle(fontFamily: Styles().fontFamilies.regular, fontSize: 16, color: Color(0xff494949))),
+              Text(Localization().getStringEx("panel.membership_request.label.steps.description", 'Share the steps someone will need to take to become a member of your group.'), style: TextStyle(fontFamily: Styles().fontFamilies!.regular, fontSize: 16, color: Color(0xff494949))),
             ),
           ]),
       ),
@@ -177,26 +176,26 @@ class _GroupMembershipStepsPanelState extends State<GroupMembershipStepsPanel> {
     );
   }
 
-  Widget _buildStep({int index}) {
+  Widget _buildStep({required int index}) {
     List<Widget> stepContent = [
       Padding(padding: EdgeInsets.only(bottom: 4),
-        child: Text(Localization().getStringEx("panel.membership_request.button.add_steps.step", 'STEP ') +(index+1).toString(), style: TextStyle(fontFamily: Styles().fontFamilies.bold, fontSize: 12, color: Styles().colors.fillColorPrimary),),
+        child: Text(Localization().getStringEx("panel.membership_request.button.add_steps.step", 'STEP ') +(index+1).toString(), style: TextStyle(fontFamily: Styles().fontFamilies!.bold, fontSize: 12, color: Styles().colors!.fillColorPrimary),),
       ),
       Stack(children: <Widget>[
-        Container(color: Styles().colors.white,
+        Container(color: Styles().colors!.white,
           child: TextField(
             maxLines: 2,
-            controller: _controllers[index],
-            focusNode: _focusNodes[index],
+            controller: _controllers![index],
+            focusNode: _focusNodes![index],
             decoration: InputDecoration(border: OutlineInputBorder(borderSide: BorderSide(color: Colors.black, width: 1.0))),
-            style: TextStyle(fontFamily: Styles().fontFamilies.regular, fontSize: 16, color: Styles().colors.textBackground,),
+            style: TextStyle(fontFamily: Styles().fontFamilies!.regular, fontSize: 16, color: Styles().colors!.textBackground,),
           ),
         ),
         Align(alignment: Alignment.topRight,
           child: GestureDetector(onTap: () { _removeStep(index: index); },
             child: Container(width: 36, height: 36,
               child: Align(alignment: Alignment.center,
-                child: Text('X', style: TextStyle(fontFamily: Styles().fontFamilies.regular, fontSize: 16, color: Styles().colors.fillColorPrimary,),),
+                child: Text('X', style: TextStyle(fontFamily: Styles().fontFamilies!.regular, fontSize: 16, color: Styles().colors!.fillColorPrimary,),),
               ),
             ),
           ),
@@ -204,12 +203,12 @@ class _GroupMembershipStepsPanelState extends State<GroupMembershipStepsPanel> {
       ],),
     ];
     
-    List<String> eventIds = _steps[index].eventIds;
+    List<String>? eventIds = _steps[index].eventIds;
     int eventsCount = eventIds?.length ?? 0;
     if (0 < eventsCount) {
       for (int eventIndex = 0; eventIndex < eventsCount; eventIndex++) {
-        String eventId = eventIds[eventIndex];
-        Event event = _events[eventId];
+        String? eventId = eventIds![eventIndex];
+        Event? event = _events[eventId];
         if (event != null) {
           stepContent.add(_EventCard(event: event, onTapRemove:(){ _removeEvent(stepIndex:index, eventIndex: eventIndex); }));
         }
@@ -236,14 +235,14 @@ class _GroupMembershipStepsPanelState extends State<GroupMembershipStepsPanel> {
         child: Row(children: <Widget>[
           Expanded(child: Container(),),
           RoundedButton(label:Localization().getStringEx("panel.membership_request.button.save.title", 'Save steps'),
-            backgroundColor: Styles().colors.white,
-            textColor: Styles().colors.fillColorPrimary,
-            fontFamily: Styles().fontFamilies.bold,
+            backgroundColor: Styles().colors!.white,
+            textColor: Styles().colors!.fillColorPrimary,
+            fontFamily: Styles().fontFamilies!.bold,
             fontSize: 16,
-            padding: EdgeInsets.symmetric(horizontal: 32, ),
-            borderColor: Styles().colors.fillColorSecondary,
+            borderColor: Styles().colors!.fillColorSecondary,
             borderWidth: 2,
-            height: 26 + 16*MediaQuery.of(context).textScaleFactor ,
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            contentWeight: 0.0,
             onTap:() { _onSubmit();  }
           ),
           Expanded(child: Container(),),
@@ -257,24 +256,24 @@ class _GroupMembershipStepsPanelState extends State<GroupMembershipStepsPanel> {
     setState(() {
       GroupMembershipStep step = GroupMembershipStep();
       _steps.add(step);
-      _controllers.add(TextEditingController(text: step.description ?? ''));
-      _focusNodes.add(FocusNode());
+      _controllers!.add(TextEditingController(text: step.description ?? ''));
+      _focusNodes!.add(FocusNode());
     });
     Timer(Duration(milliseconds: 100), () {
-      _focusNodes.last.requestFocus();
+      _focusNodes!.last.requestFocus();
     });
   }
 
-  void _removeStep({int index}) {
+  void _removeStep({int? index}) {
     Analytics().logSelect(target: 'Remove step');
     setState(() {
-      _steps.removeAt(index);
-      _controllers.removeAt(index);
-      _focusNodes.removeAt(index);
+      _steps.removeAt(index!);
+      _controllers!.removeAt(index);
+      _focusNodes!.removeAt(index);
     });
   }
 
-  void _addEvent({int stepIndex}) {
+  void _addEvent({required int stepIndex}) {
     Analytics().logSelect(target: 'Connect event');
     GroupMembershipStep step = _steps[stepIndex];
     if (step.eventIds == null) {
@@ -282,23 +281,25 @@ class _GroupMembershipStepsPanelState extends State<GroupMembershipStepsPanel> {
     }
     GroupEventsContext groupContext = GroupEventsContext(events: <Event>[]);
     Navigator.push(context, MaterialPageRoute(builder: (context) => GroupFindEventPanel(groupContext: groupContext,))).then((_){
-      for (Event newEvent in groupContext.events) {
-        if (!step.eventIds.contains(newEvent.id)) {
-          step.eventIds.add(newEvent.id);
-        }
-        if (!_events.containsKey(newEvent.id)) {
-          _events[newEvent.id] = newEvent;
+      for (Event newEvent in groupContext.events!) {
+        if (newEvent.id != null) {
+          if (!step.eventIds!.contains(newEvent.id)) {
+            step.eventIds!.add(newEvent.id!);
+          }
+          if (!_events.containsKey(newEvent.id)) {
+            _events[newEvent.id!] = newEvent;
+          }
         }
       }
       setState(() {});
     });
   }
 
-  void _removeEvent({int stepIndex, int eventIndex}) {
+  void _removeEvent({int? stepIndex, int? eventIndex}) {
     Analytics().logSelect(target: 'Remove event');
     setState(() {
-      GroupMembershipStep step = _steps[stepIndex];
-      step?.eventIds?.removeAt(eventIndex);
+      GroupMembershipStep? step = (stepIndex != null) ? _steps[stepIndex] : null;
+      step?.eventIds?.removeAt(eventIndex!);
     });
   }
 
@@ -307,26 +308,26 @@ class _GroupMembershipStepsPanelState extends State<GroupMembershipStepsPanel> {
     for (int index = 0; index < _steps.length; index++) {
       GroupMembershipStep step = _steps[index];
 
-      String text = _controllers[index].text;
-      if ((text != null) && (0 < text.length)) {
+      String text = _controllers![index].text;
+      if ((0 < text.length)) {
         step.description = text;
       }
       else {
         AppAlert.showDialogResult(context, Localization().getStringEx("panel.membership_request.button.add_steps.alert", 'Please input step #')+(index+1).toString()).then((_){
-          _focusNodes[index].requestFocus();
+          _focusNodes![index].requestFocus();
         });
         return;
       }
     }
 
-    widget.steps.replaceRange(0, widget.steps.length, _steps);
+    widget.steps!.replaceRange(0, widget.steps!.length, _steps);
     Navigator.pop(context);
   }
 }
 
 class _EventCard extends StatelessWidget {
-  final Event              event;
-  final GestureTapCallback onTapRemove;
+  final Event?              event;
+  final GestureTapCallback? onTapRemove;
   
   _EventCard({this.event, this.onTapRemove});
 
@@ -336,27 +337,27 @@ class _EventCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Container(
         decoration: BoxDecoration(
-          color: Styles().colors.white,
-          boxShadow: [BoxShadow(color: Styles().colors.blackTransparent018, spreadRadius: 2.0, blurRadius: 6.0, offset: Offset(2, 2))],
+          color: Styles().colors!.white,
+          boxShadow: [BoxShadow(color: Styles().colors!.blackTransparent018!, spreadRadius: 2.0, blurRadius: 6.0, offset: Offset(2, 2))],
           borderRadius: BorderRadius.all(Radius.circular(8))
         ),
         child: Stack(children: <Widget>[
           Padding(padding: EdgeInsets.all(16),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: <Widget>[
               Padding(padding: EdgeInsets.only(bottom: 8), child: 
-                Text(event.title,  style: TextStyle(fontFamily: Styles().fontFamilies.extraBold, fontSize: 20, color: Styles().colors.fillColorPrimary),),
+                Text(event!.title!,  style: TextStyle(fontFamily: Styles().fontFamilies!.extraBold, fontSize: 20, color: Styles().colors!.fillColorPrimary),),
               ),
               Padding(padding: EdgeInsets.symmetric(vertical: 4), child: Row(children: <Widget>[
                 Padding(padding: EdgeInsets.only(right: 8), child: Image.asset('images/icon-calendar.png'),),
-                Text(event.timeDisplayString,  style: TextStyle(fontFamily: Styles().fontFamilies.regular, fontSize: 14, color: Styles().colors.textBackground),),
+                Text(event?.timeDisplayString ?? '',  style: TextStyle(fontFamily: Styles().fontFamilies!.regular, fontSize: 14, color: Styles().colors!.textBackground),),
               ],)),
             ],)
           ),
           Align(alignment: Alignment.topRight,
-            child: GestureDetector(onTap: () { onTapRemove(); },
+            child: GestureDetector(onTap: () { onTapRemove!(); },
               child: Container(width: 36, height: 36,
                 child: Align(alignment: Alignment.center,
-                  child: Text('X', style: TextStyle(fontFamily: Styles().fontFamilies.regular, fontSize: 16, color: Styles().colors.fillColorPrimary,),),
+                  child: Text('X', style: TextStyle(fontFamily: Styles().fontFamilies!.regular, fontSize: 16, color: Styles().colors!.fillColorPrimary,),),
                 ),
               ),
             ),

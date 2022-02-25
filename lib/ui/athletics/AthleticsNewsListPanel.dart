@@ -19,7 +19,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:illinois/model/sport/SportDetails.dart';
 import 'package:illinois/service/Sports.dart';
-import 'package:illinois/service/Localization.dart';
+import 'package:rokwire_plugin/service/localization.dart';
 import 'package:illinois/model/News.dart';
 import 'package:illinois/service/Analytics.dart';
 import 'package:illinois/ui/athletics/AthleticsNewsCard.dart';
@@ -29,13 +29,13 @@ import 'package:illinois/ui/widgets/HeaderBar.dart';
 import 'package:illinois/ui/widgets/ScalableWidgets.dart';
 import 'package:illinois/ui/widgets/TabBarWidget.dart';
 import 'package:illinois/ui/widgets/ImageHolderListItem.dart';
-import 'package:illinois/utils/Utils.dart';
-import 'package:illinois/service/Styles.dart';
+import 'package:rokwire_plugin/utils/utils.dart';
+import 'package:rokwire_plugin/service/styles.dart';
 
 import 'AthleticsNewsArticlePanel.dart';
 
 class AthleticsNewsListPanel extends StatefulWidget {
-  final String sportName;
+  final String? sportName;
 
   AthleticsNewsListPanel({this.sportName});
 
@@ -46,11 +46,11 @@ class AthleticsNewsListPanel extends StatefulWidget {
 class _AthleticsNewsListPanelState extends State<AthleticsNewsListPanel>{
   static const Color backgroundColor = Color.fromRGBO(19, 41, 75, 0.15);
   bool _loading = false;
-  List<News> _news;
-  List<News> _displayNews;
+  List<News>? _news;
+  List<News>? _displayNews;
 
   //filters
-  List<String> _filters;
+  late List<String> _filters;
   bool _filterOptionsVisible = false;
   int _selectedFilterIndex = 0;
   ScrollController _scrollController = new ScrollController();
@@ -58,16 +58,8 @@ class _AthleticsNewsListPanelState extends State<AthleticsNewsListPanel>{
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: SimpleHeaderBarWithBack(
-          context: context,
-          titleWidget: Text(
-            Localization().getStringEx('panel.athletics_news_list.header.title', 'News'),
-            style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 1.0),
-          ),
+        appBar: HeaderBar(
+          title: Localization().getStringEx('panel.athletics_news_list.header.title', 'News'),
         ),
         body: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -85,7 +77,7 @@ class _AthleticsNewsListPanelState extends State<AthleticsNewsListPanel>{
                         children: <Widget> [
                           _buildFilterLabel(),
                           Expanded(
-                            child: Padding(padding: EdgeInsets.only(top: 2),child:_wrapWithBottomBorder(Styles().colors.fillColorSecondaryVariant, ScalableFilterSelectorWidget(
+                            child: Padding(padding: EdgeInsets.only(top: 2),child:_wrapWithBottomBorder(Styles().colors!.fillColorSecondaryVariant!, ScalableFilterSelectorWidget(
                               label: _filters[_selectedFilterIndex],
                               active: _filterOptionsVisible,
                               visible: true,
@@ -111,7 +103,7 @@ class _AthleticsNewsListPanelState extends State<AthleticsNewsListPanel>{
               _buildFilterValuesContainer()
               ],),),
             ]),
-            backgroundColor: Styles().colors.background,
+            backgroundColor: Styles().colors!.background,
             bottomNavigationBar: TabBarWidget(),
           );
   }
@@ -126,12 +118,12 @@ class _AthleticsNewsListPanelState extends State<AthleticsNewsListPanel>{
   _initFilter() async{
     _filters = [];
    _filters.add(Localization().getStringEx("panel.athletics_news_list.label.all_news.title", "All Athletics News"));
-    List<SportDefinition> sportTypes = Sports().sports;
+    List<SportDefinition> sportTypes = Sports().sports!;
    sportTypes.forEach((SportDefinition type){
-       _filters.add(type.name);
+      ListUtils.add(_filters, type.name);
    });
-    if (AppString.isStringNotEmpty(widget.sportName)) {
-      int initialSelectedFilterIndex = _filters.indexOf(widget.sportName);
+    if (StringUtils.isNotEmpty(widget.sportName)) {
+      int initialSelectedFilterIndex = (widget.sportName != null) ? _filters.indexOf(widget.sportName!) : -1;
       if (initialSelectedFilterIndex >= 0 &&
           initialSelectedFilterIndex < _filters.length) {
         _selectedFilterIndex = initialSelectedFilterIndex;
@@ -155,7 +147,7 @@ class _AthleticsNewsListPanelState extends State<AthleticsNewsListPanel>{
         child: CircularProgressIndicator(),
       );
     }
-    int newsCount = (_displayNews != null) ? _displayNews.length : 0;
+    int newsCount = (_displayNews != null) ? _displayNews!.length : 0;
     if (newsCount > 0) {
       return ListView.separated(
         separatorBuilder: (context, index) =>
@@ -165,11 +157,11 @@ class _AthleticsNewsListPanelState extends State<AthleticsNewsListPanel>{
         itemCount: newsCount,
         itemBuilder: (context, index) {
 
-          News news = _displayNews[index];
+          News news = _displayNews![index];
 
           Widget newsView = ImageHolderListItem(
               imageUrl: news.imageUrl,
-              placeHolderDividerResource: Styles().colors.fillColorPrimaryTransparent03,
+              placeHolderDividerResource: Styles().colors!.fillColorPrimaryTransparent03,
               placeHolderSlantResource:  'images/slant-down-right-blue.png',
           child:AthleticsNewsCard(
                 news: news,
@@ -201,14 +193,14 @@ class _AthleticsNewsListPanelState extends State<AthleticsNewsListPanel>{
     return Visibility(visible: _filterOptionsVisible, child: Padding(
         padding: EdgeInsets.only(left: 16, right: 16, top: 95, bottom: 40),
         child: Container(decoration: BoxDecoration(
-          color: Styles().colors.fillColorSecondary,
+          color: Styles().colors!.fillColorSecondary,
           borderRadius: BorderRadius.circular(5.0),), child: Padding(
           padding: EdgeInsets.only(top: 2),
           child: Container(color: Colors.white,
             child: ListView.separated(shrinkWrap: true, separatorBuilder: (context, index) =>
                 Divider(
                   height: 1,
-                  color: Styles().colors.fillColorPrimaryTransparent03,
+                  color: Styles().colors!.fillColorPrimaryTransparent03,
                 ),
               itemCount: filterValues.length,
               itemBuilder: (context, index) {
@@ -221,10 +213,10 @@ class _AthleticsNewsListPanelState extends State<AthleticsNewsListPanel>{
               controller: _scrollController,),),),)),);
   }
 
-  SportDefinition getSPortTypeByIndex(int index){
+  SportDefinition? getSPortTypeByIndex(int index){
     int typeIndex = index - 1; //predefined values which are not sportType
-    List<SportDefinition> sportTypes = Sports().sports;
-    if(typeIndex>=0 && typeIndex<sportTypes.length) {
+    List<SportDefinition>? sportTypes = Sports().sports;
+    if(typeIndex>=0 && typeIndex<sportTypes!.length) {
       return sportTypes[typeIndex];
     }
 
@@ -232,13 +224,13 @@ class _AthleticsNewsListPanelState extends State<AthleticsNewsListPanel>{
   }
 
   Widget _buildFilterLabel(){
-    return _wrapWithBottomBorder(Styles().colors.surfaceAccent,
+    return _wrapWithBottomBorder(Styles().colors!.surfaceAccent!,
         Padding(padding: EdgeInsets.only(top: 14),
         child:Text(Localization().getStringEx("panel.athletics_news_list.label.filter_by", "Filter by"),
           style: TextStyle(
           fontSize: 16,
-          color: Styles().colors.textBackground,
-        fontFamily: Styles().fontFamilies.regular
+          color: Styles().colors!.textBackground,
+        fontFamily: Styles().fontFamilies!.regular
     )),));
   }
 
@@ -265,7 +257,7 @@ class _AthleticsNewsListPanelState extends State<AthleticsNewsListPanel>{
 
   //Click listeners
   void _onNewsTap(News news) {
-    Analytics.instance.logSelect(target: "news: "+news.title);
+    Analytics().logSelect(target: "news: "+news.title!);
     Navigator.push(
         context,
         CupertinoPageRoute(
@@ -273,14 +265,14 @@ class _AthleticsNewsListPanelState extends State<AthleticsNewsListPanel>{
   }
 
   void _onFilterTypeClicked() {
-    Analytics.instance.logSelect(target: "Filter");
+    Analytics().logSelect(target: "Filter");
     setState(() {
         _filterOptionsVisible = !_filterOptionsVisible;
     });
   }
 
   void _onFilterValueClick(int newValueIndex) {
-    Analytics.instance.logSelect(target: "Filter: "+_filters[newValueIndex]) ;
+    Analytics().logSelect(target: "Filter: ${_filters[newValueIndex]}") ;
     setState(() {
       _selectedFilterIndex = newValueIndex;
       _filterOptionsVisible = false;

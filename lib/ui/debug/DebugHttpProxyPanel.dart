@@ -15,12 +15,12 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:illinois/service/HttpProxy.dart';
-import 'package:illinois/service/Localization.dart';
-import 'package:illinois/service/Styles.dart';
+import 'package:rokwire_plugin/service/localization.dart';
+import 'package:rokwire_plugin/service/styles.dart';
 import 'package:illinois/ui/widgets/HeaderBar.dart';
 import 'package:illinois/ui/widgets/RibbonButton.dart';
-import 'package:illinois/ui/widgets/RoundedButton.dart';
+import 'package:rokwire_plugin/ui/widgets/rounded_button.dart';
+import 'package:rokwire_plugin/service/http_proxy.dart';
 
 class DebugHttpProxyPanel extends StatefulWidget{
   _DebugHttpProxyPanelState createState() => _DebugHttpProxyPanelState();
@@ -28,7 +28,7 @@ class DebugHttpProxyPanel extends StatefulWidget{
 
 class _DebugHttpProxyPanelState extends State<DebugHttpProxyPanel>{
 
-  bool _proxyEnabled;
+  bool? _proxyEnabled;
 
   final TextEditingController _hostController = TextEditingController();
   final TextEditingController _portController = TextEditingController();
@@ -36,9 +36,9 @@ class _DebugHttpProxyPanelState extends State<DebugHttpProxyPanel>{
   @override
   void initState() {
     super.initState();
-    _proxyEnabled = HttpProxy().httpProxyEnabled;
-    _hostController.text = HttpProxy().httpProxyHost;
-    _portController.text = HttpProxy().httpProxyPort;
+    _proxyEnabled = HttpProxy().httpProxyEnabled ?? false;
+    _hostController.text = HttpProxy().httpProxyHost ?? '';
+    _portController.text = HttpProxy().httpProxyPort ?? '';
   }
 
   @override
@@ -51,22 +51,18 @@ class _DebugHttpProxyPanelState extends State<DebugHttpProxyPanel>{
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Styles().colors.surface,
-      appBar: SimpleHeaderBarWithBack(
-        context: context,
-        titleWidget: Text(
-          Localization().getStringEx("panel.debug_http_proxy.header.title", "Http Proxy"),
-          style: TextStyle(color: Colors.white, fontSize: 16, fontFamily: Styles().fontFamilies.extraBold),
-        ),
+      backgroundColor: Styles().colors!.surface,
+      appBar: HeaderBar(
+        title: Localization().getStringEx("panel.debug_http_proxy.header.title", "Http Proxy"),
       ),
       body: SingleChildScrollView(
         child: Padding(
           padding: EdgeInsets.all(16),
           child: Column(
             children: [
-              ToggleRibbonButton(label: Localization().getStringEx("panel.debug_http_proxy_enable.button.save.title", "Http Proxy Enabled"), toggled: _proxyEnabled, onTap: (){
+              ToggleRibbonButton(label: Localization().getStringEx("panel.debug_http_proxy_enable.button.save.title", "Http Proxy Enabled"), toggled: _proxyEnabled ?? false, onTap: (){
                 setState(() {
-                  _proxyEnabled = !_proxyEnabled;
+                  _proxyEnabled = (_proxyEnabled != true);
                 });
               }),
               Padding(
@@ -79,12 +75,12 @@ class _DebugHttpProxyPanelState extends State<DebugHttpProxyPanel>{
                     child: TextField(
                       controller: _hostController,
                       autofocus: false,
-                      cursorColor: Styles().colors.textBackground,
+                      cursorColor: Styles().colors!.textBackground,
                       keyboardType: TextInputType.text,
                       style: TextStyle(
                           fontSize: 16,
-                          fontFamily: Styles().fontFamilies.regular,
-                          color: Styles().colors.textBackground),
+                          fontFamily: Styles().fontFamilies!.regular,
+                          color: Styles().colors!.textBackground),
                       decoration: InputDecoration(
                         labelText: Localization().getStringEx("panel.debug_http_proxy.edit.host.title", "Http Proxy Host"),
                         enabledBorder: OutlineInputBorder(
@@ -109,12 +105,12 @@ class _DebugHttpProxyPanelState extends State<DebugHttpProxyPanel>{
                     child: TextField(
                       controller: _portController,
                       autofocus: false,
-                      cursorColor: Styles().colors.textBackground,
+                      cursorColor: Styles().colors!.textBackground,
                       keyboardType: TextInputType.text,
                       style: TextStyle(
                           fontSize: 16,
-                          fontFamily: Styles().fontFamilies.regular,
-                          color: Styles().colors.textBackground),
+                          fontFamily: Styles().fontFamilies!.regular,
+                          color: Styles().colors!.textBackground),
                       decoration: InputDecoration(
                         labelText: Localization().getStringEx("panel.debug_http_proxy.edit.host.title", "Http Proxy Port"),
                         enabledBorder: OutlineInputBorder(
@@ -131,10 +127,10 @@ class _DebugHttpProxyPanelState extends State<DebugHttpProxyPanel>{
                   )),
               RoundedButton(
                   label: Localization().getStringEx("panel.debug_http_proxy.button.save.title", "Save"),
-                  backgroundColor: Styles().colors.background,
+                  backgroundColor: Styles().colors!.background,
                   fontSize: 16.0,
-                  textColor: Styles().colors.fillColorPrimary,
-                  borderColor: Styles().colors.fillColorPrimary,
+                  textColor: Styles().colors!.fillColorPrimary,
+                  borderColor: Styles().colors!.fillColorPrimary,
                   onTap: ()=> _onTapSave(context))
             ],
           ),

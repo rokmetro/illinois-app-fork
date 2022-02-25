@@ -16,16 +16,16 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:illinois/service/Localization.dart';
+import 'package:rokwire_plugin/service/localization.dart';
 import 'package:illinois/model/Laundry.dart';
 import 'package:illinois/service/Analytics.dart';
 import 'package:illinois/ui/widgets/HeaderBar.dart';
-import 'package:illinois/service/Styles.dart';
+import 'package:rokwire_plugin/service/styles.dart';
 import 'package:illinois/ui/laundry/LaundryDetailPanel.dart';
 import 'package:illinois/ui/widgets/TabBarWidget.dart';
 
 class LaundryListPanel extends StatefulWidget {
-  final List<LaundryRoom> rooms;
+  final List<LaundryRoom>? rooms;
 
   LaundryListPanel({this.rooms});
 
@@ -48,18 +48,11 @@ class _LaundryListPanelState extends State<LaundryListPanel>  {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: SimpleHeaderBarWithBack(
-        context: context,
-        titleWidget: Text(Localization().getStringEx("panel.laundry_detail.header.title", "Laundry"),
-          style: TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 1.0),
-        ),
+      appBar: HeaderBar(
+        title: Localization().getStringEx("panel.laundry_detail.header.title", "Laundry"),
       ),
       body: _buildContentWidget(),
-      backgroundColor: Styles().colors.background,
+      backgroundColor: Styles().colors!.background,
       bottomNavigationBar: TabBarWidget(),
     );
   }
@@ -70,13 +63,13 @@ class _LaundryListPanelState extends State<LaundryListPanel>  {
         Expanded(
           child: 
             Container(
-                  color: Styles().colors.background,
+                  color: Styles().colors!.background,
                   child: Padding(
                     padding: EdgeInsets.only(top: 16),
                     child: SingleChildScrollView(
                       scrollDirection: Axis.vertical,
                       child: Container(
-                          color: Styles().colors.background,
+                          color: Styles().colors!.background,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: <Widget>[
@@ -87,14 +80,14 @@ class _LaundryListPanelState extends State<LaundryListPanel>  {
                                     physics: NeverScrollableScrollPhysics(),
                                     shrinkWrap: true,
                                     itemBuilder: (context, index) {
-                                      LaundryRoom laundryRoom = widget.rooms[index];
+                                      LaundryRoom laundryRoom = widget.rooms![index];
                                       return LaundryRoomRibbonButton(
                                         label: laundryRoom.title,
                                         onTap: () => _onRoomTap(laundryRoom),
                                       );
                                     },
                                     separatorBuilder: (context, index) => Container(),
-                                    itemCount: widget.rooms.length),
+                                    itemCount: widget.rooms!.length),
                               )
                             ],
                           )),
@@ -107,20 +100,20 @@ class _LaundryListPanelState extends State<LaundryListPanel>  {
   }
 
   void _onRoomTap(LaundryRoom room) {
-    Analytics.instance.logSelect(target: "Room" + room.title);
+    Analytics().logSelect(target: "Room" + room.title!);
     Navigator.push(context, CupertinoPageRoute(builder: (context) => LaundryDetailPanel(room: room,)));
   }
 }
 
 class LaundryRoomRibbonButton extends StatelessWidget {
-  final String label;
-  final GestureTapCallback onTap;
+  final String? label;
+  final GestureTapCallback? onTap;
   final BorderRadius borderRadius;
-  final String labelFontFamily;
+  final String? labelFontFamily;
   final Color backgroundColor;
 
   LaundryRoomRibbonButton(
-      {@required this.label,
+      {required this.label,
         this.onTap,
         this.borderRadius = BorderRadius.zero,
         this.labelFontFamily,
@@ -139,7 +132,7 @@ class LaundryRoomRibbonButton extends StatelessWidget {
           child: Container(
             decoration: BoxDecoration(
                 color: backgroundColor,
-                border: Border.all(color: Styles().colors.surfaceAccent, width: 1),
+                border: Border.all(color: Styles().colors!.surfaceAccent!, width: 1),
                 borderRadius: borderRadius),
 //            height: 48,
             child: Padding(
@@ -150,14 +143,14 @@ class LaundryRoomRibbonButton extends StatelessWidget {
                 children: <Widget>[
                   Expanded(child:
                     Text(
-                      label,
+                      label!,
                       style: TextStyle(
-                          color: Styles().colors.fillColorPrimary,
+                          color: Styles().colors!.fillColorPrimary,
                           fontSize: 16,
-                          fontFamily: labelFontFamily ?? Styles().fontFamilies.medium),
+                          fontFamily: labelFontFamily ?? Styles().fontFamilies!.medium),
                     ),
                   ),
-                  Image.asset('images/chevron-right.png')
+                  Image.asset('images/chevron-right.png', excludeFromSemantics: true)
                 ],
               ),
             ),

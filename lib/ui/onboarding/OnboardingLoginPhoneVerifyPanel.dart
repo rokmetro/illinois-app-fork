@@ -17,21 +17,22 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:illinois/model/Auth2.dart';
-import 'package:illinois/service/Auth2.dart';
-import 'package:illinois/service/Onboarding.dart';
-import 'package:illinois/service/Localization.dart';
+import 'package:rokwire_plugin/model/auth2.dart';
+import 'package:rokwire_plugin/service/auth2.dart';
+import 'package:rokwire_plugin/service/onboarding.dart';
+import 'package:rokwire_plugin/service/localization.dart';
 import 'package:illinois/service/Analytics.dart';
 import 'package:illinois/ui/onboarding/OnboardingLoginPhoneConfirmPanel.dart';
 import 'package:illinois/ui/onboarding/OnboardingBackButton.dart';
-import 'package:illinois/ui/widgets/ScalableWidgets.dart';
-import 'package:illinois/utils/Utils.dart';
-import 'package:illinois/service/Styles.dart';
+import 'package:rokwire_plugin/ui/widgets/rounded_button.dart';
+import 'package:illinois/utils/AppUtils.dart';
+import 'package:rokwire_plugin/utils/utils.dart';
+import 'package:rokwire_plugin/service/styles.dart';
 
 class OnboardingLoginPhoneVerifyPanel extends StatefulWidget with OnboardingPanel {
 
-  final Map<String, dynamic> onboardingContext;
-  final ValueSetter<dynamic> onFinish;
+  final Map<String, dynamic>? onboardingContext;
+  final ValueSetter<dynamic>? onFinish;
 
   OnboardingLoginPhoneVerifyPanel({this.onboardingContext, this.onFinish});
 
@@ -41,22 +42,22 @@ class OnboardingLoginPhoneVerifyPanel extends StatefulWidget with OnboardingPane
 
   @override
   bool get onboardingCanDisplay {
-    return (onboardingContext != null) && onboardingContext['shouldVerifyPhone'] == true;
+    return (onboardingContext != null) && onboardingContext!['shouldVerifyPhone'] == true;
   }
 }
 
 class _OnboardingLoginPhoneVerifyPanelState
     extends State<OnboardingLoginPhoneVerifyPanel> {
   TextEditingController _phoneNumberController = TextEditingController();
-  Auth2PhoneVerificationMethod _verificationMethod = Auth2PhoneVerificationMethod.sms;
-  String _validationErrorMsg;
+  Auth2PhoneVerificationMethod? _verificationMethod = Auth2PhoneVerificationMethod.sms;
+  String? _validationErrorMsg;
 
   bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Styles().colors.background,
+        backgroundColor: Styles().colors!.background,
         body: GestureDetector(
           excludeFromSemantics: true,
           behavior: HitTestBehavior.translucent,
@@ -75,9 +76,9 @@ class _OnboardingLoginPhoneVerifyPanelState
                               'Connect to Illinois'),
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                              fontFamily: Styles().fontFamilies.bold,
+                              fontFamily: Styles().fontFamilies!.bold,
                               fontSize: 36,
-                              color: Styles().colors.fillColorPrimary))),
+                              color: Styles().colors!.fillColorPrimary))),
                   Container(
                     height: 48,
                   ),
@@ -89,9 +90,9 @@ class _OnboardingLoginPhoneVerifyPanelState
                               "To verify your phone number, choose your preferred contact channel, and we'll send you a one-time authentication code."),
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                              fontFamily: Styles().fontFamilies.regular,
+                              fontFamily: Styles().fontFamilies!.regular,
                               fontSize: 18,
-                              color: Styles().colors.fillColorPrimary))),
+                              color: Styles().colors!.fillColorPrimary))),
                   Padding(
                     padding: EdgeInsets.only(left: 12, top: 12, bottom: 6),
                     child: Text(
@@ -101,8 +102,8 @@ class _OnboardingLoginPhoneVerifyPanelState
                       textAlign: TextAlign.left,
                       style: TextStyle(
                           fontSize: 16,
-                          color: Styles().colors.fillColorPrimary,
-                          fontFamily: Styles().fontFamilies.bold),
+                          color: Styles().colors!.fillColorPrimary,
+                          fontFamily: Styles().fontFamilies!.bold),
                     ),
                   ),
                   Padding(
@@ -121,12 +122,12 @@ class _OnboardingLoginPhoneVerifyPanelState
                         controller: _phoneNumberController,
                         autofocus: false,
                         onSubmitted: (_) => _clearErrorMsg,
-                        cursorColor: Styles().colors.textBackground,
+                        cursorColor: Styles().colors!.textBackground,
                         keyboardType: TextInputType.phone,
                         style: TextStyle(
                             fontSize: 16,
-                            fontFamily: Styles().fontFamilies.regular,
-                            color: Styles().colors.textBackground),
+                            fontFamily: Styles().fontFamilies!.regular,
+                            color: Styles().colors!.textBackground),
                         decoration: InputDecoration(
                           enabledBorder: OutlineInputBorder(
                             borderSide: BorderSide(
@@ -154,7 +155,7 @@ class _OnboardingLoginPhoneVerifyPanelState
                             selected: _verificationMethod == Auth2PhoneVerificationMethod.sms,
                             button: true,
                             child: Radio(
-                              activeColor: Styles().colors.fillColorSecondary,
+                              activeColor: Styles().colors!.fillColorSecondary,
                               value: Auth2PhoneVerificationMethod.sms,
                               groupValue: _verificationMethod,
                               onChanged: _onMethodChanged,
@@ -166,22 +167,22 @@ class _OnboardingLoginPhoneVerifyPanelState
                                   "panel.onboarding.verify_phone.text_me.label",
                                   "Text me"),
                               style: TextStyle(
-                                  fontSize: 16, fontFamily: Styles().fontFamilies.regular),
+                                  fontSize: 16, fontFamily: Styles().fontFamilies!.regular),
                             ))
                         ],
                       ),
                     ],
                   ),
                   Visibility(
-                    visible: AppString.isStringNotEmpty(_validationErrorMsg),
+                    visible: StringUtils.isNotEmpty(_validationErrorMsg),
                     child: Padding(
                       padding: EdgeInsets.symmetric(vertical: 12),
                       child: Text(
-                        AppString.getDefaultEmptyString(value: _validationErrorMsg),
+                        StringUtils.ensureNotEmpty(_validationErrorMsg),
                         style: TextStyle(
                             color: Colors.red,
                             fontSize: 14,
-                            fontFamily: Styles().fontFamilies.medium),
+                            fontFamily: Styles().fontFamilies!.medium),
                       ),
                     ),
                   ),
@@ -200,18 +201,18 @@ class _OnboardingLoginPhoneVerifyPanelState
             OnboardingBackButton(
                 padding: const EdgeInsets.only(left: 10, top: 30, right: 20, bottom: 20),
                 onTap: () {
-                  Analytics.instance.logSelect(target: "Back");
+                  Analytics().logSelect(target: "Back");
                   Navigator.pop(context);
                 }), Align(alignment: Alignment.bottomCenter, child:
-            Padding(padding: EdgeInsets.only(left: 18, right: 18, bottom: 24),child: ScalableRoundedButton(
+            Padding(padding: EdgeInsets.only(left: 18, right: 18, bottom: 24),child: RoundedButton(
                 label: Localization().getStringEx(
                     "panel.onboarding.verify_phone.button.next.label",
                     "Next"),
                 hint: Localization().getStringEx(
                     "panel.onboarding.verify_phone.button.next.hint", ""),
-                borderColor: Styles().colors.fillColorSecondary,
-                backgroundColor: Styles().colors.background,
-                textColor: Styles().colors.fillColorPrimary,
+                borderColor: Styles().colors!.fillColorSecondary,
+                backgroundColor: Styles().colors!.background,
+                textColor: Styles().colors!.fillColorPrimary,
                 onTap: () => _onTapNext()),),)
           ],),
         ));
@@ -222,18 +223,18 @@ class _OnboardingLoginPhoneVerifyPanelState
       return;
     }
 
-    Analytics.instance.logSelect(target: "Next");
+    Analytics().logSelect(target: "Next");
     _clearErrorMsg();
     _validateUserInput();
-    if (AppString.isStringNotEmpty(_validationErrorMsg)) {
+    if (StringUtils.isNotEmpty(_validationErrorMsg)) {
       return;
     }
 
-    String phoneNumber = _phoneNumberController.text;
+    String? phoneNumber = _phoneNumberController.text;
     if(kReleaseMode) {
-      if (AppString.isUsPhoneValid(phoneNumber)) {
-        phoneNumber = AppString.constructUsPhone(phoneNumber);
-        if (AppString.isUsPhoneNotValid(phoneNumber)) {
+      if (StringUtils.isUsPhoneValid(phoneNumber)) {
+        phoneNumber = StringUtils.constructUsPhone(phoneNumber);
+        if (StringUtils.isUsPhoneNotValid(phoneNumber)) {
           AppAlert.showDialogResult(context, Localization().getStringEx("panel.onboarding.verify_phone.validation.server_error.text", "Please enter a valid phone number"));
           return;
         }
@@ -246,32 +247,39 @@ class _OnboardingLoginPhoneVerifyPanelState
 
     setState(() { _isLoading = true; });
     
-    Auth2().authenticateWithPhone(phoneNumber).then((success) {
+    Auth2().authenticateWithPhone(phoneNumber).then((result) {
       if (mounted) {
         setState(() { _isLoading = false; });
-        _onPhoneInitiated(phoneNumber, success);
+        _onPhoneInitiated(phoneNumber, result);
       }
     });
   }
 
-  void _onMethodChanged(Auth2PhoneVerificationMethod method) {
-    Analytics.instance.logSelect(target: method?.toString());
+  void _onMethodChanged(Auth2PhoneVerificationMethod? method) {
+    Analytics().logSelect(target: method?.toString());
     FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       _verificationMethod = method;
     });
   }
 
-  void _onPhoneInitiated(String phoneNumber, bool success) {
-    if (!success) {
+  void _onPhoneInitiated(String? phoneNumber, Auth2PhoneRequestCodeResult result) {
+    if (result == Auth2PhoneRequestCodeResult.failed) {
       setState(() {
         _validationErrorMsg = Localization().getStringEx(
-            "panel.onboarding.verify_phone.validation.server_error.text",
-            "Please enter a valid phone number");
+            "panel.onboarding.verify_phone.validation.failed.text",
+            "Failed to send authentication code. An unexpected error occurred.");
       });
     }
-    else if(widget.onboardingContext != null) {
-      widget.onboardingContext["phone"] = phoneNumber;
+    else if (result == Auth2PhoneRequestCodeResult.failedAccountExist) {
+      setState(() {
+        _validationErrorMsg = Localization().getStringEx(
+            "panel.onboarding.verify_phone.validation.exists.text",
+            "Failed to send authentication code. An existing account is already using this phone number.");
+      });
+    }
+    else if (widget.onboardingContext != null) {
+      widget.onboardingContext!["phone"] = phoneNumber;
       Onboarding().next(context, widget);
     }
     else {
@@ -281,7 +289,7 @@ class _OnboardingLoginPhoneVerifyPanelState
 
   void _validateUserInput() {
     String phoneNumberValue = _phoneNumberController.text;
-    if (AppString.isStringEmpty(phoneNumberValue)) {
+    if (StringUtils.isEmpty(phoneNumberValue)) {
       setState(() {
         _validationErrorMsg = Localization().getStringEx(
             'panel.onboarding.verify_phone.validation.phone_number.text',

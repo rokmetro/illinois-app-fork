@@ -25,15 +25,13 @@
 #import "MapController.h"
 #import "MapDirectionsController.h"
 #import "MapLocationPickerController.h"
-#import "RegionMonitor.h"
-#import "PollPlugin.h"
 
 #import "NSArray+InaTypedValue.h"
 #import "NSDictionary+InaTypedValue.h"
 #import "NSDictionary+UIUCConfig.h"
 #import "CGGeometry+InaUtils.h"
 #import "UIColor+InaParse.h"
-#import "Bluetooth+InaUtils.h"
+#import "UILabel+InaMeasure.h"
 #import "Security+UIUCUtils.h"
 
 #import <GoogleMaps/GoogleMaps.h>
@@ -42,9 +40,7 @@
 #import <ZXingObjC/ZXingObjC.h>
 
 #import <UserNotifications/UserNotifications.h>
-#import <SafariServices/SafariServices.h>
 #import <PassKit/PassKit.h>
-#import <CoreBluetooth/CoreBluetooth.h>
 
 static NSString *const kFIRMessagingFCMTokenNotification = @"com.firebase.iid.notif.fcm-token";
 
@@ -52,6 +48,7 @@ static NSString *const kFIRMessagingFCMTokenNotification = @"com.firebase.iid.no
 @end
 
 @interface LaunchScreenView : UIView
+@property (nonatomic) NSString *statusText;
 @end
 
 UIInterfaceOrientation _interfaceOrientationFromString(NSString *value);
@@ -60,7 +57,7 @@ NSString* _interfaceOrientationToString(UIInterfaceOrientation value);
 UIInterfaceOrientation _interfaceOrientationFromMask(UIInterfaceOrientationMask value);
 UIInterfaceOrientationMask _interfaceOrientationToMask(UIInterfaceOrientation value);
 
-@interface AppDelegate()<UINavigationControllerDelegate, UNUserNotificationCenterDelegate, CLLocationManagerDelegate, CBPeripheralManagerDelegate, FIRMessagingDelegate, PKAddPassesViewControllerDelegate> {
+@interface AppDelegate()<UINavigationControllerDelegate, UNUserNotificationCenterDelegate, FIRMessagingDelegate, PKAddPassesViewControllerDelegate> {
 }
 
 // Flutter
@@ -69,7 +66,7 @@ UIInterfaceOrientationMask _interfaceOrientationToMask(UIInterfaceOrientation va
 @property (nonatomic) FlutterMethodChannel *flutterMethodChannel;
 
 // Launch View
-@property (nonatomic) UIView *launchScreenView;
+@property (nonatomic) LaunchScreenView *launchScreenView;
 
 // PassKit
 @property (nonatomic) PKAddPassesViewController *passViewController;
@@ -82,13 +79,6 @@ UIInterfaceOrientationMask _interfaceOrientationToMask(UIInterfaceOrientation va
 @property (nonatomic) NSSet *supportedInterfaceOrientations;
 @property (nonatomic) UIInterfaceOrientation preferredInterfaceOrientation;
 
-// Location Services
-@property (nonatomic) CLLocationManager *clLocationManager;
-@property (nonatomic) NSMutableSet<FlutterResult> *locationFlutterResults;
-
-// Bluetooth Services
-@property (nonatomic) CBPeripheralManager *peripheralManager;
-@property (nonatomic) NSMutableSet<FlutterResult> *bluetoothFlutterResults;
 @end
 
 @implementation AppDelegate
@@ -122,9 +112,6 @@ UIInterfaceOrientationMask _interfaceOrientationToMask(UIInterfaceOrientation va
 	MapViewFactory *factory = [[MapViewFactory alloc] initWithMessenger:registrar.messenger];
 	[registrar registerViewFactory:factory withId:@"mapview"];
 	
-	// Setup PollPlugin
-	[PollPlugin registerWithRegistrar:[self registrarForPlugin:@"PollPlugin"]];
-
 	// Setup supported & preffered orientation
 	_preferredInterfaceOrientation = UIInterfaceOrientationPortrait;
 	_supportedInterfaceOrientations = [NSSet setWithObject:@(_preferredInterfaceOrientation)];
@@ -222,6 +209,12 @@ UIInterfaceOrientationMask _interfaceOrientationToMask(UIInterfaceOrientation va
 	}
 }
 
+- (void)setLaunchScreenStatusText:(NSString*)statusText {
+	if (_launchScreenView != nil) {
+		_launchScreenView.statusText = statusText;
+	}
+}
+
 #pragma mark Flutter APIs
 
 - (void)handleFlutterAPIFromCall:(FlutterMethodCall*)call result:(FlutterResult)result {
@@ -238,38 +231,14 @@ UIInterfaceOrientationMask _interfaceOrientationToMask(UIInterfaceOrientation va
 	else if ([call.method isEqualToString:@"map"]) {
 		[self handleMapWithParameters:parameters result:result];
 	}
-	else if ([call.method isEqualToString:@"showNotification"]) {
-		[self handleShowNotificationWithParameters:parameters result:result];
-	}
-	else if ([call.method isEqualToString:@"dismissSafariVC"]) {
-		[self handleDismissSafariVCWithParameters:parameters result:result];
-	}
 	else if ([call.method isEqualToString:@"dismissLaunchScreen"]) {
 		[self handleDismissLaunchScreenWithParameters:parameters result:result];
 	}
-	else if ([call.method isEqualToString:@"firebaseInfo"]) {
-		[self handleFirebaseInfoWithParameters:parameters result:result];
-	}
-	else if ([call.method isEqualToString:@"notifications_authorization"]) {
-		[self handleNotificationsWithParameters:parameters result:result];
-	}
-	else if ([call.method isEqualToString:@"location_services_permission"]) {
-		[self handleLocationServicesWithParameters:parameters result:result];
-	}
-	else if ([call.method isEqualToString:@"bluetooth_authorization"]) {
-		[self handleBluetoothAuthorizationWithParameters:parameters result:result];
+	else if ([call.method isEqualToString:@"setLaunchScreenStatus"]) {
+		[self handleSetLaunchScreenStatusWithParameters:parameters result:result];
 	}
 	else if ([call.method isEqualToString:@"addToWallet"]) {
 		[self handleAddToWalletWithParameters:parameters result:result];
-	}
-	else if ([call.method isEqualToString:@"geoFence"]) {
-		[self handleGeoFenceWithParameters:parameters result:result];
-	}
-	else if ([call.method isEqualToString:@"deviceId"]) {
-		[self handleDeviceIdWithParameters:parameters result:result];
-	}
-	else if ([call.method isEqualToString:@"encryptionKey"]) {
-		[self handleEncryptionKeyWithParameters:parameters result:result];
 	}
 	else if ([call.method isEqualToString:@"enabledOrientations"]) {
 		[self handleEnabledOrientationsWithParameters:parameters result:result];
@@ -279,9 +248,6 @@ UIInterfaceOrientationMask _interfaceOrientationToMask(UIInterfaceOrientation va
 	}
 	else if ([call.method isEqualToString:@"test"]) {
 		[self handleTestWithParameters:parameters result:result];
-	}
-	else if ([call.method isEqualToString:@"launchApp"]) {
-		[self handleLaunchApp:parameters result:result];
 	}
 }
 
@@ -334,89 +300,16 @@ UIInterfaceOrientationMask _interfaceOrientationToMask(UIInterfaceOrientation va
 	[self.navigationViewController pushViewController:mapController animated:YES];
 }
 
-- (void)handleShowNotificationWithParameters:(NSDictionary*)parameters result:(FlutterResult)result {
-	UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
-	content.title = [parameters inaStringForKey:@"title"] ?: [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleDisplayName"];
-	content.subtitle = [parameters inaStringForKey:@"subtitle"];
-	content.body = [parameters inaStringForKey:@"body"];
-	content.sound = [parameters inaBoolForKey:@"sound" defaults:true] ? [UNNotificationSound defaultSound] : nil;
-	
-	UNTimeIntervalNotificationTrigger* trigger = [UNTimeIntervalNotificationTrigger
-												  triggerWithTimeInterval:1 repeats:NO];
-	
-	UNNotificationRequest* request = [UNNotificationRequest
-									  requestWithIdentifier:@"Poll_Created" content:content trigger:trigger];
-	
-	UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
-	[center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
-		if (error != nil) {
-			NSLog(@"%@", error.localizedDescription);
-		}
-	}];
-}
-
-- (void)handleDismissSafariVCWithParameters:(NSDictionary*)parameters result:(FlutterResult)result {
-	UIViewController *presentedController = self.flutterViewController.presentedViewController;
-	if ([presentedController isKindOfClass:[SFSafariViewController class]]) {
-		[presentedController dismissViewControllerAnimated:YES completion:^{
-			result(@(YES));
-		}];
-	}
-	else {
-		result(@(NO));
-	}
-}
-
 - (void)handleDismissLaunchScreenWithParameters:(NSDictionary*)parameters result:(FlutterResult)result {
 	[self removeLaunchScreen];
+	result(nil);
 }
 
-- (void)handleFirebaseInfoWithParameters:(NSDictionary*)parameters result:(FlutterResult)result {
-    FIRApp *firApp = [FIRApp defaultApp];
-    FIROptions *options = (firApp != nil) ? [firApp options] : nil;
-    NSString *projectID = (options != nil) ? [options projectID] : nil;
-    result(projectID);
+- (void)handleSetLaunchScreenStatusWithParameters:(NSDictionary*)parameters result:(FlutterResult)result {
+	NSString *statusText = [parameters inaStringForKey:@"status"];
+	[self setLaunchScreenStatusText:statusText];
+	result(nil);
 }
-
-- (void)handleNotificationsWithParameters:(NSDictionary*)parameters result:(FlutterResult)result {
-	NSString *method = [parameters inaStringForKey:@"method"];
-	if ([method isEqualToString:@"query"]) {
-		[self queryNotificationsAuthorizationWithFlutterResult:result];
-	}
-	else if ([method isEqualToString:@"request"]) {
-		[self requestNotificationsAuthorizationWithFlutterResult:result];
-	}
-	else {
-		result(nil);
-	}
-}
-
-- (void)handleLocationServicesWithParameters:(NSDictionary*)parameters result:(FlutterResult)result {
-	NSString *method = [parameters inaStringForKey:@"method"];
-	if ([method isEqualToString:@"query"]) {
-		[self queryLocationServicesPermisionWithFlutterResult:result];
-	}
-	else if ([method isEqualToString:@"request"]) {
-		[self requestLocationServicesPermisionWithFlutterResult:result];
-	}
-	else {
-		result(nil);
-	}
-}
-
-- (void)handleBluetoothAuthorizationWithParameters:(NSDictionary*)parameters result:(FlutterResult)result {
-	NSString *method = [parameters inaStringForKey:@"method"];
-	if ([method isEqualToString:@"query"]) {
-		[self queryBluetoothAuthorizationWithFlutterResult:result];
-	}
-	else if ([method isEqualToString:@"request"]) {
-		[self requestBluetoothAuthorizationWithFlutterResult:result];
-	}
-	else {
-		result(nil);
-	}
-}
-
 
 - (void)handleAddToWalletWithParameters:(NSDictionary*)parameters result:(FlutterResult)result {
 	NSString *base64CardData = [parameters inaStringForKey:@"cardBase64Data"];
@@ -425,53 +318,8 @@ UIInterfaceOrientationMask _interfaceOrientationToMask(UIInterfaceOrientation va
 	result(nil);
 }
 
-- (void)handleGeoFenceWithParameters:(NSDictionary*)parameters result:(FlutterResult)result {
-	NSArray *regions;
-	NSDictionary *beacons;
-	if ((regions = [parameters inaArrayForKey:@"regions"]) != nil) {
-		[RegionMonitor.sharedInstance monitorRegions:regions];
-		result(RegionMonitor.sharedInstance.currentRegionIdsList);
-	}
-	else if ((beacons = [parameters inaDictForKey:@"beacons"]) != nil) {
-		NSString *regionId = [beacons inaStringForKey:@"regionId"];
-		NSString *action = [beacons inaStringForKey:@"action"];
-		if ([action isEqualToString:@"start"]) {
-			result(@([RegionMonitor.sharedInstance startRangingBeaconsInRegionWithId:regionId]));
-		}
-		else if ([action isEqualToString:@"stop"]) {
-			result(@([RegionMonitor.sharedInstance stopRangingBeaconsInRegionWithId:regionId]));
-		}
-		else {
-			result([RegionMonitor.sharedInstance beaconsInRegionWithId:regionId]);
-		}
-	}
-	else {
-		result(nil);
-	}
-}
-
-- (void)handleDeviceIdWithParameters:(NSDictionary*)parameters result:(FlutterResult)result {
-	result(self.deviceUUID.UUIDString);
-}
-
-- (void)handleEncryptionKeyWithParameters:(NSDictionary*)parameters result:(FlutterResult)result {
-	result([self encryptionKeyWithParameters:parameters]);
-}
-
 - (void)handleTestWithParameters:(NSDictionary*)parameters result:(FlutterResult)result {
 	result(nil);
-}
-
-- (void)handleLaunchApp:(NSDictionary*)parameters result:(FlutterResult)result {
-	NSString *deepLink = [parameters inaStringForKey:@"deep_link"];
-	NSURL *deepLinkUrl = deepLink != nil ? [NSURL URLWithString:deepLink] : nil;
-	if([UIApplication.sharedApplication canOpenURL:deepLinkUrl]){
-		[UIApplication.sharedApplication openURL:deepLinkUrl options:@{} completionHandler:^(BOOL success) {
-			result([NSNumber numberWithBool:success]);
-		}];
-	} else {
-		result([NSNumber numberWithBool:NO]);
-	}
 }
 
 #pragma mark Barcode
@@ -656,42 +504,6 @@ UIInterfaceOrientationMask _interfaceOrientationToMask(UIInterfaceOrientation va
 
 #pragma mark Push Notifications
 
-- (void)queryNotificationsAuthorizationWithFlutterResult:(FlutterResult)result {
-	[UNUserNotificationCenter.currentNotificationCenter getNotificationSettingsWithCompletionHandler:^(UNNotificationSettings* settings) {
-		result([self.class notificationServicesPermisionFromAuthorizationStatus:settings.authorizationStatus]);
-	}];
-}
-
-+ (NSString*)notificationServicesPermisionFromAuthorizationStatus:(UNAuthorizationStatus)authorizationStatus {
-	switch (authorizationStatus) {
-		case UNAuthorizationStatusNotDetermined:       return @"not_determined";
-		case UNAuthorizationStatusDenied:              return @"denied";
-		default:                                       return @"allowed";
-	}
-	return nil;
-}
-
-
-- (void)requestNotificationsAuthorizationWithFlutterResult:(FlutterResult)result {
-	__weak typeof(self) weakSelf = self;
-	[UNUserNotificationCenter.currentNotificationCenter getNotificationSettingsWithCompletionHandler:^(UNNotificationSettings* settings) {
-		if (settings.authorizationStatus == UNAuthorizationStatusDenied) {
-			result([self.class notificationServicesPermisionFromAuthorizationStatus:UNAuthorizationStatusDenied]);
-		}
-		else {
-			UNAuthorizationOptions options = UNAuthorizationOptionAlert | UNAuthorizationOptionBadge | UNAuthorizationOptionSound;
-			[UNUserNotificationCenter.currentNotificationCenter requestAuthorizationWithOptions:options completionHandler:^(BOOL granted, NSError * _Nullable error){
-				dispatch_async(dispatch_get_main_queue(), ^{
-					result([self.class notificationServicesPermisionFromAuthorizationStatus:granted ? UNAuthorizationStatusAuthorized : UNAuthorizationStatusDenied]);
-					if (granted) {
-						[weakSelf registerForRemoteNotifications];
-					}
-				});
-			}];
-		}
-	}];
-}
-
 - (void)registerForRemoteNotifications {
     [UNUserNotificationCenter currentNotificationCenter].delegate = self;
 	[[UIApplication sharedApplication] registerForRemoteNotifications];
@@ -704,107 +516,6 @@ UIInterfaceOrientationMask _interfaceOrientationToMask(UIInterfaceOrientation va
 
 - (void)application:(UIApplication*)application didFailToRegisterForRemoteNotificationsWithError:(NSError*)error {
 	NSLog(@"UIApplication didFailToRegisterForRemoteNotificationsWithError: %@", error);
-}
-
-#pragma mark LocationServices
-
-- (void)queryLocationServicesPermisionWithFlutterResult:(FlutterResult)result {
-	NSString *status = [CLLocationManager locationServicesEnabled] ?
-		[self.class locationServicesPermisionFromAuthorizationStatus:[CLLocationManager authorizationStatus]] :
-		@"disabled";
-	result(status);
-}
-
-+ (NSString*)locationServicesPermisionFromAuthorizationStatus:(CLAuthorizationStatus)authorizationStatus {
-	switch (authorizationStatus) {
-		case kCLAuthorizationStatusNotDetermined:       return @"not_determined";
-		case kCLAuthorizationStatusRestricted:          return @"denied";
-		case kCLAuthorizationStatusDenied:              return @"denied";
-		case kCLAuthorizationStatusAuthorizedAlways:    return @"allowed";
-		case kCLAuthorizationStatusAuthorizedWhenInUse: return @"allowed";
-	}
-	return nil;
-}
-
-- (void)requestLocationServicesPermisionWithFlutterResult:(FlutterResult)flutterResult {
-	if ([CLLocationManager locationServicesEnabled]) {
-		CLAuthorizationStatus status = [CLLocationManager authorizationStatus];
-		if (status == kCLAuthorizationStatusNotDetermined) {
-			if (_locationFlutterResults == nil) {
-				_locationFlutterResults = [[NSMutableSet alloc] init];
-			}
-			[_locationFlutterResults addObject:flutterResult];
-
-			if (_clLocationManager == nil) {
-				_clLocationManager = [[CLLocationManager alloc] init];
-				_clLocationManager.delegate = self;
-				[_clLocationManager requestAlwaysAuthorization];
-			}
-		}
-		else {
-			flutterResult([self.class locationServicesPermisionFromAuthorizationStatus:status]);
-		}
-	}
-	else {
-		flutterResult([self.class locationServicesPermisionFromAuthorizationStatus:kCLAuthorizationStatusRestricted]);
-	}
-}
-
-#pragma mark CLLocationManagerDelegate
-
-- (void)locationManager:(CLLocationManager*)manager didChangeAuthorizationStatus:(CLAuthorizationStatus)status {
-
-	if (status != kCLAuthorizationStatusNotDetermined) {
-		_clLocationManager.delegate = nil;
-		_clLocationManager = nil;
-
-		NSSet<FlutterResult> *flutterResults = _locationFlutterResults;
-		_locationFlutterResults = nil;
-
-		for(FlutterResult flutterResult in flutterResults) {
-			flutterResult([self.class locationServicesPermisionFromAuthorizationStatus:status]);
-		}
-	}
-}
-
-#pragma mark Bluetooth Authorization
-
-- (void)queryBluetoothAuthorizationWithFlutterResult:(FlutterResult)flutterResult {
-	flutterResult(InaBluetoothAuthorizationStatusToString(InaBluetooth.peripheralAuthorizationStatus));
-}
-
-- (void)requestBluetoothAuthorizationWithFlutterResult:(FlutterResult)flutterResult {
-	if (InaBluetooth.peripheralAuthorizationStatus == InaBluetoothAuthorizationStatusNotDetermined) {
-		if (_bluetoothFlutterResults == nil) {
-			_bluetoothFlutterResults = [[NSMutableSet alloc] init];
-		}
-		[_bluetoothFlutterResults addObject:flutterResult];
-		if (_peripheralManager == nil) {
-			_peripheralManager = [[CBPeripheralManager alloc] initWithDelegate:self queue:nil];
-		}
-	}
-	else {
-		flutterResult(InaBluetoothAuthorizationStatusToString(InaBluetooth.peripheralAuthorizationStatus));
-	}
-}
-
-- (void)didBluetoothServicesPermision {
-	_peripheralManager.delegate = nil;
-	_peripheralManager = nil;
-	
-	NSSet<FlutterResult> *flutterResults = _bluetoothFlutterResults;
-	_bluetoothFlutterResults = nil;
-
-	NSString *status = InaBluetoothAuthorizationStatusToString(InaBluetooth.peripheralAuthorizationStatus);
-	for (FlutterResult flutterResult in flutterResults) {
-		flutterResult(status);
-	}
-}
-
-#pragma mark CBPeripheralManagerDelegate
-
-- (void)peripheralManagerDidUpdateState:(CBPeripheralManager*)peripheral {
-	[self didBluetoothServicesPermision];
 }
 
 #pragma mark Deep Links
@@ -855,59 +566,6 @@ UIInterfaceOrientationMask _interfaceOrientationToMask(UIInterfaceOrientation va
 	}
 }
 
-
-#pragma mark Device UUID
-
-- (NSUUID*)deviceUUID {
-	static NSString* const deviceUUID = @"deviceUUID";
-	NSData *data = uiucSecStorageData(deviceUUID, deviceUUID, nil);
-	if ([data isKindOfClass:[NSData class]] && (data.length == sizeof(uuid_t))) {
-		return [[NSUUID alloc] initWithUUIDBytes:data.bytes];
-	}
-	else {
-		uuid_t uuidData;
-		int rndStatus = SecRandomCopyBytes(kSecRandomDefault, sizeof(uuidData), uuidData);
-		if (rndStatus == errSecSuccess) {
-			NSNumber *result = uiucSecStorageData(deviceUUID, deviceUUID, [NSData dataWithBytes:uuidData length:sizeof(uuidData)]);
-			if ([result isKindOfClass:[NSNumber class]] && [result boolValue]) {
-				return [[NSUUID alloc] initWithUUIDBytes:uuidData];
-			}
-		}
-	}
-	return nil;
-}
-
-#pragma mark Encryption Key
-
-- (id)encryptionKeyWithParameters:(NSDictionary*)parameters {
-	
-	NSString *identifier = [parameters inaStringForKey:@"identifier"];
-	if (identifier == nil) {
-		return nil;
-	}
-	
-	NSInteger keySize = [parameters inaIntegerForKey:@"size"];
-	if (keySize <= 0) {
-		return nil;
-	}
-
-	NSData *data = uiucSecStorageData(identifier, nil, nil);
-	if ([data isKindOfClass:[NSData class]] && (data.length == keySize)) {
-		return [data base64EncodedStringWithOptions:0];
-	}
-	else {
-		UInt8 key[keySize];
-		int rndStatus = SecRandomCopyBytes(kSecRandomDefault, sizeof(key), key);
-		if (rndStatus == errSecSuccess) {
-			data = [NSData dataWithBytes:key length:sizeof(key)];
-			NSNumber *result = uiucSecStorageData(identifier, nil, data);
-			if ([result isKindOfClass:[NSNumber class]] && [result boolValue]) {
-				return [data base64EncodedStringWithOptions:0];
-			}
-		}
-	}
-	return nil;
-}
 
 #pragma mark PKAddPassesViewControllerDelegate
 
@@ -1014,6 +672,7 @@ UIInterfaceOrientationMask _interfaceOrientationToMask(UIInterfaceOrientation va
 @interface LaunchScreenView()
 @property (nonatomic) UIImageView *imageView;
 @property (nonatomic) UIActivityIndicatorView *activityView;
+@property (nonatomic) UILabel *statusView;
 @end
 
 @implementation LaunchScreenView
@@ -1026,6 +685,14 @@ UIInterfaceOrientationMask _interfaceOrientationToMask(UIInterfaceOrientation va
 		
 		_activityView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
 		[self addSubview:_activityView];
+		
+		_statusView = [[UILabel alloc] initWithFrame:CGRectZero];
+		_statusView.font = [UIFont systemFontOfSize:16];
+		_statusView.textAlignment = NSTextAlignmentCenter;
+		_statusView.textColor = UIColor.whiteColor;
+		_statusView.shadowColor = [UIColor colorWithWhite:1.0 alpha:0.5];
+		_statusView.shadowOffset = CGSizeMake(1, 1);
+		[self addSubview:_statusView];
 
 		[_activityView startAnimating];
 	}
@@ -1043,7 +710,19 @@ UIInterfaceOrientationMask _interfaceOrientationToMask(UIInterfaceOrientation va
 	CGSize activitySize = [_activityView sizeThatFits:contentSize];
 	_activityView.frame = CGRectMake((contentSize.width - activitySize.width) / 2, 7 * (contentSize.height - activitySize.height) / 8, activitySize.width, activitySize.height);
 	
-	
+	CGFloat statusPaddingX = 16;
+	CGSize statusSize = [_statusView inaTextSizeForBoundWidth:contentSize.width - 2 * statusPaddingX];
+	CGFloat statusY = contentSize.height - ((contentSize.height - activitySize.height) / 8 - statusSize.height) / 2 - statusSize.height;
+	_statusView.frame = CGRectMake(statusPaddingX, statusY, contentSize.width - 2 * statusPaddingX, statusSize.height);
+}
+
+- (NSString*)statusText {
+	return _statusView.text;
+}
+
+- (void)setStatusText:(NSString*)value {
+	_statusView.text = value;
+	[self setNeedsLayout];
 }
 
 @end

@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:illinois/service/Localization.dart';
-import 'package:illinois/service/Styles.dart';
+import 'package:rokwire_plugin/service/localization.dart';
+import 'package:rokwire_plugin/service/styles.dart';
 import 'package:illinois/ui/settings/SettingsWidgets.dart';
 import 'package:illinois/ui/widgets/HeaderBar.dart';
 import 'package:illinois/ui/widgets/TabBarWidget.dart';
@@ -33,15 +32,11 @@ class _SettingsBluetoothPanelState extends State<SettingsBluetoothPanel> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: SimpleHeaderBarWithBack(
-        context: context,
-        titleWidget: Text(
-          Localization().getStringEx("panel.settings.bluetooth.label.title", "Bluetooth"),
-          style: TextStyle(color: Styles().colors.white, fontSize: 16, fontFamily: Styles().fontFamilies.extraBold, letterSpacing: 1.0),
-        ),
+      appBar: HeaderBar(
+        title: Localization().getStringEx("panel.settings.bluetooth.label.title", "Bluetooth"),
       ),
       body: SingleChildScrollView(child: _buildContent()),
-      backgroundColor: Styles().colors.background,
+      backgroundColor: Styles().colors!.background,
       bottomNavigationBar: TabBarWidget(),
     );
   }
@@ -55,7 +50,7 @@ class _SettingsBluetoothPanelState extends State<SettingsBluetoothPanel> {
             padding: EdgeInsets.symmetric(horizontal: 6),
             child: Text(
               Localization().getStringEx("panel.settings.bluetooth.label.desctiption", "Create and answer quizzes and polls with people near you."),
-              style: TextStyle(color: Styles().colors.fillColorPrimary, fontSize: 16, fontFamily: Styles().fontFamilies.bold),
+              style: TextStyle(color: Styles().colors!.fillColorPrimary, fontSize: 16, fontFamily: Styles().fontFamilies!.bold),
           ),),
           Container(height: 24,),
           InfoButton(
@@ -77,7 +72,7 @@ class _SettingsBluetoothPanelState extends State<SettingsBluetoothPanel> {
     return false; // tbd
   }
   
-  String get _bluetoothStatus{
+  String? get _bluetoothStatus{
       return _bluetoothEnabled?Localization().getStringEx("panel.settings.bluetooth.label.status.enabled", "Enabled"): Localization().getStringEx("panel.settings.bluetooth.label.status.disabled", "Disabled");
   }
 }

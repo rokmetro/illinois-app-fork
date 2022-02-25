@@ -17,27 +17,27 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:illinois/service/Analytics.dart';
-import 'package:illinois/service/Localization.dart';
+import 'package:rokwire_plugin/service/localization.dart';
 import 'package:illinois/ui/SearchPanel.dart';
 import 'package:illinois/ui/explore/ExploreViewTypeTab.dart';
-import 'package:illinois/service/Styles.dart';
+import 'package:rokwire_plugin/service/styles.dart';
 
 enum ListMapDisplayType { List, Map }
 
 class ExploreDisplayTypeHeader extends StatelessWidget {
-  final ListMapDisplayType displayType;
-  final GestureTapCallback onTapList;
-  final GestureTapCallback onTapMap;
+  final ListMapDisplayType? displayType;
+  final GestureTapCallback? onTapList;
+  final GestureTapCallback? onTapMap;
   final bool searchVisible;
-  final Map<String, dynamic> additionalData;
+  final Map<String, dynamic>? additionalData;
 
   ExploreDisplayTypeHeader({this.displayType, this.onTapList, this.onTapMap, this.searchVisible = false, this.additionalData});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-        height: 24 + (16*(MediaQuery.of(context).textScaleFactor??1)),
-        color: Styles().colors.fillColorPrimaryVariant,
+        height: 24 + (16*(MediaQuery.of(context).textScaleFactor)),
+        color: Styles().colors!.fillColorPrimaryVariant,
         child: Padding(
             padding: EdgeInsets.only(left: 18),
             child: Column(children: <Widget>[
@@ -70,9 +70,9 @@ class ExploreDisplayTypeHeader extends StatelessWidget {
                       button: true, excludeSemantics: true,
                       label: Localization().getStringEx('panel.search.button.search.title', 'Search'),child:
                     IconButton(
-                      icon: Image.asset('images/icon-search.png'),
+                      icon: Image.asset('images/icon-search.png', excludeFromSemantics: true),
                       onPressed: () {
-                        Analytics.instance.logSelect(target: "Search");
+                        Analytics().logSelect(target: "Search");
                         Navigator.push(context, CupertinoPageRoute(builder: (context) => SearchPanel(searchData:additionalData ))).
                           then(
                             (value){

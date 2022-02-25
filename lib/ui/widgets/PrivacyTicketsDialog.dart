@@ -16,23 +16,22 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:illinois/service/Auth2.dart';
-import 'package:illinois/service/Localization.dart';
+import 'package:rokwire_plugin/service/auth2.dart';
+import 'package:rokwire_plugin/service/localization.dart';
 import 'package:illinois/service/Analytics.dart';
 import 'package:illinois/ui/settings/SettingsPrivacyPanel.dart';
-import 'package:illinois/service/Styles.dart';
-
-import 'RoundedButton.dart';
+import 'package:rokwire_plugin/service/styles.dart';
+import 'package:rokwire_plugin/ui/widgets/rounded_button.dart';
 
 class PrivacyTicketsDialog extends StatefulWidget {
-  final Function onContinueTap;
+  final Function? onContinueTap;
 
   PrivacyTicketsDialog({this.onContinueTap});
 
   @override
   _PrivacyTicketsDialogState createState() => _PrivacyTicketsDialogState();
 
-  static show(BuildContext context, {Function onContinueTap}){
+  static show(BuildContext context, {Function? onContinueTap}){
     showDialog(
         context: context,
         builder: (_) => Material(
@@ -76,7 +75,7 @@ class _PrivacyTicketsDialogState extends State<PrivacyTicketsDialog> {
               Container(
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: Styles().colors.fillColorPrimary,
+                    color: Styles().colors!.fillColorPrimary,
                     borderRadius: BorderRadius.only(topLeft: Radius.circular(5), topRight: Radius.circular(5)),
                   ),
                   child: Padding(
@@ -97,7 +96,7 @@ class _PrivacyTicketsDialogState extends State<PrivacyTicketsDialog> {
                                       excludeSemantics: true,
                                       child: Text(
                                         title,
-                                        style: TextStyle(color: Styles().colors.white, fontSize: 24),
+                                        style: TextStyle(color: Styles().colors!.white, fontSize: 24),
                                         textAlign: TextAlign.center,
                                       )),
                                 )),
@@ -113,19 +112,19 @@ class _PrivacyTicketsDialogState extends State<PrivacyTicketsDialog> {
                                         onTap: () {
                                           _onTapClose();
                                         },
-                                        child: Container(child: Image.asset('images/close-white.png')))))
+                                        child: Container(child: Image.asset('images/close-white.png', excludeFromSemantics: true)))))
                           ])))),
               Container(
                   width: double.infinity,
-                  color: Styles().colors.white,
+                  color: Styles().colors!.white,
                   child: Padding(
                       padding: EdgeInsets.all(12),
                       child: Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
                         Text(Localization().getStringEx("widget.privacy_tickets_modal.label.your_privacy", "Your privacy setting"),
                             style: TextStyle(
-                              color: Styles().colors.textBackground,
+                              color: Styles().colors!.textBackground,
                               fontSize: 18,
-                              fontFamily: Styles().fontFamilies.extraBold,
+                              fontFamily: Styles().fontFamilies!.extraBold,
                             )),
                         Padding(
                             padding: EdgeInsets.all(15),
@@ -133,7 +132,7 @@ class _PrivacyTicketsDialogState extends State<PrivacyTicketsDialog> {
                               painter: ShapesPainter(),
                               child: Text(Auth2().prefs?.privacyLevel?.toString() ?? "",
                                   style: TextStyle(
-                                    color: Styles().colors.white,
+                                    color: Styles().colors!.white,
                                   )),
                             )),
                         Container(
@@ -144,8 +143,8 @@ class _PrivacyTicketsDialogState extends State<PrivacyTicketsDialog> {
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 18,
-                            fontFamily: Styles().fontFamilies.extraBold,
-                            color: Styles().colors.textBackground,
+                            fontFamily: Styles().fontFamilies!.extraBold,
+                            color: Styles().colors!.textBackground,
                           ),
                         ),
                         Container(
@@ -155,9 +154,9 @@ class _PrivacyTicketsDialogState extends State<PrivacyTicketsDialog> {
                             Localization().getStringEx("widget.privacy_tickets_modal.label.understand",
                                 "I understand that my information will be collected in the purchase process for any tickets I purchase."),
                             style: TextStyle(
-                              color: Styles().colors.textBackground,
+                              color: Styles().colors!.textBackground,
                               fontSize: 16,
-                              fontFamily: Styles().fontFamilies.regular,
+                              fontFamily: Styles().fontFamilies!.regular,
                             )),
                         Container(
                           height: 10,
@@ -167,12 +166,12 @@ class _PrivacyTicketsDialogState extends State<PrivacyTicketsDialog> {
                           hint: Localization().getStringEx("widget.privacy_tickets_modal.button.continue.hint", ""),
                           backgroundColor: Colors.white,
                           fontSize: 16,
-                          borderColor: Styles().colors.fillColorSecondary,
-                          textColor: Styles().colors.fillColorPrimary,
+                          borderColor: Styles().colors!.fillColorSecondary,
+                          textColor: Styles().colors!.fillColorPrimary,
                           onTap: () {
-                            Analytics.instance.logAlert(text: "Buy Tickets Privacy Alert", selection: "Continue");
+                            Analytics().logAlert(text: "Buy Tickets Privacy Alert", selection: "Continue");
                             _closeModal();
-                            widget.onContinueTap();
+                            widget.onContinueTap!();
                           },
                         ),
                         Container(
@@ -182,9 +181,9 @@ class _PrivacyTicketsDialogState extends State<PrivacyTicketsDialog> {
                             Localization()
                                 .getStringEx("widget.privacy_tickets_modal.label.change_privacy", "Change my privacy setting to allow tickets purchase"),
                             style: TextStyle(
-                              color: Styles().colors.textBackground,
+                              color: Styles().colors!.textBackground,
                               fontSize: 16,
-                              fontFamily: Styles().fontFamilies.regular,
+                              fontFamily: Styles().fontFamilies!.regular,
                             )),
                         Container(
                           height: 10,
@@ -194,8 +193,8 @@ class _PrivacyTicketsDialogState extends State<PrivacyTicketsDialog> {
                           hint: Localization().getStringEx("widget.privacy_tickets_modal.button.change_privacy.hint", ""),
                           backgroundColor: Colors.white,
                           fontSize: 16,
-                          borderColor: Styles().colors.fillColorSecondary,
-                          textColor: Styles().colors.fillColorPrimary,
+                          borderColor: Styles().colors!.fillColorSecondary,
+                          textColor: Styles().colors!.fillColorPrimary,
                           onTap: () {
                             _onTapChangePrivacySettings();
                           },
@@ -208,13 +207,13 @@ class _PrivacyTicketsDialogState extends State<PrivacyTicketsDialog> {
   }
 
   _onTapChangePrivacySettings() {
-    Analytics.instance.logAlert(text: "Buy Tickets Privacy Alert", selection: "Edit my privacy");
+    Analytics().logAlert(text: "Buy Tickets Privacy Alert", selection: "Edit my privacy");
     _closeModal();
     Navigator.push(context, CupertinoPageRoute(builder: (context) => SettingsPrivacyPanel()));
   }
 
   _onTapClose() {
-    Analytics.instance.logAlert(text: "Buy Tickets Privacy Alert", selection: "Close");
+    Analytics().logAlert(text: "Buy Tickets Privacy Alert", selection: "Close");
     _closeModal();
   }
 
@@ -227,13 +226,13 @@ class ShapesPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     Offset thumbCenter = size.center(Offset(0, 0));
-    canvas.drawCircle(thumbCenter, 20, Paint()..color = Styles().colors.fillColorSecondaryVariant);
-    canvas.drawCircle(thumbCenter, 18, Paint()..color = Styles().colors.white);
-    canvas.drawCircle(thumbCenter, 15, Paint()..color = Styles().colors.fillColorPrimary);
+    canvas.drawCircle(thumbCenter, 20, Paint()..color = Styles().colors!.fillColorSecondaryVariant!);
+    canvas.drawCircle(thumbCenter, 18, Paint()..color = Styles().colors!.white!);
+    canvas.drawCircle(thumbCenter, 15, Paint()..color = Styles().colors!.fillColorPrimary!);
   }
 
   @override
   bool shouldRepaint(CustomPainter oldDelegate) {
-    return null;
+    return true;
   }
 }

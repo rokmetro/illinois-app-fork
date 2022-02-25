@@ -15,19 +15,17 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:illinois/service/Localization.dart';
+import 'package:rokwire_plugin/service/localization.dart';
 import 'package:illinois/service/Analytics.dart';
-import 'package:illinois/service/Onboarding.dart';
-import 'package:illinois/ui/widgets/ScalableWidgets.dart';
-import 'package:illinois/ui/widgets/SwipeDetector.dart';
+import 'package:rokwire_plugin/service/onboarding.dart';
+import 'package:rokwire_plugin/ui/widgets/rounded_button.dart';
+import 'package:rokwire_plugin/ui/widgets/swipe_detector.dart';
 import 'package:illinois/ui/onboarding/OnboardingBackButton.dart';
-import 'package:illinois/service/Styles.dart';
+import 'package:rokwire_plugin/service/styles.dart';
 
 class OnboardingPrivacyStatementPanel extends StatefulWidget with OnboardingPanel {
 
-  final Map<String, dynamic> onboardingContext;
+  final Map<String, dynamic>? onboardingContext;
   OnboardingPrivacyStatementPanel({this.onboardingContext});
   _OnboardingPrivacyStatementPanelState createState() => _OnboardingPrivacyStatementPanelState();
 }
@@ -35,7 +33,7 @@ class OnboardingPrivacyStatementPanel extends StatefulWidget with OnboardingPane
 class _OnboardingPrivacyStatementPanelState extends State<OnboardingPrivacyStatementPanel> {
 
   GlobalKey _headingKey = GlobalKey();
-  double _headingHeight;
+  double? _headingHeight;
 
   @override
   void initState() {
@@ -44,9 +42,9 @@ class _OnboardingPrivacyStatementPanelState extends State<OnboardingPrivacyState
 
   void _evalHeadingSize() {
     try {
-      final RenderObject renderBox = _headingKey?.currentContext?.findRenderObject();
+      final RenderObject? renderBox = _headingKey.currentContext?.findRenderObject();
       if (renderBox is RenderBox) {
-        setState(() { _headingHeight = renderBox.size?.height; });
+        setState(() { _headingHeight = renderBox.size.height; });
       }
     } on Exception catch (e) {
       print(e.toString());
@@ -67,13 +65,13 @@ class _OnboardingPrivacyStatementPanelState extends State<OnboardingPrivacyState
     double headingHeight = _headingHeight ?? 0;
     double lockSize = headingHeight * 0.5;
     if (headingHeight == 0) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
+      WidgetsBinding.instance!.addPostFrameCallback((_) {
         _evalHeadingSize();
       });
     }
     
     return Scaffold(
-        backgroundColor: Styles().colors.background,
+        backgroundColor: Styles().colors!.background,
         body: SwipeDetector(
             onSwipeLeft: () => _goNext(context),
             onSwipeRight: () => _goBack(context),
@@ -91,7 +89,7 @@ class _OnboardingPrivacyStatementPanelState extends State<OnboardingPrivacyState
                         ),
                         OnboardingBackButton( padding: const EdgeInsets.only(left: 10, top: 30, right: 20, bottom: 20),
                         onTap:() {
-                          Analytics.instance.logSelect(target: "Back");
+                          Analytics().logSelect(target: "Back");
                           _goBack(context);
                         }),
                       ],),
@@ -108,9 +106,9 @@ class _OnboardingPrivacyStatementPanelState extends State<OnboardingPrivacyState
                                 titleText,
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                    fontFamily: Styles().fontFamilies.bold,
+                                    fontFamily: Styles().fontFamilies!.bold,
                                     fontSize: 32,
-                                    color: Styles().colors.fillColorPrimary),
+                                    color: Styles().colors!.fillColorPrimary),
                               ),
                             )),
                       ),
@@ -125,9 +123,9 @@ class _OnboardingPrivacyStatementPanelState extends State<OnboardingPrivacyState
                                   descriptionText,
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                      fontFamily: Styles().fontFamilies.regular,
+                                      fontFamily: Styles().fontFamilies!.regular,
                                       fontSize: 20,
-                                      color: Styles().colors.fillColorPrimary),
+                                      color: Styles().colors!.fillColorPrimary),
                                 )),
                           )),
                     ]),
@@ -140,12 +138,12 @@ class _OnboardingPrivacyStatementPanelState extends State<OnboardingPrivacyState
                     Padding(
                       padding: EdgeInsets.only(
                           bottom: 24),
-                      child: ScalableRoundedButton(
+                      child: RoundedButton(
                         label: Localization().getStringEx('panel.onboarding.privacy.button.continue.title', 'Set your privacy level'),
                         hint: Localization().getStringEx('panel.onboarding.privacy.button.continue.hint', ''),
-                        backgroundColor: Styles().colors.background,
-                        borderColor: Styles().colors.fillColorSecondaryVariant,
-                        textColor: Styles().colors.fillColorPrimary,
+                        backgroundColor: Styles().colors!.background,
+                        borderColor: Styles().colors!.fillColorSecondaryVariant,
+                        textColor: Styles().colors!.fillColorPrimary,
                         onTap: () => _goNext(context),
                       ),),
                   ],

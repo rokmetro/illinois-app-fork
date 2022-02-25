@@ -15,43 +15,42 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:illinois/service/Assets.dart';
-import 'package:illinois/service/Auth2.dart';
+import 'package:rokwire_plugin/service/assets.dart';
+import 'package:rokwire_plugin/service/auth2.dart';
 import 'package:illinois/service/Config.dart';
 import 'package:illinois/service/FlexUI.dart';
-import 'package:illinois/service/Onboarding.dart';
-import 'package:illinois/service/Localization.dart';
+import 'package:rokwire_plugin/service/onboarding.dart';
+import 'package:rokwire_plugin/service/localization.dart';
 import 'package:illinois/model/PrivacyData.dart';
 import 'package:illinois/service/Analytics.dart';
-import 'package:illinois/service/NotificationService.dart';
+import 'package:illinois/utils/AppUtils.dart';
+import 'package:rokwire_plugin/service/notification_service.dart';
 import 'package:illinois/service/Storage.dart';
 import 'package:illinois/ui/widgets/HeaderBar.dart';
-import 'package:illinois/ui/widgets/ScalableWidgets.dart';
+import 'package:rokwire_plugin/ui/widgets/rounded_button.dart';
 import 'package:illinois/ui/widgets/TabBarWidget.dart';
-import 'package:illinois/ui/widgets/RoundedButton.dart';
 import 'package:illinois/ui/onboarding/OnboardingBackButton.dart';
-import 'package:illinois/utils/Utils.dart';
-import 'package:illinois/service/Styles.dart';
+import 'package:rokwire_plugin/utils/utils.dart';
+import 'package:rokwire_plugin/service/styles.dart';
 
 enum SettingsPrivacyPanelMode { regular, onboarding, update }
 
 class SettingsPrivacyPanel extends StatefulWidget with OnboardingPanel {
   final SettingsPrivacyPanelMode mode;
-  final Map<String, dynamic> onboardingContext;
+  final Map<String, dynamic>? onboardingContext;
 
-  SettingsPrivacyPanel({Key key, this.mode = SettingsPrivacyPanelMode.regular, this.onboardingContext}) : super(key: key);
+  SettingsPrivacyPanel({Key? key, this.mode = SettingsPrivacyPanelMode.regular, this.onboardingContext}) : super(key: key);
 
   @override
   _SettingsPrivacyPanelState createState() => _SettingsPrivacyPanelState();
 }
 
 class _SettingsPrivacyPanelState extends State<SettingsPrivacyPanel> implements NotificationsListener {
-  PrivacyData _data;
-  double _sliderValue;
-  String _selectedPrivacyState = "feature";
+  PrivacyData? _data;
+  double? _sliderValue;
+  String? _selectedPrivacyState = "feature";
 
-  ScrollController _controller;
+  ScrollController? _controller;
   bool _disabled = false;
   bool _updating = false; 
 
@@ -66,7 +65,7 @@ class _SettingsPrivacyPanelState extends State<SettingsPrivacyPanel> implements 
     ]);
 
     _controller = ScrollController();
-    _controller.addListener(_scrollListener);
+    _controller!.addListener(_scrollListener);
     _disabled = (widget.mode != SettingsPrivacyPanelMode.regular);
 
     _loadPrivacyData();
@@ -102,7 +101,7 @@ class _SettingsPrivacyPanelState extends State<SettingsPrivacyPanel> implements 
   }
 
   void _scrollListener() {
-    if (_controller.offset >= _controller.position.maxScrollExtent && !_controller.position.outOfRange) {
+    if (_controller!.offset >= _controller!.position.maxScrollExtent && !_controller!.position.outOfRange) {
       //enable when the user scroll to bottom.
       setState(() {
         _disabled = false;
@@ -129,16 +128,10 @@ class _SettingsPrivacyPanelState extends State<SettingsPrivacyPanel> implements 
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: (widget.mode == SettingsPrivacyPanelMode.regular)
-          ? SimpleHeaderBarWithBack(
-              context: context,
-              titleWidget: Text(
-                Localization().getStringEx('panel.settings.privacy.label.title', 'My Privacy'),
-                style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w900, letterSpacing: 1.0),
-              ),
-            )
-          : null,
+        ? HeaderBar(title: Localization().getStringEx('panel.settings.privacy.label.title', 'My Privacy'),)
+        : null,
       body: _buildContentWidget(),
-      backgroundColor: Styles().colors.background,
+      backgroundColor: Styles().colors!.background,
       bottomNavigationBar: (widget.mode == SettingsPrivacyPanelMode.regular) ? TabBarWidget() : null,
     );
   }
@@ -173,7 +166,7 @@ class _SettingsPrivacyPanelState extends State<SettingsPrivacyPanel> implements 
             ],
         ))),
         Container(
-          color: Styles().colors.fillColorPrimary,
+          color: Styles().colors!.fillColorPrimary,
           child: SafeArea(
             top: false,
             child: SizedBox(
@@ -183,7 +176,7 @@ class _SettingsPrivacyPanelState extends State<SettingsPrivacyPanel> implements 
                   children: <Widget>[
                     Container(
 //                        height: 100,
-                        color: Styles().colors.fillColorPrimary,
+                        color: Styles().colors!.fillColorPrimary,
                         child: Padding(
                           padding: EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                           child: _PrivacyLevelSlider(
@@ -210,38 +203,26 @@ class _SettingsPrivacyPanelState extends State<SettingsPrivacyPanel> implements 
 
   Widget _buildSaveCancelButtons() {
     return Container(
-        color: Styles().colors.fillColorPrimaryVariant,
+        color: Styles().colors!.fillColorPrimaryVariant,
         child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             child: Row(
               mainAxisSize: MainAxisSize.max,
               children: <Widget>[
                 Expanded(
-                  child: Stack(children: <Widget>[
-                    ScalableRoundedButton(
-                        label: _disabled
-                            ? Localization().getStringEx('panel.settings.privacy.button.set_privacy.disabled.title', 'Scroll to Review')
-                            : Localization().getStringEx('panel.settings.privacy.button.set_privacy.title', 'Set my Privacy'),
-                        hint: _disabled
-                            ? Localization().getStringEx('panel.settings.privacy.button.set_privacy.disabled.hint', '')
-                            : Localization().getStringEx('panel.settings.privacy.button.set_privacy.hint', ''),
-                        borderColor: _disabled ? Styles().colors.disabledTextColorTwo : Styles().colors.fillColorSecondary,
-                        backgroundColor: Styles().colors.fillColorPrimaryVariant,
-                        textColor: _disabled ? Styles().colors.disabledTextColorTwo : Styles().colors.white,
-                        onTap: () => _onSaveClicked()),
-                    Visibility(
-                      visible: _updating,
-                      child: Container(
-                        height: 48, 
-                        child: Align(
-                          alignment:Alignment.center,
-                          child: SizedBox(
-                            height: 24,
-                            width: 24,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(Styles().colors.white),),),),),),
-                    ]))
+                  child: RoundedButton(
+                      label: _disabled
+                          ? Localization().getStringEx('panel.settings.privacy.button.set_privacy.disabled.title', 'Scroll to Review')
+                          : Localization().getStringEx('panel.settings.privacy.button.set_privacy.title', 'Set my Privacy'),
+                      hint: _disabled
+                          ? Localization().getStringEx('panel.settings.privacy.button.set_privacy.disabled.hint', '')
+                          : Localization().getStringEx('panel.settings.privacy.button.set_privacy.hint', ''),
+                      borderColor: _disabled ? Styles().colors!.disabledTextColorTwo : Styles().colors!.fillColorSecondary,
+                      backgroundColor: Styles().colors!.fillColorPrimaryVariant,
+                      textColor: _disabled ? Styles().colors!.disabledTextColorTwo : Styles().colors!.white,
+                      progress: _updating,
+                      onTap: () => _onSaveClicked()),
+                  )
               ],
             )));
   }
@@ -254,7 +235,7 @@ class _SettingsPrivacyPanelState extends State<SettingsPrivacyPanel> implements 
           children: <Widget>[
             Expanded(
               child: Container(
-                color: Styles().colors.fillColorPrimary,
+                color: Styles().colors!.fillColorPrimary,
                 child: Padding(
                   padding: EdgeInsets.all(8),
                   child: Row(
@@ -274,7 +255,7 @@ class _SettingsPrivacyPanelState extends State<SettingsPrivacyPanel> implements 
                           width: 30,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.all(Radius.circular(15)),
-                            border: Border.all(color: Styles().colors.white, width: 2),
+                            border: Border.all(color: Styles().colors!.white!, width: 2),
                           ),
                           child: Center(
                             child: Text(
@@ -302,7 +283,7 @@ class _SettingsPrivacyPanelState extends State<SettingsPrivacyPanel> implements 
           child: Text(
             Localization().getStringEx("panel.settings.privacy.dialog.update_privacy.label1", "Your new privacy setting"),
             textAlign: TextAlign.center,
-            style: TextStyle(fontFamily: Styles().fontFamilies.medium, fontSize: 16, color: Colors.black),
+            style: TextStyle(fontFamily: Styles().fontFamilies!.medium, fontSize: 16, color: Colors.black),
           ),
         ),
         Padding(
@@ -310,12 +291,12 @@ class _SettingsPrivacyPanelState extends State<SettingsPrivacyPanel> implements 
           child: ClipRRect(
             borderRadius: BorderRadius.circular(15),
             child: Container(
-              color: Styles().colors.fillColorPrimary,
+              color: Styles().colors!.fillColorPrimary,
               height: 30,
               width: 30,
               child: Center(
                 child: Text(
-                  _sliderValue?.round()?.toString() ?? "",
+                  _sliderValue?.round().toString() ?? "",
                   style: TextStyle(color: Colors.white),
                 ),
               ),
@@ -327,7 +308,7 @@ class _SettingsPrivacyPanelState extends State<SettingsPrivacyPanel> implements 
           child: Text(
             Localization().getStringEx("panel.settings.privacy.dialog.update_privacy.label2", "requires us to make the following chages:"),
             textAlign: TextAlign.center,
-            style: TextStyle(fontFamily: Styles().fontFamilies.medium, fontSize: 16, color: Colors.black),
+            style: TextStyle(fontFamily: Styles().fontFamilies!.medium, fontSize: 16, color: Colors.black),
           ),
         ),
         _buildPrivacyFeature2DialogEntries(),
@@ -337,7 +318,7 @@ class _SettingsPrivacyPanelState extends State<SettingsPrivacyPanel> implements 
         Text(
           Localization().getStringEx("panel.settings.privacy.dialog.update_privacy.confirm", "Are you sure?"),
           textAlign: TextAlign.center,
-          style: TextStyle(fontFamily: Styles().fontFamilies.bold, fontSize: 16, color: Colors.black),
+          style: TextStyle(fontFamily: Styles().fontFamilies!.bold, fontSize: 16, color: Colors.black),
         ),
         Container(
           height: 10,
@@ -350,24 +331,24 @@ class _SettingsPrivacyPanelState extends State<SettingsPrivacyPanel> implements 
               RoundedButton(
                   onTap: () {
                     Navigator.pop(context);
-                    Analytics.instance.logAlert(text: "Update privacy", selection: "Yes");
+                    Analytics().logAlert(text: "Update privacy", selection: "Yes");
                     _save();
                   },
                   backgroundColor: Colors.transparent,
-                  borderColor: Styles().colors.fillColorSecondary,
-                  textColor: Styles().colors.fillColorPrimary,
+                  borderColor: Styles().colors!.fillColorSecondary,
+                  textColor: Styles().colors!.fillColorPrimary,
                   label: Localization().getStringEx("panel.settings.privacy.dialog.update_privacy.yes", "Yes")),
               Container(
                 height: 10,
               ),
               RoundedButton(
                   onTap: () {
-                    Analytics.instance.logAlert(text: "Update privacy", selection: "No");
+                    Analytics().logAlert(text: "Update privacy", selection: "No");
                     Navigator.pop(context);
                   },
                   backgroundColor: Colors.transparent,
-                  borderColor: Styles().colors.fillColorSecondary,
-                  textColor: Styles().colors.fillColorPrimary,
+                  borderColor: Styles().colors!.fillColorSecondary,
+                  textColor: Styles().colors!.fillColorPrimary,
                   label: Localization().getStringEx("panel.settings.privacy.dialog.update_privacy.no", "No"))
             ],
           ),
@@ -379,11 +360,11 @@ class _SettingsPrivacyPanelState extends State<SettingsPrivacyPanel> implements 
   Widget _buildPrivacyFeature2DialogEntries() {
     List<Widget> list = [];
     if (_data?.features2 != null) {
-      for (PrivacyFeature2 feature2 in _data.features2) {
-        if (feature2.maxLevel.round() >= _sliderValue.round()) {
+      for (PrivacyFeature2? feature2 in _data!.features2!) {
+        if (feature2!.maxLevel!.round() >= _sliderValue!.round()) {
           list.add(Text(
-            Localization().getStringEx(feature2.key, feature2.text),
-            style: TextStyle(fontFamily: Styles().fontFamilies.bold, fontSize: 16, color: Colors.black),
+            Localization().getString(feature2.key, defaults: feature2.text) ?? '',
+            style: TextStyle(fontFamily: Styles().fontFamilies!.bold, fontSize: 16, color: Colors.black),
           ));
         }
       }
@@ -400,8 +381,8 @@ class _SettingsPrivacyPanelState extends State<SettingsPrivacyPanel> implements 
 
   void _onSaveClicked() {
     if (!_disabled) {
-      Analytics.instance.logSelect(target: 'Set Privacy');
-      if ((widget.mode == SettingsPrivacyPanelMode.regular) && (_sliderValue.toInt() < this._privacyLevel)) {
+      Analytics().logSelect(target: 'Set Privacy');
+      if ((widget.mode == SettingsPrivacyPanelMode.regular) && (_sliderValue!.toInt() < this._privacyLevel)) {
         AppAlert.showCustomDialog(context: context, contentPadding: EdgeInsets.all(0), contentWidget: _buildUpdatePrivacyDialog(context));
       }
       else {
@@ -411,7 +392,7 @@ class _SettingsPrivacyPanelState extends State<SettingsPrivacyPanel> implements 
   }
 
   void _save() {
-    Auth2().prefs?.privacyLevel = _sliderValue.toInt();
+    Auth2().prefs?.privacyLevel = _sliderValue!.toInt();
     Storage().privacyUpdateVersion = Config().appVersion;
     
     if (widget.mode == SettingsPrivacyPanelMode.regular) {
@@ -434,13 +415,13 @@ class _SettingsPrivacyPanelState extends State<SettingsPrivacyPanel> implements 
   Widget _buildContentHeadingWidget() {
     return (widget.mode == SettingsPrivacyPanelMode.onboarding)
         ? Semantics(explicitChildNodes: true, child:
-            Container(color: Styles().colors.surface, child:
+            Container(color: Styles().colors!.surface, child:
                 Stack(children: <Widget>[
                   _titleLayout(),
                   OnboardingBackButton(
                       padding: const EdgeInsets.only(left: 10, top: 10, right: 20, bottom: 5),
                       onTap: () {
-                        Analytics.instance.logSelect(target: "Back");
+                        Analytics().logSelect(target: "Back");
                         Navigator.pop(context);
                       }),
                 ])))
@@ -451,7 +432,7 @@ class _SettingsPrivacyPanelState extends State<SettingsPrivacyPanel> implements 
     String title = (widget.mode != SettingsPrivacyPanelMode.update)
       ? Localization().getStringEx('panel.settings.privacy.label.set_your_privacy_level', 'Set your privacy level')
       : Localization().getStringEx('panel.settings.privacy.label.update_your_privacy_level', 'Update your privacy level');
-    String hint = (widget.mode != SettingsPrivacyPanelMode.update)
+    String? hint = (widget.mode != SettingsPrivacyPanelMode.update)
       ? Localization().getStringEx('panel.settings.privacy.label.set_your_privacy_level.hint', 'Header 1')
       : Localization().getStringEx('panel.settings.privacy.label.update_your_privacy_level.hint', 'Header 1');
     Widget titleWidget = Semantics(
@@ -460,33 +441,33 @@ class _SettingsPrivacyPanelState extends State<SettingsPrivacyPanel> implements 
       excludeSemantics: true,
       header: true,
       child: Container(
-          color: Styles().colors.surface,
+          color: Styles().colors!.surface,
           child: Padding(
             padding: EdgeInsets.only(left: 10, right: 10, top: 10),
             child: Center(
               child: Text(
                 title,
-                style: new TextStyle(fontFamily: Styles().fontFamilies.extraBold, fontSize: 24.0, color: Styles().colors.fillColorPrimary),
+                style: new TextStyle(fontFamily: Styles().fontFamilies!.extraBold, fontSize: 24.0, color: Styles().colors!.fillColorPrimary),
             )),
           )));
     
     Widget subTitleWidget;
     if (widget.mode == SettingsPrivacyPanelMode.update) {
       String subTitle = Localization().getStringEx('panel.settings.privacy.label.some_details_have_changed', 'Some details have changed');
-      String subTitleHint = Localization().getStringEx('panel.settings.privacy.label.some_details_have_changed.hint', 'Header 2');
+      String? subTitleHint = Localization().getStringEx('panel.settings.privacy.label.some_details_have_changed.hint', 'Header 2');
       subTitleWidget = Semantics(
         label: subTitle,
         hint: subTitleHint,
         excludeSemantics: true,
         header: true,
         child: Container(
-            color: Styles().colors.surface,
+            color: Styles().colors!.surface,
             child: Padding(
               padding: EdgeInsets.only(left: 10, right: 10, top: 5),
               child: Center(
                 child: Text(
                   subTitle,
-                  style: new TextStyle(fontFamily: Styles().fontFamilies.bold, fontSize: 18.0, color: Styles().colors.fillColorPrimary),
+                  style: new TextStyle(fontFamily: Styles().fontFamilies!.bold, fontSize: 18.0, color: Styles().colors!.fillColorPrimary),
               )),
             )));
     }
@@ -502,13 +483,13 @@ class _SettingsPrivacyPanelState extends State<SettingsPrivacyPanel> implements 
 
   Widget _descriptionLayout() {
     return Container(
-        color: Styles().colors.surface,
+        color: Styles().colors!.surface,
         child: Padding(
             padding: EdgeInsets.only(top: 14, left: 24, right: 24, bottom: 24),
             child: Text(
                 Localization().getStringEx('panel.settings.privacy.label.description',
                   'Choose your privacy level with the slider below. You can review what information you share and change your setting at any time.'),
-                style: new TextStyle(fontFamily: Styles().fontFamilies.regular, fontSize: 16.0, color: Styles().colors.textBackground),
+                style: new TextStyle(fontFamily: Styles().fontFamilies!.regular, fontSize: 16.0, color: Styles().colors!.textBackground),
                 textAlign: TextAlign.center)));
   }
 
@@ -519,24 +500,24 @@ class _SettingsPrivacyPanelState extends State<SettingsPrivacyPanel> implements 
             child: Text(
               Localization().getStringEx('panel.settings.privacy.label.bottom_description',
                   'Regardless of the privacy level anonymous data will be collected and used to optimize performance'),
-              style: TextStyle(fontFamily: Styles().fontFamilies.regular, color: Styles().colors.textBackground, fontSize: 14),
+              style: TextStyle(fontFamily: Styles().fontFamilies!.regular, color: Styles().colors!.textBackground, fontSize: 14),
             )));
   }
 
   Widget _buildTabsWidget() {
     return Container(
-        color: Styles().colors.background,
+        color: Styles().colors!.background,
         child: Padding(padding: EdgeInsets.symmetric(horizontal: 12, vertical: 16), child: Row(children: _buildTypeTabs())));
   }
 
   List<Widget> _buildTypeTabs() {
     List<Widget> tabs =  [];
-    if (_data != null && AppCollection.isCollectionNotEmpty(_data.types)) {
-      _data.types.forEach((PrivacyType type) {
+    if (_data != null && CollectionUtils.isNotEmpty(_data!.types)) {
+      _data!.types!.forEach((PrivacyType? type) {
         tabs.add(Expanded(
             child: _PreferenceTab(
-                text: type.title,
-                left: _data.types.first == type,
+                text: type!.title,
+                left: _data!.types!.first == type,
                 selected: _selectedPrivacyState == type.value,
                 onTap: () {
                   setState(() {
@@ -550,11 +531,11 @@ class _SettingsPrivacyPanelState extends State<SettingsPrivacyPanel> implements 
 }
 
 class _PrivacyEntriesListWidget extends StatefulWidget {
-  final PrivacyData data;
-  final double selectedPrivacyLevel;
-  final String selectedPrivacyState;
+  final PrivacyData? data;
+  final double? selectedPrivacyLevel;
+  final String? selectedPrivacyState;
 
-  const _PrivacyEntriesListWidget({Key key, this.data, this.selectedPrivacyLevel, this.selectedPrivacyState}) : super(key: key);
+  const _PrivacyEntriesListWidget({Key? key, this.data, this.selectedPrivacyLevel, this.selectedPrivacyState}) : super(key: key);
 
   PrivacyEntriesListState createState() => PrivacyEntriesListState();
 }
@@ -567,9 +548,9 @@ class PrivacyEntriesListState extends State<_PrivacyEntriesListWidget> {
 
   List<Widget> _buildCategories() {
     List<Widget> widgets =  [];
-    PrivacyData data = widget.data;
-    if (data != null && AppCollection.isCollectionNotEmpty(data.categories)) {
-      data.categories.forEach((PrivacyCategory category) {
+    PrivacyData? data = widget.data;
+    if (data != null && CollectionUtils.isNotEmpty(data.categories)) {
+      data.categories!.forEach((PrivacyCategory category) {
         _fillListContent(widgets, category);
       });
     }
@@ -583,7 +564,7 @@ class PrivacyEntriesListState extends State<_PrivacyEntriesListWidget> {
   }
 
   Widget _buildCategoryContent(PrivacyCategory category) {
-    BorderSide borderSide = BorderSide(color: Styles().colors.surfaceAccent, style: BorderStyle.solid);
+    BorderSide borderSide = BorderSide(color: Styles().colors!.surfaceAccent!, style: BorderStyle.solid);
     return Padding(
         padding: EdgeInsets.symmetric(horizontal: 10),
         child: Semantics(container: true,child: Container(
@@ -593,11 +574,11 @@ class PrivacyEntriesListState extends State<_PrivacyEntriesListWidget> {
 
   List<Widget> _buildCategoryEntries(PrivacyCategory category) {
     List<Widget> widgets =  [];
-    List<PrivacyEntry> entries = category?.entries;
+    List<PrivacyEntry>? entries = category.entries;
     widgets.add(_buildCategoryDescriptionWidget(category));
-    if (AppCollection.isCollectionNotEmpty(entries)) {
-      entries.forEach((PrivacyEntry entry) {
-        widgets.add(_buildEntryWidget(entry));
+    if (CollectionUtils.isNotEmpty(entries)) {
+      entries!.forEach((PrivacyEntry? entry) {
+        widgets.add(_buildEntryWidget(entry!));
       });
     }
     return widgets;
@@ -616,27 +597,27 @@ class PrivacyEntriesListState extends State<_PrivacyEntriesListWidget> {
                 height: 50,
                 alignment: Alignment.centerLeft,
                 decoration: BoxDecoration(
-                  border: Border.all(color: Styles().colors.surfaceAccent),
-                  color: Styles().colors.lightGray,
+                  border: Border.all(color: Styles().colors!.surfaceAccent!),
+                  color: Styles().colors!.lightGray,
                   borderRadius: BorderRadius.only(topLeft: Radius.circular(0), topRight: Radius.circular(0)),
                 ),
                 child: Padding(
                     padding: EdgeInsets.symmetric(horizontal: 12),
-                    child: Text(category.title, style: TextStyle(fontFamily: Styles().fontFamilies.bold, color: Styles().colors.fillColorPrimary, fontSize: 16))))));
+                    child: Text(category.title!, style: TextStyle(fontFamily: Styles().fontFamilies!.bold, color: Styles().colors!.fillColorPrimary, fontSize: 16))))));
   }
 
   Widget _buildCategoryDescriptionWidget(PrivacyCategory category) {
-    String categoryStateDescription = PrivacyData().getLocalizedString(category?.description != null ? category?.description[widget.selectedPrivacyState] : null);
-    bool hasDescription = AppString.isStringNotEmpty(categoryStateDescription);
+    String? categoryStateDescription = PrivacyData().getLocalizedString(category.description != null ? category.description![widget.selectedPrivacyState] : null);
+    bool hasDescription = StringUtils.isNotEmpty(categoryStateDescription);
     return !hasDescription
         ? Container()
         : Padding(
             padding: EdgeInsets.symmetric(horizontal: 0),
             child: Container(
-                color: Styles().colors.white,
+                color: Styles().colors!.white,
                 child: Padding(
                     padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                    child: Text(categoryStateDescription, style: TextStyle(fontFamily: Styles().fontFamilies.regular, color: Styles().colors.textBackground, fontSize: 16)))));
+                    child: Text(categoryStateDescription!, style: TextStyle(fontFamily: Styles().fontFamilies!.regular, color: Styles().colors!.textBackground, fontSize: 16)))));
   }
 
   Widget _buildEntryWidget(PrivacyEntry entry) {
@@ -650,7 +631,7 @@ class PrivacyEntriesListState extends State<_PrivacyEntriesListWidget> {
               enabled: active,
               excludeSemantics: true,
               child: Container(
-                  color: Styles().colors.white,
+                  color: Styles().colors!.white,
                   child: Padding(
                       padding: EdgeInsets.only(right: 24, top: 8, bottom: 8),
                       child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -663,8 +644,8 @@ class PrivacyEntriesListState extends State<_PrivacyEntriesListWidget> {
                             child: Padding(
                                 padding: EdgeInsets.only(left: 12),
                                 child: Text(
-                                  entry.text,
-                                  style: TextStyle(fontFamily: Styles().fontFamilies.regular, color: active ? Styles().colors.textBackground : Styles().colors.disabledTextColor, fontSize: 14),
+                                  entry.text!,
+                                  style: TextStyle(fontFamily: Styles().fontFamilies!.regular, color: active ? Styles().colors!.textBackground : Styles().colors!.disabledTextColor, fontSize: 14),
                                 )))
                       ])))));
     else
@@ -672,24 +653,24 @@ class PrivacyEntriesListState extends State<_PrivacyEntriesListWidget> {
   }
 
   bool _isActive(PrivacyEntry entry) {
-    return entry.minLevel <= widget.selectedPrivacyLevel;
+    return entry.minLevel! <= widget.selectedPrivacyLevel!;
   }
 }
 
 class _PrivacyLevelSlider extends StatefulWidget {
-  final double initialValue;
-  final Function onValueChanged;
+  final double? initialValue;
+  final Function? onValueChanged;
 
-  const _PrivacyLevelSlider({Key key, this.onValueChanged, this.initialValue}) : super(key: key);
+  const _PrivacyLevelSlider({Key? key, this.onValueChanged, this.initialValue}) : super(key: key);
 
   @override
   _PrivacyLevelSliderState createState() => _PrivacyLevelSliderState();
 }
 
 class _PrivacyLevelSliderState extends State<_PrivacyLevelSlider> {
-  double _discreteValue;
-  Color _mainColor = Styles().colors.white;
-  Color _trackColor = Styles().colors.fillColorSecondary;
+  double? _discreteValue;
+  Color? _mainColor = Styles().colors!.white;
+  Color? _trackColor = Styles().colors!.fillColorSecondary;
 
   @override
   void initState() {
@@ -699,10 +680,10 @@ class _PrivacyLevelSliderState extends State<_PrivacyLevelSlider> {
 
   @override
   Widget build(BuildContext context) {
-    int _roundedValue = _discreteValue?.round();
+    int _roundedValue = _discreteValue?.round() ?? 0;
     final ThemeData theme = Theme.of(context);
     return Container(
-        color: Styles().colors.fillColorPrimary,
+        color: Styles().colors!.fillColorPrimary,
         child: Column(
           children: <Widget>[
             Padding(
@@ -718,7 +699,7 @@ class _PrivacyLevelSliderState extends State<_PrivacyLevelSlider> {
                         Padding(
                             padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             child: Text(Localization().getStringEx('widget.privacy_level_slider.label.left.title', "More Privacy"),
-                                style: TextStyle(fontFamily: Styles().fontFamilies.regular, color: Styles().colors.white, fontSize: 14)))),
+                                style: TextStyle(fontFamily: Styles().fontFamilies!.regular, color: Styles().colors!.white, fontSize: 14)))),
                     ])),
                     Expanded(
                         child: Row(mainAxisAlignment: MainAxisAlignment.end, children: <Widget>[
@@ -726,7 +707,7 @@ class _PrivacyLevelSliderState extends State<_PrivacyLevelSlider> {
                             Padding(
                                 padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                 child: Text(Localization().getStringEx('widget.privacy_level_slider.label.right.title', "More Features"),
-                                    style: TextStyle(fontFamily: Styles().fontFamilies.regular, color: Styles().colors.white, fontSize: 14)))),
+                                    style: TextStyle(fontFamily: Styles().fontFamilies!.regular, color: Styles().colors!.white, fontSize: 14)))),
                           Image.asset("images/chevron-right.png"),
                     ])),
                   ],
@@ -743,8 +724,8 @@ class _PrivacyLevelSliderState extends State<_PrivacyLevelSlider> {
                         child: Container(
                             height: 25,
                             decoration: BoxDecoration(
-                              color: Styles().colors.fillColorPrimaryVariant,
-                              border: Border.all(color: Styles().colors.fillColorPrimaryVariant, width: 1),
+                              color: Styles().colors!.fillColorPrimaryVariant,
+                              border: Border.all(color: Styles().colors!.fillColorPrimaryVariant!, width: 1),
                               borderRadius: BorderRadius.circular(24.0),
                             )),
                       )),
@@ -759,7 +740,7 @@ class _PrivacyLevelSliderState extends State<_PrivacyLevelSlider> {
                           thumbShape: _CustomThumbShape(),
                           tickMarkShape: _CustomTickMarkShape(),
                           showValueIndicator: ShowValueIndicator.never,
-                          valueIndicatorTextStyle: TextStyle(fontSize: 20, fontFamily: Styles().fontFamilies.extraBold, color: Styles().colors.fillColorPrimary)),
+                          valueIndicatorTextStyle: TextStyle(fontSize: 20, fontFamily: Styles().fontFamilies!.extraBold, color: Styles().colors!.fillColorPrimary)),
                       child: MergeSemantics(
                           child: Semantics(
                               label: Localization().getStringEx('panel.settings.privacy.button.set_privacy.slider.hint', "Privacy Level"),
@@ -769,7 +750,7 @@ class _PrivacyLevelSliderState extends State<_PrivacyLevelSlider> {
                               decreasedValue: Localization().getStringEx('panel.settings.privacy.button.set_privacy.slider.decrease', "decreased to") +
                                   (_roundedValue - 1).toString(),
                               child: Slider(
-                                value: _discreteValue,
+                                value: _discreteValue!,
                                 min: 1.0,
                                 max: 5.0,
                                 divisions: 4,
@@ -778,7 +759,7 @@ class _PrivacyLevelSliderState extends State<_PrivacyLevelSlider> {
                                 onChanged: (double value) {
                                   setState(() {
                                     _discreteValue = value;
-                                    widget.onValueChanged(value);
+                                    widget.onValueChanged!(value);
                                   });
                                 },
                               )))),
@@ -797,7 +778,7 @@ class _CustomThumbShape extends SliderComponentShape {
   }
 
   @override
-  void paint(PaintingContext context, Offset center, {Animation<double> activationAnimation, Animation<double> enableAnimation, bool isDiscrete, TextPainter labelPainter, RenderBox parentBox, SliderThemeData sliderTheme, TextDirection textDirection, double value, double textScaleFactor, Size sizeWithOverflow}) {
+  void paint(PaintingContext context, Offset center, {Animation<double>? activationAnimation, required Animation<double> enableAnimation, bool? isDiscrete, required TextPainter labelPainter, RenderBox? parentBox, required SliderThemeData sliderTheme, TextDirection? textDirection, double? value, double? textScaleFactor, Size? sizeWithOverflow}) {
     final Canvas canvas = context.canvas;
     final ColorTween colorTween = ColorTween(
       begin: sliderTheme.disabledThumbColor,
@@ -805,54 +786,54 @@ class _CustomThumbShape extends SliderComponentShape {
     );
 
     final ColorTween colorTween2 = ColorTween(
-      begin: Styles().colors.white,
-      end: Styles().colors.white,
+      begin: Styles().colors!.white,
+      end: Styles().colors!.white,
     );
 
     final ColorTween colorTween3 = ColorTween(
-      begin: Styles().colors.fillColorSecondary,
-      end: Styles().colors.fillColorSecondary,
+      begin: Styles().colors!.fillColorSecondary,
+      end: Styles().colors!.fillColorSecondary,
     );
     final ColorTween colorTween4 = ColorTween(
-      begin: Styles().colors.fillColorPrimary,
-      end: Styles().colors.fillColorPrimary,
+      begin: Styles().colors!.fillColorPrimary,
+      end: Styles().colors!.fillColorPrimary,
     );
 
-    canvas.drawCircle(center, 25, Paint()..color = colorTween4.evaluate(enableAnimation));
-    canvas.drawCircle(center, 23, Paint()..color = colorTween2.evaluate(enableAnimation));
-    canvas.drawCircle(center, 21, Paint()..color = colorTween3.evaluate(enableAnimation));
-    canvas.drawCircle(center, 19, Paint()..color = colorTween.evaluate(enableAnimation));
+    canvas.drawCircle(center, 25, Paint()..color = colorTween4.evaluate(enableAnimation)!);
+    canvas.drawCircle(center, 23, Paint()..color = colorTween2.evaluate(enableAnimation)!);
+    canvas.drawCircle(center, 21, Paint()..color = colorTween3.evaluate(enableAnimation)!);
+    canvas.drawCircle(center, 19, Paint()..color = colorTween.evaluate(enableAnimation)!);
     labelPainter.paint(canvas, center + Offset(-labelPainter.width / 2.0, -labelPainter.height / 2.0));
   }
 }
 
 class _CustomTickMarkShape extends SliderTickMarkShape {
   @override
-  Size getPreferredSize({SliderThemeData sliderTheme, bool isEnabled}) {
+  Size getPreferredSize({SliderThemeData? sliderTheme, bool? isEnabled}) {
     return Size.fromRadius(3);
   }
 
   @override
   void paint(PaintingContext context, Offset center,
-      {RenderBox parentBox, SliderThemeData sliderTheme, Animation<double> enableAnimation, Offset thumbCenter, bool isEnabled, TextDirection textDirection}) {
+      {RenderBox? parentBox, required SliderThemeData sliderTheme, required Animation<double> enableAnimation, Offset? thumbCenter, bool? isEnabled, TextDirection? textDirection}) {
     final Canvas canvas = context.canvas;
     final ColorTween colorTween = ColorTween(
       begin: sliderTheme.disabledThumbColor,
-      end: Styles().colors.fillColorPrimary,
+      end: Styles().colors!.fillColorPrimary,
     );
     final ColorTween colorTween2 = ColorTween(begin: sliderTheme.disabledThumbColor, end: sliderTheme.thumbColor);
-    canvas.drawCircle(center, 8, Paint()..color = colorTween.evaluate(enableAnimation));
-    canvas.drawCircle(center, 6, Paint()..color = colorTween2.evaluate(enableAnimation));
+    canvas.drawCircle(center, 8, Paint()..color = colorTween.evaluate(enableAnimation)!);
+    canvas.drawCircle(center, 6, Paint()..color = colorTween2.evaluate(enableAnimation)!);
   }
 }
 
 class _PreferenceTab extends StatelessWidget {
-  final String text;
-  final bool left;
-  final bool selected;
-  final GestureTapCallback onTap;
+  final String? text;
+  final bool? left;
+  final bool? selected;
+  final GestureTapCallback? onTap;
 
-  _PreferenceTab({Key key, this.text, this.left, this.selected, this.onTap}) : super(key: key);
+  _PreferenceTab({Key? key, this.text, this.left, this.selected, this.onTap}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -866,15 +847,15 @@ class _PreferenceTab extends StatelessWidget {
           child: Container(
             height: 48,
             decoration: BoxDecoration(
-              color: selected ? Colors.white : Color(0xffededed),
+              color: selected! ? Colors.white : Color(0xffededed),
               border: Border.all(color: Color(0xffc1c1c1), width: 1, style: BorderStyle.solid),
-              borderRadius: left ? BorderRadius.horizontal(left: Radius.circular(100.0)) : BorderRadius.horizontal(right: Radius.circular(100.0)),
+              borderRadius: left! ? BorderRadius.horizontal(left: Radius.circular(100.0)) : BorderRadius.horizontal(right: Radius.circular(100.0)),
             ),
             child: Center(
                 child:
-                  Text(text,
+                  Text(text!,
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontFamily: selected ? Styles().fontFamilies.extraBold : Styles().fontFamilies.medium, fontSize: 16, color: Styles().colors.fillColorPrimary)))),
+                      style: TextStyle(fontFamily: selected! ? Styles().fontFamilies!.extraBold : Styles().fontFamilies!.medium, fontSize: 16, color: Styles().colors!.fillColorPrimary)))),
           ),
     );
   }
@@ -885,7 +866,7 @@ class _PinnedSliverHeading extends SliverPersistentHeaderDelegate{
   final Widget child;
   final double constExtent = 80;
 
-  _PinnedSliverHeading({@required this.child});
+  _PinnedSliverHeading({required this.child});
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {

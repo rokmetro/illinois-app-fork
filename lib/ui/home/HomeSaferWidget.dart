@@ -4,19 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:illinois/service/Analytics.dart';
 import 'package:illinois/service/Config.dart';
 import 'package:illinois/service/FlexUI.dart';
-import 'package:illinois/service/Localization.dart';
-import 'package:illinois/service/NotificationService.dart';
-import 'package:illinois/service/Styles.dart';
-import 'package:illinois/ui/WebPanel.dart';
+import 'package:rokwire_plugin/service/localization.dart';
+import 'package:rokwire_plugin/service/notification_service.dart';
+import 'package:rokwire_plugin/service/styles.dart';
 import 'package:illinois/ui/home/HomeSaferTestLocationsPanel.dart';
 import 'package:illinois/ui/home/HomeSaferWellnessAnswerCenterPanel.dart';
 import 'package:illinois/ui/wallet/IDCardPanel.dart';
-import 'package:illinois/ui/widgets/SectionTitlePrimary.dart';
-import 'package:illinois/utils/Utils.dart';
+import 'package:rokwire_plugin/ui/widgets/section_heading.dart';
+import 'package:rokwire_plugin/utils/utils.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HomeSaferWidget extends StatefulWidget {
 
-  final StreamController<void> refreshController;
+  final StreamController<void>? refreshController;
 
   HomeSaferWidget({this.refreshController});
 
@@ -36,7 +36,7 @@ class _HomeSaferWidgetState extends State<HomeSaferWidget> implements Notificati
     ]);
 
     if (widget.refreshController != null) {
-      widget.refreshController.stream.listen((_) {
+      widget.refreshController!.stream.listen((_) {
       });
     }
   }
@@ -59,18 +59,18 @@ class _HomeSaferWidgetState extends State<HomeSaferWidget> implements Notificati
 
   @override
   Widget build(BuildContext context) {
-    return SectionTitlePrimary(
+    return SectionHeading(
       title: Localization().getStringEx('widget.home.safer.label.title', 'Building Access'),
-      iconPath: 'images/campus-tools.png',
+      titleIconAsset: 'images/campus-tools.png',
       children: _buildCommandsList(),);
   }
 
   List<Widget> _buildCommandsList() {
     List<Widget> contentList = <Widget>[];
-    List<dynamic> contentListCodes = FlexUI()['home.content.safer'];
+    List<dynamic>? contentListCodes = FlexUI()['home.content.safer'];
     if (contentListCodes != null) {
       for (dynamic contentListCode in contentListCodes) {
-        Widget contentEntry;
+        Widget? contentEntry;
         if (contentListCode == 'building_access') {
           contentEntry = _buildCommandEntry(
             title: Localization().getStringEx('widget.home.safer.button.building_access.title', 'Building Access'),
@@ -94,8 +94,8 @@ class _HomeSaferWidgetState extends State<HomeSaferWidget> implements Notificati
         }
         else if (contentListCode == 'wellness_answer_center') {
           contentEntry = _buildCommandEntry(
-            title: Localization().getStringEx('widget.home.safer.button.wellness_answer_center.title', 'Wellness Answer Center'),
-            description: Localization().getStringEx('widget.home.safer.button.wellness_answer_center.description', 'Contact Wellness Answer Center for issues'),
+            title: Localization().getStringEx('widget.home.safer.button.wellness_answer_center.title', 'Answer Center'),
+            description: Localization().getStringEx('widget.home.safer.button.wellness_answer_center.description', 'Get answers to your questions.'),
             onTap: _onWellnessAnswerCenter,
           );
         }
@@ -112,22 +112,22 @@ class _HomeSaferWidgetState extends State<HomeSaferWidget> implements Notificati
    return contentList;
   }
 
-  Widget _buildCommandEntry({String title, String description, void Function() onTap}) {
-    return Semantics(container: true, child: 
+  Widget _buildCommandEntry({required String title, String? description, void Function()? onTap}) {
+    return Semantics(label: title, container: true, button: true, child:
       InkWell(onTap: onTap, child:
         Container(
           padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-          decoration: BoxDecoration(color: Styles().colors.surface, borderRadius: BorderRadius.all(Radius.circular(4)), boxShadow: [BoxShadow(color: Styles().colors.blackTransparent018, spreadRadius: 2.0, blurRadius: 6.0, offset: Offset(2, 2))] ),
+          decoration: BoxDecoration(color: Styles().colors!.surface, borderRadius: BorderRadius.all(Radius.circular(4)), boxShadow: [BoxShadow(color: Styles().colors!.blackTransparent018!, spreadRadius: 2.0, blurRadius: 6.0, offset: Offset(2, 2))] ),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: <Widget>[
             Row(children: <Widget>[
               Expanded(child:
-                Text(title, style: TextStyle(fontFamily: Styles().fontFamilies.extraBold, fontSize: 20, color: Styles().colors.fillColorPrimary),),
+                Text(title, style: TextStyle(fontFamily: Styles().fontFamilies!.extraBold, fontSize: 20, color: Styles().colors!.fillColorPrimary), semanticsLabel: "",),
               ),
-              Image.asset('images/chevron-right.png'),
+              Image.asset('images/chevron-right.png', excludeFromSemantics: true,),
             ],),
-            AppString.isStringNotEmpty(description) ?
+            StringUtils.isNotEmpty(description) ?
               Padding(padding: EdgeInsets.only(top: 5), child:
-                Text(description, style: TextStyle(fontFamily: Styles().fontFamilies.regular, fontSize: 16, color: Styles().colors.textSurface),),
+                Text(description!, style: TextStyle(fontFamily: Styles().fontFamilies!.regular, fontSize: 16, color: Styles().colors!.textSurface),),
               ) :
               Container(),
           ],),),),
@@ -160,19 +160,13 @@ class _HomeSaferWidgetState extends State<HomeSaferWidget> implements Notificati
 
   void _onMyMcKinley() {
     Analytics().logSelect(target: 'MyMcKinley');
-    if (AppString.isStringNotEmpty(Config().saferMcKinley['url'])) {
-    Navigator.push(context, CupertinoPageRoute(
-      builder: (context) => WebPanel(
-        url: Config().saferMcKinley['url'],
-        title: Localization().getStringEx('widget.home.safer.button.my_mckinley.title', 'MyMcKinley'),
-        analyticsName: 'MyMcKinley',
-        hideToolBar: true,)
-    ));
+    if (StringUtils.isNotEmpty(Config().saferMcKinley['url'])) {
+      launch(Config().saferMcKinley['url']);
     }
   }
 
   void _onWellnessAnswerCenter() {
-    Analytics().logSelect(target: 'Wellness Answer Center');
+    Analytics().logSelect(target: 'Answer Center');
     Navigator.push(context, CupertinoPageRoute(
       builder: (context) => HomeSaferWellnessAnswerCenterPanel()
     ));

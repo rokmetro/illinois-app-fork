@@ -14,23 +14,24 @@
  * limitations under the License.
  */
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:illinois/model/Groups.dart';
+import 'package:rokwire_plugin/model/group.dart';
+import 'package:illinois/ext/Group.dart';
 import 'package:illinois/service/Analytics.dart';
-import 'package:illinois/service/AppDateTime.dart';
-import 'package:illinois/service/Groups.dart';
-import 'package:illinois/service/Localization.dart';
+import 'package:rokwire_plugin/service/app_datetime.dart';
+import 'package:rokwire_plugin/service/groups.dart';
+import 'package:rokwire_plugin/service/localization.dart';
 import 'package:illinois/ui/widgets/HeaderBar.dart';
 import 'package:illinois/ui/widgets/RibbonButton.dart';
-import 'package:illinois/ui/widgets/ScalableWidgets.dart';
-import 'package:illinois/utils/Utils.dart';
-import 'package:illinois/service/Styles.dart';
+import 'package:rokwire_plugin/ui/widgets/rounded_button.dart';
+import 'package:illinois/utils/AppUtils.dart';
+import 'package:rokwire_plugin/utils/utils.dart';
+import 'package:rokwire_plugin/service/styles.dart';
 import 'package:sprintf/sprintf.dart';
 
 class GroupPendingMemberPanel extends StatefulWidget implements AnalyticsPageAttributes {
-  final Member member;
-  final Group group;
+  final Member? member;
+  final Group? group;
   
   GroupPendingMemberPanel({this.member, this.group});
   
@@ -38,7 +39,7 @@ class GroupPendingMemberPanel extends StatefulWidget implements AnalyticsPageAtt
   _GroupPendingMemberPanelState createState() => _GroupPendingMemberPanelState();
 
   @override
-  Map<String, dynamic> get analyticsPageAttributes => group?.analyticsAttributes;
+  Map<String, dynamic>? get analyticsPageAttributes => group?.analyticsAttributes;
 }
 
 
@@ -50,20 +51,18 @@ class _GroupPendingMemberPanelState extends State<GroupPendingMemberPanel> {
 
   @override
   void dispose() {
-    _reasonController?.dispose();
+    _reasonController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Styles().colors.background,
-      appBar: SimpleHeaderBarWithBack(
-        context: context,
-      ),
+      backgroundColor: Styles().colors!.background,
+      appBar: HeaderBar(),
       body:
       Container(
-        color:  Styles().colors.white,
+        color:  Styles().colors!.white,
         child:Column(
         children: <Widget>[
           Expanded(
@@ -84,7 +83,7 @@ class _GroupPendingMemberPanelState extends State<GroupPendingMemberPanel> {
 
   Widget _buildHeading(){
     return
-      Container(color: Styles().colors.background,
+      Container(color: Styles().colors!.background,
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child:Column(
         children: [
@@ -94,7 +93,7 @@ class _GroupPendingMemberPanelState extends State<GroupPendingMemberPanel> {
               padding: const EdgeInsets.symmetric(vertical: 16),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(65),
-                child: Container(width: 65, height: 65 ,child: AppString.isStringNotEmpty(widget.member?.photoURL) ? Image.network(widget.member.photoURL) : Image.asset('images/missing-photo-placeholder.png')),
+                child: Container(width: 65, height: 65 ,child: StringUtils.isNotEmpty(widget.member?.photoURL) ? Image.network(widget.member!.photoURL!, excludeFromSemantics: true) : Image.asset('images/missing-photo-placeholder.png', excludeFromSemantics: true)),
               ),
             ),
             Container(width: 11,),
@@ -102,18 +101,18 @@ class _GroupPendingMemberPanelState extends State<GroupPendingMemberPanel> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Text(widget.member?.name ?? "",
+                  Text(widget.member?.displayShortName ?? "",
                     style: TextStyle(
-                        fontFamily: Styles().fontFamilies.extraBold,
+                        fontFamily: Styles().fontFamilies!.extraBold,
                         fontSize: 20,
-                        color: Styles().colors.fillColorPrimary
+                        color: Styles().colors!.fillColorPrimary
                     ),
                   ),
-                  Text( Localization().getStringEx("panel.pending_member_detail.label.requested", "Requested on ")+(AppDateTime().formatDateTime(widget?.member?.dateCreatedUtc?.toLocal(), format: "MMM dd, yyyy")??""),
+                  Text( Localization().getStringEx("panel.pending_member_detail.label.requested", "Requested on ")+(AppDateTime().formatDateTime(widget.member?.dateCreatedUtc?.toLocal(), format: "MMM dd, yyyy")??""),
                     style: TextStyle(
-                        fontFamily: Styles().fontFamilies.regular,
+                        fontFamily: Styles().fontFamilies!.regular,
                         fontSize: 14,
-                        color: Styles().colors.textSurface
+                        color: Styles().colors!.textSurface
                     ),
                   ),
                 ],
@@ -130,7 +129,7 @@ class _GroupPendingMemberPanelState extends State<GroupPendingMemberPanel> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         _buildQuestions(),
-        Container(height: 1, color: Styles().colors.surfaceAccent,),
+        Container(height: 1, color: Styles().colors!.surfaceAccent,),
         _buildApproval()
       ],
     );
@@ -138,9 +137,9 @@ class _GroupPendingMemberPanelState extends State<GroupPendingMemberPanel> {
 
   Widget _buildQuestions(){
     List<Widget> list = [];
-    if(AppCollection.isCollectionNotEmpty(widget?.member?.answers)) {
-      for (int index = 0; index < widget.member.answers.length; index++) {
-        GroupMembershipAnswer answer = widget.member.answers[index];
+    if(CollectionUtils.isNotEmpty(widget.member?.answers)) {
+      for (int index = 0; index < widget.member!.answers!.length; index++) {
+        GroupMembershipAnswer answer = widget.member!.answers![index];
         list.add(_MembershipAnswer(member: widget.member, answer: answer));
         list.add(Container(height: 16,));
       }
@@ -148,7 +147,7 @@ class _GroupPendingMemberPanelState extends State<GroupPendingMemberPanel> {
 
     return
       Container(
-        color: Styles().colors.background,
+        color: Styles().colors!.background,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child:Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -161,7 +160,7 @@ class _GroupPendingMemberPanelState extends State<GroupPendingMemberPanel> {
   Widget _buildApproval(){
     return
       Container(
-        color: Styles().colors.white,
+        color: Styles().colors!.white,
         padding: EdgeInsets.symmetric(horizontal: 16),
           child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -172,21 +171,19 @@ class _GroupPendingMemberPanelState extends State<GroupPendingMemberPanel> {
               Container(width: 8,),
               Text(Localization().getStringEx("panel.pending_member_detail.label.approval", "Member approval"),
                 style: TextStyle(
-                    fontFamily: Styles().fontFamilies.bold,
+                    fontFamily: Styles().fontFamilies!.bold,
                     fontSize: 16,
-                    color: Styles().colors.fillColorPrimary
+                    color: Styles().colors!.fillColorPrimary
                 ),
               ),
             ],),
             Container(height: 21,),
             ToggleRibbonButton(
-                height: null,
                 borderRadius: BorderRadius.circular(4),
-                border: Border.all(color: Styles().colors.fillColorPrimary),
+                border: Border.all(color: Styles().colors!.fillColorPrimary!),
                 label: Localization().getStringEx("panel.pending_member_detail.button.approve.text", "Approve "),
                 padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 toggled: _approved,
-                context: context,
                 onTap: () {
                   Analytics().logSelect(target: 'Aprove');
                   setState(() {
@@ -199,17 +196,15 @@ class _GroupPendingMemberPanelState extends State<GroupPendingMemberPanel> {
             Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(4),
-                border: Border.all(color: Styles().colors.fillColorPrimary),
+                border: Border.all(color: Styles().colors!.fillColorPrimary!),
               ),
               child: Column(
                 children: [
                   ToggleRibbonButton(
-                      height: null,
                       label: Localization().getStringEx("panel.pending_member_detail.button.deny.text", "Deny"),
                       borderRadius: BorderRadius.circular(4),
                       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       toggled: _denied,
-                      context: context,
                       onTap: () {
                         Analytics().logSelect(target: 'Deny');
                         setState(() {
@@ -223,9 +218,9 @@ class _GroupPendingMemberPanelState extends State<GroupPendingMemberPanel> {
                     child:
                     Text(Localization().getStringEx("panel.pending_member_detail.deny.description", "If you choose not to accept this person, please provide a reason."),
                       style: TextStyle(
-                          fontFamily: Styles().fontFamilies.regular,
+                          fontFamily: Styles().fontFamilies!.regular,
                           fontSize: 14,
-                          color: Styles().colors.textSurface
+                          color: Styles().colors!.textSurface
                       ),
                   )),
                   Container(height: 8,),
@@ -236,7 +231,7 @@ class _GroupPendingMemberPanelState extends State<GroupPendingMemberPanel> {
                       padding: EdgeInsets.symmetric(),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(4),
-                        border: Border.all(color: Styles().colors.fillColorPrimary),
+                        border: Border.all(color: Styles().colors!.fillColorPrimary!),
                       ),
                       child:
                       Row(children: [
@@ -245,9 +240,9 @@ class _GroupPendingMemberPanelState extends State<GroupPendingMemberPanel> {
                           decoration: InputDecoration(
                               border: InputBorder.none),
                           style: TextStyle(
-                              color: Styles().colors.fillColorPrimary,
+                              color: Styles().colors!.fillColorPrimary,
                               fontSize: 16,
-                              fontFamily: Styles().fontFamilies.regular),
+                              fontFamily: Styles().fontFamilies!.regular),
                           onChanged: (text){setState(() {});},
                           minLines: 4,
                           maxLines: 999,
@@ -265,35 +260,25 @@ class _GroupPendingMemberPanelState extends State<GroupPendingMemberPanel> {
 
   Widget _buildBottomButtons(BuildContext context){
     return SafeArea(child: Container(
-      color: Styles().colors.white,
+      color: Styles().colors!.white,
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       child: Row(
         children: <Widget>[
             Expanded(child:
-              Stack(children: <Widget>[
-                ScalableRoundedButton(
-                  label: _continueButtonText,
-                  hint: Localization().getStringEx("panel.pending_member_detail.button.add.hint", ""),
-                  backgroundColor: Styles().colors.white,
-                  borderColor: _canContinue? Styles().colors.fillColorSecondary : Styles().colors.surfaceAccent,
-                  textColor: _canContinue? Styles().colors.fillColorPrimary : Styles().colors.surfaceAccent,
-                  fontFamily: Styles().fontFamilies.bold,
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 13),
-                  onTap: () {
-                    Analytics().logSelect(target: 'Apply');
-                    _processMembership();
-                  },
-                ),
-                Visibility(visible: _updating, child:
-                  Center(child:
-                    Padding(padding: EdgeInsets.only(top: 12), child:
-                    Container(width: 24, height: 24, child:
-                        CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Styles().colors.fillColorSecondary), strokeWidth: 2,)
-                      ),
-                    ),
-                  ),
-                ),
-              ],),
+              RoundedButton(
+                label: _continueButtonText ?? '',
+                hint: Localization().getStringEx("panel.pending_member_detail.button.add.hint", ""),
+                backgroundColor: Styles().colors!.white,
+                borderColor: _canContinue? Styles().colors!.fillColorSecondary : Styles().colors!.surfaceAccent,
+                textColor: _canContinue? Styles().colors!.fillColorPrimary : Styles().colors!.surfaceAccent,
+                fontFamily: Styles().fontFamilies!.bold,
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+                progress: _updating,
+                onTap: () {
+                  Analytics().logSelect(target: 'Apply');
+                  _processMembership();
+                },
+              ),
             )
         ],
       ),
@@ -324,16 +309,16 @@ class _GroupPendingMemberPanelState extends State<GroupPendingMemberPanel> {
   }
 
   bool get _canContinue{
-    return _approved || (_denied && (_reasonController?.text?.isNotEmpty ?? false));
+    return _approved || (_denied && _reasonController.text.isNotEmpty);
   }
 
-  String get _continueButtonText{
+  String? get _continueButtonText{
       if(_approved){
         return Localization().getStringEx("panel.pending_member_detail.button.approve_member.title", "Approve member");
       }
 
       if(_denied){
-        if(_reasonController?.text?.isNotEmpty ?? false) {
+        if(_reasonController.text.isNotEmpty) {
           return Localization().getStringEx("panel.pending_member_detail.button.deny_member.title", "Deny member");
         } else {
           return Localization().getStringEx("panel.pending_member_detail.button.deny_reason.title", "Provide deny reason");
@@ -344,39 +329,39 @@ class _GroupPendingMemberPanelState extends State<GroupPendingMemberPanel> {
 }
 
 class _MembershipAnswer extends StatelessWidget{
-  final Member member;
+  final Member? member;
   final GroupMembershipAnswer answer;
-  _MembershipAnswer({@required this.member, @required this.answer});
+  _MembershipAnswer({required this.member, required this.answer});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text(answer?.question ?? '',
+        Text(answer.question ?? '',
           style: TextStyle(
-              fontFamily: Styles().fontFamilies.bold,
+              fontFamily: Styles().fontFamilies!.bold,
               fontSize: 14,
-              color: Styles().colors.fillColorPrimary
+              color: Styles().colors!.fillColorPrimary
           ),
         ),
         Container(height: 9,),
         Container(
           padding: EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Styles().colors.white,
-            border: Border.all(color: Styles().colors.fillColorPrimary)
+            color: Styles().colors!.white,
+            border: Border.all(color: Styles().colors!.fillColorPrimary!)
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Row(children: [
                 Expanded(child:
-                  Text(answer?.answer ?? "",
+                  Text(answer.answer ?? "",
                     style: TextStyle(
-                        fontFamily: Styles().fontFamilies.regular,
+                        fontFamily: Styles().fontFamilies!.regular,
                         fontSize: 16,
-                        color: Styles().colors.textBackground
+                        color: Styles().colors!.textBackground
                     ),
                   ),
                 )

@@ -14,33 +14,22 @@
  * limitations under the License.
  */
 
-import 'dart:async';
-import 'dart:io';
-import 'package:illinois/service/AppLivecycle.dart';
-import 'package:illinois/service/Localization.dart';
+import 'package:rokwire_plugin/service/localization.dart';
 import 'package:illinois/service/Analytics.dart';
-import 'package:illinois/service/NotificationService.dart';
 import 'package:illinois/ui/widgets/HeaderBar.dart';
 import 'package:illinois/ui/widgets/TabBarWidget.dart';
 import 'package:flutter/material.dart';
-import 'package:illinois/utils/Utils.dart';
-import 'package:illinois/service/Styles.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:webview_flutter/webview_flutter.dart';
+import 'package:sprintf/sprintf.dart';
+import 'package:rokwire_plugin/ui/panels/web_panel.dart' as rokwire;
 
-class WebPanel extends StatefulWidget implements AnalyticsPageName, AnalyticsPageAttributes{
-  final String url;
-  final String analyticsName;
-  final String title;
-  final bool hideToolBar;
+class WebPanel extends rokwire.WebPanel implements AnalyticsPageName, AnalyticsPageAttributes {
+  final String? analyticsName;
 
-  WebPanel({@required this.url, this.analyticsName, this.title = "", this.hideToolBar = false});
+  WebPanel({Key? key, String? url, String? title, this.analyticsName, bool showTabBar = true}) :
+    super(key: key, url: url, title: title, headerBar: HeaderBar(title: title), tabBar: showTabBar ? TabBarWidget() : null);
 
   @override
-  _WebPanelState createState() => _WebPanelState();
-
-  @override
-  String get analyticsPageName {
+  String? get analyticsPageName {
     return analyticsName;
   }
 
@@ -48,126 +37,21 @@ class WebPanel extends StatefulWidget implements AnalyticsPageName, AnalyticsPag
   Map<String, dynamic> get analyticsPageAttributes {
     return { Analytics.LogAttributeUrl : url };
   }
-}
 
-class _WebPanelState extends State<WebPanel> implements NotificationsListener{
-
-  _OnlineStatus _onlineStatus;
-  bool _pageLoaded = false;
-
-  bool _isForeground = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _checkOnlineStatus();
-    NotificationService().subscribe(this, AppLivecycle.notifyStateChanged);
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    NotificationService().unsubscribe(this);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-      return Scaffold(
-          appBar: _getHeaderBar(),
-          backgroundColor: Styles().colors.background,
-          body: Column(
-            children: <Widget>[
-              Expanded(
-                  child: (_onlineStatus == _OnlineStatus.offline)
-                      ? _buildError()
-                      : Stack(
-                    children: _buildWebView(),
-                  )
-              ),
-              widget.hideToolBar? Container() :TabBarWidget()
-            ],
-          ));
-  }
-
-  List<Widget> _buildWebView() {
-    List<Widget> list = [];
-    list.add(Visibility(
-      visible: _isForeground,
-      child: WebView(
-        initialUrl: widget.url,
-        javascriptMode: JavascriptMode.unrestricted,
-        navigationDelegate: _processNavigation,
-        onPageFinished: (url) {
-          setState(() {
-            _pageLoaded = true;
-          });
-        },
-        ),
-    ));
-
-    if (!_pageLoaded) {
-      list.add(Center(child: CircularProgressIndicator()));
-    }
-
-    return list;
-  }
-
-  FutureOr<NavigationDecision> _processNavigation(NavigationRequest navigation) {
-    String url = navigation.url;
-    if (AppUrl.launchInternal(url)) {
-      return NavigationDecision.navigate;
-    }
-    else {
-      launch(url);
-      return NavigationDecision.prevent;
-    }
-  }
-
-  Widget _buildError(){
-    return Center(
-      child: Container(
-          width: 280,
-          child: Text(
-            Localization().getStringEx(
-                'panel.web.offline.message', 'You need to be online in order to perform this operation. Please check your Internet connection.'),
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 18,
-              color: Styles().colors.fillColorPrimary,
-            ),
-          )),
+  @protected
+  Widget buildOfflineStatus(BuildContext context) {
+    return buildStatus(context,
+        title: Localization().getStringEx("panel.web.offline.title", "Web Content Not Available"),
+        message: Localization().getStringEx("panel.web.offline.message", "You need to be online in order to access web content. Please check your Internet connection."),
     );
   }
 
-
-  void _checkOnlineStatus() async {
-    try {
-      final result = await InternetAddress.lookup('www.example.com');
-      setState(() {
-        _onlineStatus = (result.isNotEmpty && result[0].rawAddress.isNotEmpty)
-            ? _OnlineStatus.online
-            : _OnlineStatus.offline;
-      });
-    } on SocketException catch (_) {
-      setState(() {
-        _onlineStatus = _OnlineStatus.offline;
-      });
-    }
+  @protected
+  Widget buildTrackingDisabledStatus(BuildContext context) {
+    return buildStatus(context,
+        title: Localization().getStringEx("panel.web.tracking_disabled.title", "Web Content Blocked"),
+        message: sprintf(Localization().getStringEx("panel.web.tracking_disabled.message", "You have opted to deny cookie usage for web content in this app, therefore we have blocked access to web sites. If you change your mind, change your preference <a href='%s'>here</a>. Your phone Settings may also need to have Privacy > Tracking enabled."), [appSettingsUrl]),
+    );
   }
-
-  Widget _getHeaderBar() {
-    return SimpleHeaderBarWithBack(context: context,
-      titleWidget: Text(widget.title, style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w900, letterSpacing: 1.0),),);
-  }
-
-  void onNotification(String name, dynamic param){
-    if(name == AppLivecycle.notifyStateChanged) {
-      setState(() {
-        _isForeground = (param == AppLifecycleState.resumed);
-      });
-    }
-  }
-
 }
 
-enum _OnlineStatus { online, offline }

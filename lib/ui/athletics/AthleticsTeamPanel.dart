@@ -16,23 +16,23 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:illinois/model/Auth2.dart';
+import 'package:rokwire_plugin/model/auth2.dart';
 import 'package:illinois/model/sport/SportDetails.dart';
-import 'package:illinois/service/Assets.dart';
-import 'package:illinois/service/Localization.dart';
-import 'package:illinois/service/NotificationService.dart';
-import 'package:illinois/service/Auth2.dart';
-import 'package:illinois/model/Coach.dart';
+import 'package:rokwire_plugin/service/assets.dart';
+import 'package:rokwire_plugin/service/localization.dart';
+import 'package:rokwire_plugin/service/notification_service.dart';
+import 'package:rokwire_plugin/service/auth2.dart';
+import 'package:illinois/model/sport/Coach.dart';
 import 'package:illinois/model/sport/Game.dart';
 import 'package:illinois/model/News.dart';
 import 'package:illinois/model/sport/Team.dart';
-import 'package:illinois/model/Roster.dart';
+import 'package:illinois/model/sport/Roster.dart';
 import 'package:illinois/service/Sports.dart';
 import 'package:illinois/service/Analytics.dart';
 import 'package:illinois/service/Config.dart';
 import 'package:illinois/ui/athletics/AthleticsNewsCard.dart';
-import 'package:illinois/ui/widgets/ScalableWidgets.dart';
-import 'package:illinois/ui/widgets/TrianglePainter.dart';
+import 'package:rokwire_plugin/ui/widgets/rounded_button.dart';
+import 'package:rokwire_plugin/ui/widgets/triangle_painter.dart';
 import 'package:illinois/ui/athletics/AthleticsSchedulePanel.dart';
 import 'package:illinois/ui/athletics/AthleticsNewsListPanel.dart';
 import 'package:illinois/ui/athletics/AthleticsNewsArticlePanel.dart';
@@ -45,11 +45,11 @@ import 'package:illinois/ui/WebPanel.dart';
 import 'package:illinois/ui/widgets/HeaderBar.dart';
 import 'package:illinois/ui/widgets/TabBarWidget.dart';
 import 'package:illinois/ui/widgets/ImageHolderListItem.dart';
-import 'package:illinois/utils/Utils.dart';
-import 'package:illinois/service/Styles.dart';
+import 'package:rokwire_plugin/utils/utils.dart';
+import 'package:rokwire_plugin/service/styles.dart';
 
 class AthleticsTeamPanel extends StatefulWidget {
-  final SportDefinition sport;
+  final SportDefinition? sport;
 
   AthleticsTeamPanel(this.sport);
 
@@ -58,12 +58,12 @@ class AthleticsTeamPanel extends StatefulWidget {
 }
 
 class _AthleticsTeamPanelState extends State<AthleticsTeamPanel> implements NotificationsListener {
-  List<Game> _games;
-  TeamRecord _record;
-  List<News> _teamNews;
-  List<Roster> _allRosters;
-  List<Coach> _allCoaches;
-  Set<String> _sportPreferences;
+  List<Game>? _games;
+  TeamRecord? _record;
+  List<News>? _teamNews;
+  List<Roster>? _allRosters;
+  List<Coach>? _allCoaches;
+  Set<String?>? _sportPreferences;
 
   int _progress = 0;
 
@@ -87,25 +87,17 @@ class _AthleticsTeamPanelState extends State<AthleticsTeamPanel> implements Noti
   }
 
   bool get hasSportPreference{
-    return _sportPreferences != null && _sportPreferences.contains(widget.sport.shortName);
+    return _sportPreferences != null && _sportPreferences!.contains(widget.sport!.shortName);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: SimpleHeaderBarWithBack(
-        context: context,
-        titleWidget: Text(
-          Localization().getStringEx('panel.athletics_team.header.title', 'Team'),
-          style: TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 1.0),
-        ),
+      appBar: HeaderBar(
+        title: Localization().getStringEx('panel.athletics_team.header.title', 'Team'),
       ),
       body: _buildContentWidget(),
-      backgroundColor: Styles().colors.background,
+      backgroundColor: Styles().colors!.background,
       bottomNavigationBar: TabBarWidget(),
     );
   }
@@ -114,32 +106,32 @@ class _AthleticsTeamPanelState extends State<AthleticsTeamPanel> implements Noti
     if(_isLoading()) {
       return Center(child: CircularProgressIndicator(),);
     }
-    String sportShortName = widget.sport.shortName;
-    SportSocialMedia sportSocialMedia = Sports().getSocialMediaForSport(sportShortName);
-    String facebookPageUrl = sportSocialMedia?.facebookPage;
-    String instagramUrl;
-    String instagramName = sportSocialMedia?.instagramName;
-    if (AppString.isStringNotEmpty(Config().instagramHostUrl) && AppString.isStringNotEmpty(instagramName)) {
+    String? sportShortName = widget.sport!.shortName;
+    SportSocialMedia? sportSocialMedia = Sports().getSocialMediaForSport(sportShortName);
+    String? facebookPageUrl = sportSocialMedia?.facebookPage;
+    String? instagramUrl;
+    String? instagramName = sportSocialMedia?.instagramName;
+    if (StringUtils.isNotEmpty(Config().instagramHostUrl) && StringUtils.isNotEmpty(instagramName)) {
       instagramUrl = '${Config().instagramHostUrl}$instagramName';
     }
-    String twitterUrl;
-    String twitterName = sportSocialMedia?.twitterName;
-    if (AppString.isStringNotEmpty(Config().twitterHostUrl) && AppString.isStringNotEmpty(twitterName)) {
+    String? twitterUrl;
+    String? twitterName = sportSocialMedia?.twitterName;
+    if (StringUtils.isNotEmpty(Config().twitterHostUrl) && StringUtils.isNotEmpty(twitterName)) {
       twitterUrl = '${Config().twitterHostUrl}$twitterName';
     }
 
-    String followLabel = Localization().getStringEx("panel.athletics_team.label.follow.title", "Follow") + " " + (widget?.sport?.name ?? "");
+    String followLabel = Localization().getStringEx("panel.athletics_team.label.follow.title", "Follow") + " ${widget.sport?.name}";
     String randomImageURL = Assets().randomStringFromListWithKey('images.random.sports.$sportShortName') ?? '';
     return SingleChildScrollView(
       child: Container(
-        color: Styles().colors.background,
+        color: Styles().colors!.background,
         child: Column(
           children: <Widget>[
             Stack(
               alignment: Alignment.bottomCenter,
               children: <Widget>[
                 Positioned(
-                    child: Image.network(randomImageURL)),
+                    child: Image.network(randomImageURL, excludeFromSemantics: true)),
                 CustomPaint(
                   painter: TrianglePainter(painterColor: Colors.white),
                   child: Container(
@@ -160,11 +152,11 @@ class _AthleticsTeamPanelState extends State<AthleticsTeamPanel> implements Noti
                     children: <Widget>[
                       Expanded(
                         child: Text(
-                          widget.sport.name,
+                          widget.sport!.name!,
                           maxLines: 2,
 
                           style: TextStyle(
-                              color: Styles().colors.fillColorPrimary, fontSize: 32),
+                              color: Styles().colors!.fillColorPrimary, fontSize: 32),
                         ),
                       ),
                       Container(width: 24,),
@@ -177,7 +169,7 @@ class _AthleticsTeamPanelState extends State<AthleticsTeamPanel> implements Noti
                           onTap: _onTapSportPreference,
                           child: Padding(
                               padding: EdgeInsets.only(top: 8),
-                              child: hasSportPreference ? Image.asset('images/deselected-dark.png') : Image.asset('images/deselected.png')
+                              child: hasSportPreference ? Image.asset('images/deselected-dark.png', excludeFromSemantics: true) : Image.asset('images/deselected.png', excludeFromSemantics: true)
                           ),
                         ),
                       )
@@ -200,17 +192,16 @@ class _AthleticsTeamPanelState extends State<AthleticsTeamPanel> implements Noti
                       Localization().getStringEx("panel.athletics_team.label.record.title", "Record"),
                       textAlign: TextAlign.left,
                       style: TextStyle(
-                          color: Styles().colors.fillColorPrimary,
+                          color: Styles().colors!.fillColorPrimary,
                           fontSize: 20,
                           fontWeight: FontWeight.w900),
                     ),),
                     Expanded(
                       child: Text(
-                        AppString.getDefaultEmptyString(
-                            value: _record?.overallRecordUnformatted),
+                        StringUtils.ensureNotEmpty(_record?.overallRecordUnformatted),
                         textAlign: TextAlign.right,
                         style: TextStyle(
-                            color: Styles().colors.fillColorPrimary,
+                            color: Styles().colors!.fillColorPrimary,
                             fontSize: 32,
                             fontWeight: FontWeight.w900),
                       )
@@ -220,7 +211,7 @@ class _AthleticsTeamPanelState extends State<AthleticsTeamPanel> implements Noti
               ),
             ),
             Container(
-              color: Styles().colors.surfaceAccent,
+              color: Styles().colors!.surfaceAccent,
               height: 1,
             ),
             Padding(
@@ -233,37 +224,32 @@ class _AthleticsTeamPanelState extends State<AthleticsTeamPanel> implements Noti
                     _GameResult(
                       header: Localization().getStringEx("panel.athletics_team.label.conf.title", 'Conf'),
                       hint: Localization().getStringEx("panel.athletics_team.label.conf.hint", ''),
-                      result: AppString.getDefaultEmptyString(
-                          value: _record?.conferenceRecord),
+                      result: StringUtils.ensureNotEmpty(_record?.conferenceRecord),
                     ),
                     _GameResult(
                       header: Localization().getStringEx("panel.athletics_team.label.home.title", 'Home'),
                       hint: Localization().getStringEx("panel.athletics_team.label.home.hint", ''),
-                      result: AppString.getDefaultEmptyString(
-                          value: _record?.homeRecord),
+                      result: StringUtils.ensureNotEmpty(_record?.homeRecord),
                     ),
                     _GameResult(
                       header: Localization().getStringEx("panel.athletics_team.label.away.title", 'Away'),
                       hint: Localization().getStringEx("panel.athletics_team.label.away.hint", ''),
-                      result: AppString.getDefaultEmptyString(
-                          value: _record?.awayRecord),
+                      result: StringUtils.ensureNotEmpty(_record?.awayRecord),
                     ),
                     _GameResult(
                       header: Localization().getStringEx("panel.athletics_team.label.neutral.title", 'Neutral'),
                       hint: Localization().getStringEx("panel.athletics_team.label.neutral.hint", ''),
-                      result: AppString.getDefaultEmptyString(
-                          value: _record?.neutralRecord),
+                      result: StringUtils.ensureNotEmpty(_record?.neutralRecord),
                     ),
                     _GameResult(
                       header: Localization().getStringEx("panel.athletics_team.label.streak.title", 'Streak'),
                       hint: Localization().getStringEx("panel.athletics_team.label.streak.hint", ''),
-                      result: AppString.getDefaultEmptyString(
-                          value: _record?.streak),
+                      result: StringUtils.ensureNotEmpty(_record?.streak),
                     ),
                     Padding(
                       padding: EdgeInsets.only(left: 6, right: 10),
                       child: Container(
-                        color: Styles().colors.fillColorSecondary,
+                        color: Styles().colors!.fillColorSecondary,
                         width: 2,
                         height: 48,
                       ),
@@ -272,21 +258,22 @@ class _AthleticsTeamPanelState extends State<AthleticsTeamPanel> implements Noti
                 ),
               ),
             ),
-            Visibility(visible:(_games != null && _games.isNotEmpty) ,child: Stack(
+            Visibility(visible:(_games != null && _games!.isNotEmpty) ,child: Stack(
               alignment: Alignment.topCenter,
               children: <Widget>[
                 Column(
                   children: <Widget>[
                     Container(
-                      color: Styles().colors.fillColorPrimary,
+                      color: Styles().colors!.fillColorPrimary,
                       height: 40,
                     ),
                     Container(
                       height: 112,
                       width: double.infinity,
                       child: Image.asset('images/slant-down-right.png',
-                        color: Styles().colors.fillColorPrimary,
+                        color: Styles().colors!.fillColorPrimary,
                         fit: BoxFit.fill,
+                        excludeFromSemantics: true
                       ),
                     )
                   ],
@@ -303,7 +290,7 @@ class _AthleticsTeamPanelState extends State<AthleticsTeamPanel> implements Noti
                           children: <Widget>[
                             Padding(
                               padding: EdgeInsets.only(right: 16),
-                              child: Image.asset('images/icon-schedule.png'),
+                              child: Image.asset('images/icon-schedule.png', excludeFromSemantics: true),
                             ),
                             Text(
                               Localization().getStringEx("panel.athletics_team.label.schedule.title", 'Schedule'),
@@ -323,11 +310,11 @@ class _AthleticsTeamPanelState extends State<AthleticsTeamPanel> implements Noti
                           color: Colors.transparent,
                           height: 20,
                         ),
-                        itemCount: (_games != null ? _games.length : 0),
+                        itemCount: (_games != null ? _games!.length : 0),
                         itemBuilder: (context, index) {
-                          if (_games != null && _games.length > 0) {
+                          if (_games != null && _games!.length > 0) {
                             Game game =
-                            _games[index];
+                            _games![index];
                             return AthleticsScheduleCard(
                               game: game,
                             );
@@ -340,13 +327,13 @@ class _AthleticsTeamPanelState extends State<AthleticsTeamPanel> implements Noti
                     ),
                     Padding(
                       padding: EdgeInsets.only(bottom: 48, left: 10, right: 10),
-                      child: ScalableRoundedButton(
+                      child: RoundedButton(
                         label: Localization().getStringEx("panel.athletics_team.button.full_schedule.title", 'Full Schedule'),
                         hint: Localization().getStringEx("panel.athletics_team.button.full_schedule.hint", ''),
                         onTap: _showScheduleListPanel(),
-                        textColor: Styles().colors.fillColorPrimary,
-                        borderColor: Styles().colors.fillColorSecondary,
-                        backgroundColor: Styles().colors.background,
+                        textColor: Styles().colors!.fillColorPrimary,
+                        borderColor: Styles().colors!.fillColorSecondary,
+                        backgroundColor: Styles().colors!.background,
                       ),
                     )
                   ],
@@ -359,7 +346,7 @@ class _AthleticsTeamPanelState extends State<AthleticsTeamPanel> implements Noti
                 Column(
                   children: <Widget>[
                     Container(
-                      color: Styles().colors.fillColorPrimary,
+                      color: Styles().colors!.fillColorPrimary,
                       height: 40,
                     ),
                     Container(
@@ -375,7 +362,7 @@ class _AthleticsTeamPanelState extends State<AthleticsTeamPanel> implements Noti
                 Column(
                   children: <Widget>[
                     Container(
-                      color: Styles().colors.fillColorPrimary,
+                      color: Styles().colors!.fillColorPrimary,
                       height: 56,
                       child: Padding(
                         padding: EdgeInsets.only(left: 16),
@@ -387,7 +374,7 @@ class _AthleticsTeamPanelState extends State<AthleticsTeamPanel> implements Noti
                             children: <Widget>[
                               Padding(
                                 padding: EdgeInsets.only(right: 16),
-                                child: Image.asset('images/icon-news.png'),
+                                child: Image.asset('images/icon-news.png', excludeFromSemantics: true),
                               ),
                               Text(
                                 Localization().getStringEx("panel.athletics_team.button.news.title", 'News'),
@@ -414,19 +401,19 @@ class _AthleticsTeamPanelState extends State<AthleticsTeamPanel> implements Noti
                       ),
                       Expanded(
                         flex: 5,
-                        child: ScalableRoundedButton(
+                        child: RoundedButton(
                           label: Localization().getStringEx("panel.athletics_team.button.all_news.title", 'All News'),
                           hint: Localization().getStringEx("panel.athletics_team.button.all_news.hint", ''),
                           onTap: () {
-                            Analytics.instance.logSelect(target:"All News");
+                            Analytics().logSelect(target:"All News");
                             Navigator.push(
                               context,
                               CupertinoPageRoute(
-                                builder: (context) => AthleticsNewsListPanel(sportName: widget.sport.name,)));
+                                builder: (context) => AthleticsNewsListPanel(sportName: widget.sport!.name,)));
                           },
-                          textColor: Styles().colors.fillColorPrimary,
-                          borderColor: Styles().colors.fillColorSecondary,
-                          backgroundColor: Styles().colors.background,
+                          textColor: Styles().colors!.fillColorPrimary,
+                          borderColor: Styles().colors!.fillColorSecondary,
+                          backgroundColor: Styles().colors!.background,
                         ),
                       ),
                       Expanded(
@@ -439,12 +426,12 @@ class _AthleticsTeamPanelState extends State<AthleticsTeamPanel> implements Noti
               ],
             ),
             Visibility(
-              visible: AppCollection.isCollectionNotEmpty(_allRosters),
+              visible: CollectionUtils.isNotEmpty(_allRosters),
               child: Stack(
                 alignment: Alignment.topCenter,
                 children: <Widget>[
                   Container(
-                    color: Styles().colors.backgroundVariant,
+                    color: Styles().colors!.backgroundVariant,
                     height: 112,
                     width: MediaQuery.of(context).size.width,
                     child: Padding(
@@ -452,7 +439,7 @@ class _AthleticsTeamPanelState extends State<AthleticsTeamPanel> implements Noti
                       child: Text(
                         Localization().getStringEx("panel.athletics_team.label.team_roster.title", 'Team Roster'),
                         style: TextStyle(
-                            color: Styles().colors.fillColorPrimary, fontSize: 20),
+                            color: Styles().colors!.fillColorPrimary, fontSize: 20),
                       ),
                     ),
                   ),
@@ -470,7 +457,7 @@ class _AthleticsTeamPanelState extends State<AthleticsTeamPanel> implements Noti
               ),
             ),
             Visibility(
-              visible: AppCollection.isCollectionNotEmpty(_allRosters),
+              visible: CollectionUtils.isNotEmpty(_allRosters),
               child: Padding(
                 padding: EdgeInsets.only(bottom: 32, left: 10, right: 10),
                 child:
@@ -480,13 +467,13 @@ class _AthleticsTeamPanelState extends State<AthleticsTeamPanel> implements Noti
                     child: Container(),),
                   Expanded(
                     flex: 5,
-                    child: ScalableRoundedButton(
+                    child: RoundedButton(
                       label: Localization().getStringEx("panel.athletics_team.button.full_roster.title", 'Full Roster'),
                       hint: Localization().getStringEx("panel.athletics_team.button.full_roster.hint", ''),
                       onTap: _showRosterListPanel(),
-                      textColor: Styles().colors.fillColorPrimary,
-                      borderColor: Styles().colors.fillColorSecondary,
-                      backgroundColor: Styles().colors.background,
+                      textColor: Styles().colors!.fillColorPrimary,
+                      borderColor: Styles().colors!.fillColorSecondary,
+                      backgroundColor: Styles().colors!.background,
                     ),
                   ),
                   Expanded(
@@ -497,12 +484,12 @@ class _AthleticsTeamPanelState extends State<AthleticsTeamPanel> implements Noti
               ),
             ),
             Visibility(
-              visible: AppCollection.isCollectionNotEmpty(_allCoaches),
+              visible: CollectionUtils.isNotEmpty(_allCoaches),
               child: Stack(
                 alignment: Alignment.topCenter,
                 children: <Widget>[
                   Container(
-                    color: Styles().colors.backgroundVariant,
+                    color: Styles().colors!.backgroundVariant,
                     height: 112,
                     width: MediaQuery.of(context).size.width,
                     child: Padding(
@@ -510,7 +497,7 @@ class _AthleticsTeamPanelState extends State<AthleticsTeamPanel> implements Noti
                       child: Text(
                         Localization().getStringEx("panel.athletics_team.label.coaching_staff.title", 'Coaching Staff'),
                         style: TextStyle(
-                            color: Styles().colors.fillColorPrimary,
+                            color: Styles().colors!.fillColorPrimary,
                             fontSize: 20,
                             fontWeight: FontWeight.w900),
                       ),
@@ -530,7 +517,7 @@ class _AthleticsTeamPanelState extends State<AthleticsTeamPanel> implements Noti
               ),
             ),
             Visibility(
-              visible: AppCollection.isCollectionNotEmpty(_allCoaches),
+              visible: CollectionUtils.isNotEmpty(_allCoaches),
               child: Padding(
                 padding: EdgeInsets.only(bottom: 48, left: 10, right: 10),
                 child:
@@ -541,13 +528,13 @@ class _AthleticsTeamPanelState extends State<AthleticsTeamPanel> implements Noti
                     ),
                     Expanded(
                       flex: 5,
-                      child: ScalableRoundedButton(
+                      child: RoundedButton(
                         label: Localization().getStringEx("panel.athletics_team.button.all_staff.title", 'All Staff'),
                         hint: Localization().getStringEx("panel.athletics_team.button.all_staff.hint", ''),
                         onTap:_showCoachListPanel(),
-                        textColor: Styles().colors.fillColorPrimary,
-                        borderColor: Styles().colors.fillColorSecondary,
-                        backgroundColor: Styles().colors.background,
+                        textColor: Styles().colors!.fillColorPrimary,
+                        borderColor: Styles().colors!.fillColorSecondary,
+                        backgroundColor: Styles().colors!.background,
                       ),
                     ),
                     Expanded(
@@ -560,7 +547,7 @@ class _AthleticsTeamPanelState extends State<AthleticsTeamPanel> implements Noti
               padding: EdgeInsets.only(bottom: 32),
               child: Text(
                 followLabel,
-                style: TextStyle(color: Styles().colors.textBackground, fontSize: 20),
+                style: TextStyle(color: Styles().colors!.textBackground, fontSize: 20),
               ),
             ),
             Stack(
@@ -571,7 +558,7 @@ class _AthleticsTeamPanelState extends State<AthleticsTeamPanel> implements Noti
                   child: Container(
                     height: 98,
                     width: double.infinity,
-                    child: Image.asset('images/slant-down-right-rotated.png', color: Styles().colors.fillColorSecondary,fit: BoxFit.fill),
+                    child: Image.asset('images/slant-down-right-rotated.png', color: Styles().colors!.fillColorSecondary,fit: BoxFit.fill, excludeFromSemantics: true),
                   ),
                 ),
                 Row(
@@ -632,24 +619,24 @@ class _AthleticsTeamPanelState extends State<AthleticsTeamPanel> implements Noti
   }
 
   Widget _buildNewsList() {
-    return AppCollection.isCollectionNotEmpty(_teamNews) ? ListView.separated(
+    return CollectionUtils.isNotEmpty(_teamNews) ? ListView.separated(
       shrinkWrap: true,
       separatorBuilder: (context, index) => Divider(
         color: Colors.transparent,
         height: 30,
       ),
-      itemCount: _teamNews.length,
+      itemCount: _teamNews!.length,
       itemBuilder: (context, index) {
-        News news = _teamNews[index];
+        News news = _teamNews![index];
         return ImageHolderListItem(
             //Only the first item got image
             imageUrl: index == 0? news.imageUrl : null,
-            placeHolderDividerResource: Styles().colors.fillColorPrimaryTransparent03,
+            placeHolderDividerResource: Styles().colors!.fillColorPrimaryTransparent03,
             placeHolderSlantResource: 'images/slant-down-right-blue.png',
             child: AthleticsNewsCard(
               news: news,
               onTap: () {
-                Analytics.instance.logSelect(target:"NewsCard: "+news.title);
+                Analytics().logSelect(target:"NewsCard: "+news.title!);
                 Navigator.push(
                     context,
                     CupertinoPageRoute(
@@ -673,7 +660,7 @@ class _AthleticsTeamPanelState extends State<AthleticsTeamPanel> implements Noti
 
   void _loadGames() {
     _increaseProgress();
-    Sports().loadGames(sports: [widget.sport.shortName], limit: 3).then((games) {
+    Sports().loadGames(sports: [widget.sport!.shortName], limit: 3).then((games) {
       _games = games;
       _decreaseProgress();
     });
@@ -681,7 +668,7 @@ class _AthleticsTeamPanelState extends State<AthleticsTeamPanel> implements Noti
 
   void _loadRecord() {
     _increaseProgress();
-    Sports().loadRecordForCurrentSeason(widget.sport.shortName).then((record) {
+    Sports().loadRecordForCurrentSeason(widget.sport!.shortName).then((record) {
       _record = record;
       _decreaseProgress();
     });
@@ -689,7 +676,7 @@ class _AthleticsTeamPanelState extends State<AthleticsTeamPanel> implements Noti
 
   void _loadNews() {
     _increaseProgress();
-    Sports().loadNews(widget.sport.shortName, 2).then((newsList) {
+    Sports().loadNews(widget.sport!.shortName, 2).then((newsList) {
       _teamNews = newsList;
       _decreaseProgress();
     });
@@ -697,7 +684,7 @@ class _AthleticsTeamPanelState extends State<AthleticsTeamPanel> implements Noti
 
   void _loadRosters() {
     _increaseProgress();
-    Sports().loadRosters(widget.sport.shortName).then((rosters) {
+    Sports().loadRosters(widget.sport!.shortName).then((rosters) {
       _allRosters = rosters;
       _decreaseProgress();
     });
@@ -705,7 +692,7 @@ class _AthleticsTeamPanelState extends State<AthleticsTeamPanel> implements Noti
 
   void _loadCoaches() {
     _increaseProgress();
-    Sports().loadCoaches(widget.sport.shortName).then((coaches) {
+    Sports().loadCoaches(widget.sport!.shortName).then((coaches) {
       _allCoaches = coaches;
       _decreaseProgress();
     });
@@ -713,7 +700,7 @@ class _AthleticsTeamPanelState extends State<AthleticsTeamPanel> implements Noti
 
   GestureTapCallback _showRosterListPanel() {
     return () {
-      Analytics.instance.logSelect(target:"Full Rosters");
+      Analytics().logSelect(target:"Full Rosters");
       Navigator.push(
           context,
           CupertinoPageRoute(
@@ -723,7 +710,7 @@ class _AthleticsTeamPanelState extends State<AthleticsTeamPanel> implements Noti
 
   GestureTapCallback _showCoachListPanel() {
     return () {
-      Analytics.instance.logSelect(target:"All Staff");
+      Analytics().logSelect(target:"All Staff");
       Navigator.push(
           context,
           CupertinoPageRoute(
@@ -733,7 +720,7 @@ class _AthleticsTeamPanelState extends State<AthleticsTeamPanel> implements Noti
 
   GestureTapCallback _showScheduleListPanel() {
     return () {
-      Analytics.instance.logSelect(target:"Full Schedule List");
+      Analytics().logSelect(target:"Full Schedule List");
       Navigator.push(
           context,
           CupertinoPageRoute(
@@ -743,12 +730,12 @@ class _AthleticsTeamPanelState extends State<AthleticsTeamPanel> implements Noti
   }
 
   void _onTapSportPreference() {
-    Analytics.instance.logSelect(target:"Category -Favorite");
-    Auth2().prefs?.toggleSportInterest(widget.sport.shortName);
+    Analytics().logSelect(target:"Category -Favorite");
+    Auth2().prefs?.toggleSportInterest(widget.sport!.shortName);
   }
 
   void _onTapRosterItem(BuildContext context, Roster roster) {
-    Analytics.instance.logSelect(target:"Roster: "+roster.name);
+    Analytics().logSelect(target:"Roster: "+roster.name!);
     Navigator.push(
         context,
         CupertinoPageRoute(
@@ -757,7 +744,7 @@ class _AthleticsTeamPanelState extends State<AthleticsTeamPanel> implements Noti
   }
 
   void _onTapCoachItem(BuildContext context, Coach coach) {
-    Analytics.instance.logSelect(target:"Coach: "+coach.title);
+    Analytics().logSelect(target:"Coach: "+coach.title!);
     Navigator.push(
         context,
         CupertinoPageRoute(
@@ -768,7 +755,7 @@ class _AthleticsTeamPanelState extends State<AthleticsTeamPanel> implements Noti
   List<Widget> _buildTeamRoster() {
     List<Widget> rosterWidgets = [];
     if(_allRosters != null) {
-      for (Roster roster in _allRosters) {
+      for (Roster roster in _allRosters!) {
         if(rosterWidgets.length >= 5){
           break;
         }
@@ -786,7 +773,7 @@ class _AthleticsTeamPanelState extends State<AthleticsTeamPanel> implements Noti
   List<Widget> _buildCoachingStaff() {
     List<Widget> coachingWidgets = [];
     if(_allCoaches != null) {
-      for (Coach coach in _allCoaches) {
+      for (Coach coach in _allCoaches!) {
         if(coachingWidgets.length >= 5){
           break;
         }
@@ -831,11 +818,11 @@ class _AthleticsTeamPanelState extends State<AthleticsTeamPanel> implements Noti
 }
 
 class _GameResult extends StatelessWidget {
-  final String header;
-  final String hint;
-  final String result;
+  final String? header;
+  final String? hint;
+  final String? result;
 
-  _GameResult({@required this.header, @required this.hint, @required this.result});
+  _GameResult({required this.header, required this.hint, required this.result});
 
   @override
   Widget build(BuildContext context) {
@@ -850,7 +837,7 @@ class _GameResult extends StatelessWidget {
           Padding(
             padding: EdgeInsets.only(left: 6, right: 10),
             child: Container(
-              color: Styles().colors.fillColorSecondary,
+              color: Styles().colors!.fillColorSecondary,
               width: 2,
               height: 48,
             ),
@@ -859,18 +846,18 @@ class _GameResult extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(
-                header,
+                header!,
                 style: TextStyle(
-                    fontFamily: Styles().fontFamilies.medium,
-                    color: Styles().colors.fillColorPrimary,
+                    fontFamily: Styles().fontFamilies!.medium,
+                    color: Styles().colors!.fillColorPrimary,
                     fontSize: 14),
               ),
               Padding(
                 padding: EdgeInsets.only(top: 6),
                 child: Text(
-                  result,
+                  result!,
                   style:
-                      TextStyle(color: Styles().colors.fillColorPrimary, fontSize: 24),
+                      TextStyle(color: Styles().colors!.fillColorPrimary, fontSize: 24),
                 ),
               )
             ],
@@ -882,14 +869,14 @@ class _GameResult extends StatelessWidget {
 }
 
 class _RosterItem extends StatelessWidget {
-  final String imageUrl;
-  final String name;
-  final String position;
-  final GestureTapCallback onTap;
+  final String? imageUrl;
+  final String? name;
+  final String? position;
+  final GestureTapCallback? onTap;
 
   _RosterItem(
-      {@required this.name,
-      @required this.position,
+      {required this.name,
+      required this.position,
       this.imageUrl,
       this.onTap});
 
@@ -910,18 +897,18 @@ class _RosterItem extends StatelessWidget {
                   child: _imageContainer()),
               Container(height: 12,),
               Text(
-                name,
+                name!,
                 style: TextStyle(
-                    fontFamily: Styles().fontFamilies.bold,
-                    color: Styles().colors.fillColorPrimary,
+                    fontFamily: Styles().fontFamilies!.bold,
+                    color: Styles().colors!.fillColorPrimary,
                     fontSize: 16),
               ),
               Text(
-                AppString.getDefaultEmptyString(value: position),
+                StringUtils.ensureNotEmpty(position),
                 softWrap: true,
                 style: TextStyle(
-                    fontFamily: Styles().fontFamilies.medium,
-                    color: Styles().colors.textBackground,
+                    fontFamily: Styles().fontFamilies!.medium,
+                    color: Styles().colors!.textBackground,
                     fontSize: 16),
               ),
             ],
@@ -934,10 +921,10 @@ class _RosterItem extends StatelessWidget {
   Widget _imageContainer() {
     double width = 128;
     double height = 144;
-    if (AppString.isStringNotEmpty(imageUrl)) {
-      return Image.network(imageUrl, width: width, height: height, fit: BoxFit.cover, alignment: Alignment.topCenter);
+    if (StringUtils.isNotEmpty(imageUrl)) {
+      return Image.network(imageUrl!, excludeFromSemantics: true, width: width, height: height, fit: BoxFit.cover, alignment: Alignment.topCenter);
     } else {
-      return Container(width: width, height: height, color: Styles().colors.background);
+      return Container(width: width, height: height, color: Styles().colors!.background);
     }
   }
 }
@@ -997,9 +984,9 @@ class _RosterItem extends StatelessWidget {
 }*/
 
 class _TeamSocialCell extends StatelessWidget {
-  final String name;
-  final String iconResource;
-  final String webUrl;
+  final String? name;
+  final String? iconResource;
+  final String? webUrl;
 
   _TeamSocialCell({this.iconResource, this.webUrl, this.name});
 
@@ -1011,24 +998,24 @@ class _TeamSocialCell extends StatelessWidget {
         width: 66,
         height: 66,
         decoration: BoxDecoration(
-            color: Styles().colors.fillColorPrimary,
+            color: Styles().colors!.fillColorPrimary,
             borderRadius: BorderRadius.all(Radius.circular(4))),
         child: Center(
-          child: Image.asset(iconResource),
+          child: Image.asset(iconResource!, excludeFromSemantics: true),
         ),
       ),
     );
   }
 
   void _onTap(BuildContext context) {
-    Analytics.instance.logSelect(target:"Social: "+name);
-    if (AppString.isStringNotEmpty(webUrl)) {
+    Analytics().logSelect(target:"Social: "+name!);
+    if (StringUtils.isNotEmpty(webUrl)) {
       Navigator.push(
           context,
           CupertinoPageRoute(
               builder: (context) =>
                   WebPanel(
-                      url: webUrl, title: name.toUpperCase(),)));
+                      url: webUrl, title: name!.toUpperCase(),)));
     }
   }
 }

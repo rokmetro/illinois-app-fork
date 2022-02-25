@@ -15,17 +15,16 @@
  */
 
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:illinois/model/Groups.dart';
+import 'package:rokwire_plugin/model/group.dart';
 import 'package:illinois/service/Analytics.dart';
-import 'package:illinois/service/Groups.dart';
-import 'package:illinois/service/Localization.dart';
-import 'package:illinois/service/Styles.dart';
+import 'package:rokwire_plugin/service/groups.dart';
+import 'package:rokwire_plugin/service/localization.dart';
+import 'package:rokwire_plugin/service/styles.dart';
 import 'package:illinois/ui/groups/GroupWidgets.dart';
 import 'package:illinois/ui/widgets/HeaderBar.dart';
 import 'package:illinois/ui/widgets/TabBarWidget.dart';
-import 'package:illinois/utils/Utils.dart';
+import 'package:rokwire_plugin/utils/utils.dart';
 import 'package:sprintf/sprintf.dart';
 
 class GroupsSearchPanel extends StatefulWidget {
@@ -34,9 +33,9 @@ class GroupsSearchPanel extends StatefulWidget {
 }
 
 class _GroupsSearchPanelState extends State<GroupsSearchPanel> {
-  List<Group> _groups;
+  List<Group>? _groups;
   TextEditingController _searchController = TextEditingController();
-  String _searchLabel = Localization().getStringEx('panel.groups_search.label.search_for', 'Searching only Groups Titles');
+  String? _searchLabel = Localization().getStringEx('panel.groups_search.label.search_for', 'Searching only Groups Titles');
   int _resultsCount = 0;
   bool _resultsCountLabelVisible = false;
   bool _loading = false;
@@ -50,18 +49,11 @@ class _GroupsSearchPanelState extends State<GroupsSearchPanel> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: SimpleHeaderBarWithBack(
-        context: context,
-        titleWidget: Text(Localization().getStringEx("panel.groups_search.header.title", "Search"),
-          style: TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 1.0),
-        ),
+      appBar: HeaderBar(
+        title: Localization().getStringEx("panel.groups_search.header.title", "Search"),
       ),
       body: _buildContent(),
-      backgroundColor: Styles().colors.background,
+      backgroundColor: Styles().colors!.background,
       bottomNavigationBar: TabBarWidget(),
     );
   }
@@ -91,12 +83,12 @@ class _GroupsSearchPanelState extends State<GroupsSearchPanel> {
                         onChanged: (text) => _onTextChanged(text),
                         onSubmitted: (_) => _onTapSearch(),
                         autofocus: true,
-                        cursorColor: Styles().colors.fillColorSecondary,
+                        cursorColor: Styles().colors!.fillColorSecondary,
                         keyboardType: TextInputType.text,
                         style: TextStyle(
                             fontSize: 16,
-                            fontFamily: Styles().fontFamilies.regular,
-                            color: Styles().colors.textBackground),
+                            fontFamily: Styles().fontFamilies!.regular,
+                            color: Styles().colors!.textBackground),
                         decoration: InputDecoration(
                           border: InputBorder.none,
                         ),
@@ -131,7 +123,7 @@ class _GroupsSearchPanelState extends State<GroupsSearchPanel> {
                       onTap: _onTapSearch,
                       child: Image.asset(
                         'images/icon-search.png',
-                        color: Styles().colors.fillColorSecondary,
+                        color: Styles().colors!.fillColorSecondary,
                         width: 25,
                         height: 25,
                       ),
@@ -146,12 +138,12 @@ class _GroupsSearchPanelState extends State<GroupsSearchPanel> {
               child: RichText(
                 text: TextSpan(
                   style: TextStyle(
-                      fontSize: 20, color: Styles().colors.fillColorPrimary),
+                      fontSize: 20, color: Styles().colors!.fillColorPrimary),
                   children: <TextSpan>[
                     TextSpan(
                         text: _searchLabel,
                         style: TextStyle(
-                          fontFamily: Styles().fontFamilies.semiBold,
+                          fontFamily: Styles().fontFamilies!.semiBold,
                         )),
                   ],
                 ),
@@ -160,11 +152,11 @@ class _GroupsSearchPanelState extends State<GroupsSearchPanel> {
             visible: _resultsCountLabelVisible,
             child: Padding(
               padding: EdgeInsets.only(left: 16, right: 16, bottom: 24),
-              child: Text(_resultsInfoText,
+              child: Text(_resultsInfoText!,
                 style: TextStyle(
                     fontSize: 16,
-                    fontFamily: Styles().fontFamilies.regular,
-                    color: Styles().colors.textBackground),
+                    fontFamily: Styles().fontFamilies!.regular,
+                    color: Styles().colors!.textBackground),
               ),
             ),
           ),
@@ -183,8 +175,8 @@ class _GroupsSearchPanelState extends State<GroupsSearchPanel> {
         ),
       );
     }
-    int groupsCount = AppCollection.isCollectionNotEmpty(_groups) ? _groups.length : 0;
-    Widget groupsContent;
+    int groupsCount = CollectionUtils.isNotEmpty(_groups) ? _groups!.length : 0;
+    Widget? groupsContent;
     if (groupsCount > 0) {
       groupsContent = ListView.separated(
         physics: NeverScrollableScrollPhysics(),
@@ -194,7 +186,7 @@ class _GroupsSearchPanelState extends State<GroupsSearchPanel> {
         ),
         itemCount: groupsCount,
         itemBuilder: (context, index) {
-          Group group = _groups[index];
+          Group? group = _groups![index];
           GroupCard groupCard = GroupCard(group: group);
           return Padding(padding: EdgeInsets.only(top: 16), child: groupCard);
         }
@@ -203,7 +195,7 @@ class _GroupsSearchPanelState extends State<GroupsSearchPanel> {
     return groupsContent ?? Container();
   }
 
-  String get _resultsInfoText {
+  String? get _resultsInfoText {
     if (_resultsCount == 0) {
       return Localization().getStringEx('panel.groups_search.label.not_found', 'No results found');
     } else if (_resultsCount == 1) {
@@ -216,15 +208,15 @@ class _GroupsSearchPanelState extends State<GroupsSearchPanel> {
   }
 
   void _onTapSearch() {
-    Analytics.instance.logSelect(target: "Search Groups");
+    Analytics().logSelect(target: "Search Groups");
     FocusScope.of(context).requestFocus(new FocusNode());
     _setLoading(true);
     String searchValue = _searchController.text;
-    if (AppString.isStringEmpty(searchValue)) {
+    if (StringUtils.isEmpty(searchValue)) {
       return;
     }
     searchValue = searchValue.trim();
-    if (AppString.isStringEmpty(searchValue)) {
+    if (StringUtils.isEmpty(searchValue)) {
       return;
     }
     _setLoading(true);
@@ -239,8 +231,8 @@ class _GroupsSearchPanelState extends State<GroupsSearchPanel> {
   }
 
   void _onTapClear() {
-    Analytics.instance.logSelect(target: "Clear Search");
-    if (AppString.isStringEmpty(_searchController.text)) {
+    Analytics().logSelect(target: "Clear Search");
+    if (StringUtils.isEmpty(_searchController.text)) {
       Navigator.pop(context);
       return;
     }

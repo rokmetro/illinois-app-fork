@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:illinois/main.dart';
-import 'package:illinois/service/Onboarding.dart';
-import 'package:illinois/service/Localization.dart';
+import 'package:rokwire_plugin/service/onboarding.dart';
+import 'package:rokwire_plugin/service/localization.dart';
 import 'package:illinois/service/Analytics.dart';
-import 'package:illinois/ui/widgets/ScalableWidgets.dart';
-import 'package:illinois/ui/widgets/SwipeDetector.dart';
-import 'package:illinois/service/Styles.dart';
+import 'package:rokwire_plugin/ui/widgets/rounded_button.dart';
+import 'package:rokwire_plugin/ui/widgets/swipe_detector.dart';
+import 'package:rokwire_plugin/service/styles.dart';
 
 class OnboardingGetStartedPanel extends StatelessWidget with OnboardingPanel {
   
-  final Map<String, dynamic> onboardingContext;
+  final Map<String, dynamic>? onboardingContext;
   OnboardingGetStartedPanel({this.onboardingContext});
 
   @override
@@ -35,7 +34,7 @@ class OnboardingGetStartedPanel extends StatelessWidget with OnboardingPanel {
     App.instance.homeContext = context;
     Analytics().accessibilityState = MediaQuery.of(context).accessibleNavigation;
 
-    String strWelcome = Localization().getStringEx(
+    String? strWelcome = Localization().getStringEx(
         'panel.onboarding.get_started.image.welcome.title',
         'Welcome to Illinois');
     String strPersonalizedRecommendations = Localization().getStringEx(
@@ -52,7 +51,7 @@ class OnboardingGetStartedPanel extends StatelessWidget with OnboardingPanel {
           Stack(
             alignment: Alignment.bottomCenter,
             children: <Widget>[
-              Image.asset('images/splash_image.png', fit: BoxFit.cover, semanticLabel: strWelcome,
+              Image.asset('images/splash_image.png', excludeFromSemantics: true, fit: BoxFit.cover, semanticLabel: strWelcome,
                 height: double.infinity,
                 width: double.infinity,),
               Column(children: <Widget>[
@@ -70,7 +69,7 @@ class OnboardingGetStartedPanel extends StatelessWidget with OnboardingPanel {
                                     strPersonalizedRecommendations,
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
-                                      fontFamily: Styles().fontFamilies.medium,
+                                      fontFamily: Styles().fontFamilies!.medium,
                                       fontSize: 20,
                                       color: Colors.white,
                                     ),
@@ -87,18 +86,18 @@ class OnboardingGetStartedPanel extends StatelessWidget with OnboardingPanel {
                             ),
                             Padding(
                               padding: EdgeInsets.only(top: 20),
-                              child: ScalableRoundedButton(
+                              child: RoundedButton(
                                 label: Localization().getStringEx(
                                     'panel.onboarding.get_started.button.get_started.title',
                                     'Get Started'),
                                 hint: Localization().getStringEx(
                                     'panel.onboarding.get_started.button.get_started.hint',
                                     ''),
-                                backgroundColor: Styles().colors.fillColorPrimary,
-                                textColor: Styles().colors.white,
+                                backgroundColor: Styles().colors!.fillColorPrimary,
+                                textColor: Styles().colors!.white,
                                 onTap: () => _goNext(context),
-                                borderColor: Styles().colors.fillColorPrimary,
-                                secondaryBorderColor: Styles().colors.white,
+                                borderColor: Styles().colors!.fillColorPrimary,
+                                secondaryBorderColor: Styles().colors!.white,
                               ),
                             )
                           ],
@@ -108,7 +107,7 @@ class OnboardingGetStartedPanel extends StatelessWidget with OnboardingPanel {
   }
 
   void _goNext(BuildContext context) {
-    Analytics.instance.logSelect(target: "Get Started") ;
+    Analytics().logSelect(target: "Get Started") ;
     return Onboarding().next(context, this);
   }
 }

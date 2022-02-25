@@ -17,14 +17,15 @@
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
-import 'package:illinois/service/Auth2.dart';
-import 'package:illinois/service/Connectivity.dart';
+import 'package:rokwire_plugin/service/auth2.dart';
+import 'package:illinois/utils/AppUtils.dart';
+import 'package:rokwire_plugin/service/connectivity.dart';
 import 'package:illinois/service/FlexUI.dart';
-import 'package:illinois/service/Localization.dart';
+import 'package:rokwire_plugin/service/localization.dart';
 import 'package:illinois/service/Analytics.dart';
 import 'package:illinois/service/Config.dart';
 import 'package:illinois/service/NativeCommunicator.dart';
-import 'package:illinois/service/NotificationService.dart';
+import 'package:rokwire_plugin/service/notification_service.dart';
 import 'package:illinois/service/Storage.dart';
 import 'package:illinois/ui/explore/ExplorePanel.dart';
 import 'package:illinois/ui/SavedPanel.dart';
@@ -46,8 +47,8 @@ import 'package:illinois/ui/settings/SettingsIlliniCashPanel.dart';
 import 'package:illinois/ui/settings/SettingsMealPlanPanel.dart';
 import 'package:illinois/ui/settings/SettingsPrivacyCenterPanel.dart';
 import 'package:illinois/ui/wallet/IDCardPanel.dart';
-import 'package:illinois/utils/Utils.dart';
-import 'package:illinois/service/Styles.dart';
+import 'package:rokwire_plugin/utils/utils.dart';
+import 'package:rokwire_plugin/service/styles.dart';
 import 'package:url_launcher/url_launcher.dart' as url_launcher;
 
 class BrowsePanel extends StatefulWidget {
@@ -74,6 +75,7 @@ class _BrowsePanelState extends State<BrowsePanel> implements NotificationsListe
       Connectivity.notifyStatusChanged,
       Localization.notifyStringsUpdated,
       FlexUI.notifyChanged,
+      Config.notifyConfigChanged,
       Styles.notifyChanged,
       Storage.notifySettingChanged,
     ]);
@@ -139,7 +141,7 @@ class _BrowsePanelState extends State<BrowsePanel> implements NotificationsListe
             ),
           ],
         ),
-        backgroundColor: Styles().colors.background,
+        backgroundColor: Styles().colors!.background,
       );
   }
 
@@ -156,7 +158,7 @@ class _BrowsePanelState extends State<BrowsePanel> implements NotificationsListe
     const int gridWidth = 2;
     List<dynamic> codes = FlexUI()['browse.all'] ?? [];
     for (String code in codes) {
-      Widget entry = _buildBrowseAllEntry(code);
+      Widget? entry = _buildBrowseAllEntry(code);
       if (entry != null) {
         
         if (0 < rowEntries) {
@@ -199,13 +201,13 @@ class _BrowsePanelState extends State<BrowsePanel> implements NotificationsListe
     return Padding(padding: EdgeInsets.symmetric(horizontal: 16), child: Column(children: list),);
   }
   
-  Widget _buildBrowseAllEntry(String code) {
+  Widget? _buildBrowseAllEntry(String code) {
     if (code == 'athletics') {
       return _GridSquareButton(
         title: Localization().getStringEx('panel.browse.button.athletics.title', 'Athletics'),
         hint: Localization().getStringEx('panel.browse.button.athletics.hint', ''),
         icon: 'images/icon-browse-athletics.png',
-        color: Styles().colors.fillColorPrimary,
+        textColor: Styles().colors!.fillColorPrimary,
         onTap: () => _navigateToAthletics(),
       );
     }
@@ -214,7 +216,7 @@ class _BrowsePanelState extends State<BrowsePanel> implements NotificationsListe
         title: Localization().getStringEx('panel.browse.button.events.title', 'Events'),
         hint: Localization().getStringEx('panel.browse.button.events.hint', ''),
         icon: 'images/icon-browse-events.png',
-        color: Styles().colors.fillColorSecondary,
+        textColor: Styles().colors!.fillColorPrimary,
         onTap: () => _navigateToExploreEvents(),
       );
     }
@@ -223,7 +225,7 @@ class _BrowsePanelState extends State<BrowsePanel> implements NotificationsListe
         title: Localization().getStringEx('panel.browse.button.dining.title', 'Dining'),
         hint: Localization().getStringEx('panel.browse.button.dining.hint', ''),
         icon: 'images/icon-browse-dinings.png',
-        color: Styles().colors.mango,
+        textColor: Styles().colors!.fillColorPrimary,
         onTap: () => _navigateToExploreDining(),
       );
     }
@@ -232,7 +234,7 @@ class _BrowsePanelState extends State<BrowsePanel> implements NotificationsListe
         title: Localization().getStringEx('panel.browse.button.wellness.title', 'Wellness'),
         hint: Localization().getStringEx('panel.browse.button.wellness.hint', ''),
         icon: 'images/icon-browse-wellness.png',
-        color: Styles().colors.accentColor3,
+        textColor: Styles().colors!.fillColorPrimary,
         onTap: () => _navigateToWellness(),
       );
     }
@@ -241,8 +243,7 @@ class _BrowsePanelState extends State<BrowsePanel> implements NotificationsListe
         title: Localization().getStringEx('panel.browse.button.saved.title', 'Saved'),
         hint: Localization().getStringEx('panel.browse.button.saved.hint', ''),
         icon: 'images/icon-browse-saved.png',
-        color: Colors.white,
-        textColor: Styles().colors.fillColorPrimary,
+        textColor: Styles().colors!.fillColorPrimary,
         onTap: () => _navigateSaved(),
       );
     }
@@ -251,7 +252,7 @@ class _BrowsePanelState extends State<BrowsePanel> implements NotificationsListe
         title: Localization().getStringEx('panel.browse.button.quick_polls.title', 'Quick polls'),
         hint: Localization().getStringEx('panel.browse.button.quick_polls.hint', ''),
         icon: 'images/icon-browse-quick-polls.png',
-        color: Styles().colors.accentColor2,
+        textColor: Styles().colors!.fillColorPrimary,
         onTap: () => _navigateQuickPolls(),
       );
     }
@@ -263,14 +264,14 @@ class _BrowsePanelState extends State<BrowsePanel> implements NotificationsListe
             title: Localization().getStringEx('panel.browse.button.groups.title', 'Groups'),
             hint: Localization().getStringEx('panel.browse.button.groups.hint', ''),
             icon: 'images/icon-browse-gropus.png',
-            color: Styles().colors.accentColor2,
+            textColor: Styles().colors!.fillColorPrimary,
             onTap: () => _navigateGroups(),
           ),
           Visibility(
             visible: _groupsLogin,
             child: CircularProgressIndicator(
               strokeWidth: 2,
-              valueColor: AlwaysStoppedAnimation<Color>(Styles().colors.white)
+              valueColor: AlwaysStoppedAnimation<Color?>(Styles().colors!.white)
             ),
           )
         ],
@@ -281,7 +282,7 @@ class _BrowsePanelState extends State<BrowsePanel> implements NotificationsListe
         title: Localization().getStringEx('panel.browse.button.safer.title', 'Safer Illinois'),
         hint: Localization().getStringEx('panel.browse.button.safer.hint', ''),
         icon: 'images/icon-browse-safer.png',
-        color: Styles().colors.fillColorPrimary,
+        textColor: Styles().colors!.fillColorPrimary,
         onTap: () => _navigateToSaferIllinois(),
       );
     }
@@ -290,7 +291,7 @@ class _BrowsePanelState extends State<BrowsePanel> implements NotificationsListe
         title: Localization().getStringEx('panel.browse.button.building_status.title', 'Building Entry'),
         hint: Localization().getStringEx('panel.browse.button.building_status.hint', ''),
         icon: 'images/icon-browse-building-status.png',
-        color: Styles().colors.fillColorPrimary,
+        textColor: Styles().colors!.fillColorPrimary,
         onTap: () => _navigateToBuildingStatus(),
       );
     }
@@ -299,26 +300,35 @@ class _BrowsePanelState extends State<BrowsePanel> implements NotificationsListe
         title: Localization().getStringEx('panel.browse.button.campus_guide.title', 'Campus Guide'),
         hint: Localization().getStringEx('panel.browse.button.campus_guide.hint', ''),
         icon: 'images/icon-browse-student-guide.png',
-        color: Styles().colors.accentColor3,
+        textColor: Styles().colors!.fillColorPrimary,
         onTap: () => _navigateCampusGuide(),
       );
     }
     else if (code == 'inbox') {
       return _GridSquareButton(
-        title: Localization().getStringEx('panel.browse.button.inbox.title', 'Inbox'),
+        title: Localization().getStringEx('panel.browse.button.inbox.title', 'Notifications'),
         hint: Localization().getStringEx('panel.browse.button.inbox.hint', ''),
         icon: 'images/icon-browse-inbox.png',
-        color: Styles().colors.fillColorSecondary,
+        textColor: Styles().colors!.fillColorPrimary,
         onTap: () => _navigateInbox(),
       );
     }
     else if (code == 'privacy_center') {
       return _GridSquareButton(
-        title: Localization().getStringEx('panel.browse.button.privacy_center.title', 'Privacy Center'),
+        title: Localization().getStringEx('panel.browse.button.privacy_center.title', 'Privacy'),
         hint: Localization().getStringEx('panel.browse.button.privacy_center.hint', ''),
         icon: 'images/icon-browse-privacy-center.png',
-        color: Styles().colors.accentColor4,
+        textColor: Styles().colors!.fillColorPrimary,
         onTap: () => _navigatePrivacyCenter(),
+      );
+    }
+    else if ((code == 'crisis_help') && _canCrisisHelp) {
+      return _GridSquareButton(
+        title: Localization().getStringEx('panel.browse.button.crisis_help.title', 'Crisis Help'),
+        hint: Localization().getStringEx('panel.browse.button.crisis_help.hint', ''),
+        icon: 'images/icon-browse-crisis-help.png',
+        textColor: Styles().colors!.fillColorPrimary,
+        onTap: () => _navigateCrisisHelp(),
       );
     }
     else {
@@ -332,17 +342,17 @@ class _BrowsePanelState extends State<BrowsePanel> implements NotificationsListe
     ];
     List<dynamic> codes = FlexUI()['browse.content'] ?? [];
     for (String code in codes) {
-      Widget entry = _buildBrowseContentEntry(code);
+      Widget? entry = _buildBrowseContentEntry(code);
       if (entry != null) {
         list.add(entry);
-        list.add(Padding(padding: _ribbonButtonPadding, child: Container(height: 1, color: Styles().colors.surfaceAccent,),));
+        list.add(Padding(padding: _ribbonButtonPadding, child: Container(height: 1, color: Styles().colors!.surfaceAccent,),));
       }
     }
 
     return list;
   }
 
-  Widget _buildBrowseContentEntry(String code) {
+  Widget? _buildBrowseContentEntry(String code) {
     if (code == 'settings') {
       return _RibbonButton(
         icon: Image.asset('images/icon-settings.png'),
@@ -462,52 +472,69 @@ class _BrowsePanelState extends State<BrowsePanel> implements NotificationsListe
         onTap: () => _onFeedbackTap(),
       );
     }
-    
+    else if ((code == 'faqs') && _canFAQs) {
+      return _RibbonButton(
+        icon: Image.asset('images/icon-faqs.png'),
+        accessoryIcon: Image.asset('images/link-out.png'),
+        title: Localization().getStringEx('panel.browse.button.faqs.title', 'FAQs'),
+        hint: Localization().getStringEx('panel.browse.button.faqs.hint', ''),
+        padding: _ribbonButtonPadding,
+        onTap: () => _onFAQsTap(),
+      );
+    }
+    else if ((code == 'date_cat') && _canDateCat) {
+      return _RibbonButton(
+        icon: Image.asset('images/icon-settings.png'),
+        accessoryIcon: Image.asset('images/link-out.png'),
+        title: Localization().getStringEx('panel.browse.button.date_cat.title', 'Due Date Catalog'),
+        hint: Localization().getStringEx('panel.browse.button.date_cat.hint', ''),
+        padding: _ribbonButtonPadding,
+        onTap: () => _onDateCatTap(),
+      );
+    }
+
     else {
       return null;
     }
   }
 
   void _navigateToExploreEvents() {
-    Analytics.instance.logSelect(target: "Events");
+    Analytics().logSelect(target: "Events");
     Navigator.push(context, CupertinoPageRoute(builder: (context) => ExplorePanel(initialTab: ExploreTab.Events, showHeaderBack: true,)));
   }
 
   void _navigateToExploreDining() {
-    Analytics.instance.logSelect(target: "Dining");
+    Analytics().logSelect(target: "Dining");
     Navigator.push(context, CupertinoPageRoute(builder: (context) => ExplorePanel(initialTab: ExploreTab.Dining, showHeaderBack: true,)));
   }
 
   void _navigateToAthletics() {
-    Analytics.instance.logSelect(target: "Athletics");
+    Analytics().logSelect(target: "Athletics");
     Navigator.push(context, CupertinoPageRoute(builder: (context) => AthleticsHomePanel()));
   }
 
   void _navigateToWellness() {
-    Analytics.instance.logSelect(target: "Wellness");
+    Analytics().logSelect(target: "Wellness");
     Navigator.push(context, CupertinoPageRoute(builder: (context) => WellnessPanel()));
   }
 
   void _navigateSettings() {
-    Analytics.instance.logSelect(target: "Settings");
+    Analytics().logSelect(target: "Settings");
     Navigator.push(context, CupertinoPageRoute(builder: (context) => SettingsHomePanel()));
   }
 
   void _navigateMyIllini() {
-    Analytics.instance.logSelect(target: "My Illini");
-    if (Connectivity().isNotOffline && (Config().myIlliniUrl != null)) {
-      String myIlliniPanelTitle = Localization().getStringEx(
-          'panel.browse.web_panel.header.schedule_grades_more.title', 'My Illini');
-      Navigator.push(
-          context, CupertinoPageRoute(builder: (context) => WebPanel(url: Config().myIlliniUrl, title: myIlliniPanelTitle,)));
-    }
-    else {
+    Analytics().logSelect(target: "My Illini");
+    if (Connectivity().isOffline) {
       AppAlert.showOfflineMessage(context, Localization().getStringEx('panel.browse.label.offline.my_illini', 'My Illini not available while offline.'));
+    }
+    else if (StringUtils.isNotEmpty(Config().myIlliniUrl)) {
+      url_launcher.launch(Config().myIlliniUrl!);
     }
   }
 
   void _navigateIlliniCash() {
-    Analytics.instance.logSelect(target: "Illini Cash");
+    Analytics().logSelect(target: "Illini Cash");
     Navigator.of(context, rootNavigator: true).push(CupertinoPageRoute(
         settings: RouteSettings(name: SettingsIlliniCashPanel.routeName),
         builder: (context){
@@ -517,7 +544,7 @@ class _BrowsePanelState extends State<BrowsePanel> implements NotificationsListe
   }
 
   void _navigateMealPlan() {
-    Analytics.instance.logSelect(target: "Meal Plan");
+    Analytics().logSelect(target: "Meal Plan");
     Navigator.of(context, rootNavigator: false).push(CupertinoPageRoute(
         builder: (context){
           return SettingsMealPlanPanel();
@@ -526,7 +553,7 @@ class _BrowsePanelState extends State<BrowsePanel> implements NotificationsListe
   }
 
   void _navigateLaundry() {
-    Analytics.instance.logSelect(target: "Laundry");
+    Analytics().logSelect(target: "Laundry");
     if (Connectivity().isNotOffline) {
       Navigator.push(context, CupertinoPageRoute(builder: (context) => LaundryHomePanel()));
     }
@@ -536,22 +563,22 @@ class _BrowsePanelState extends State<BrowsePanel> implements NotificationsListe
   }
 
   void _navigateSaved() {
-    Analytics.instance.logSelect(target: "Saved");
+    Analytics().logSelect(target: "Saved");
     Navigator.push(context, CupertinoPageRoute(builder: (context) => SavedPanel()));
   }
 
   void _navigateParking() {
-    Analytics.instance.logSelect(target: "Parking");
+    Analytics().logSelect(target: "Parking");
     Navigator.push(context, CupertinoPageRoute(builder: (context) => ParkingEventsPanel()));
   }
 
   void _navigateQuickPolls() {
-    Analytics.instance.logSelect(target: "Quick Polls");
+    Analytics().logSelect(target: "Quick Polls");
     Navigator.push(context, CupertinoPageRoute(builder: (context) => PollsHomePanel()));
   }
 
   void _navigateCreateEvent() {
-    Analytics.instance.logSelect(target: "Create an Event");
+    Analytics().logSelect(target: "Create an Event");
     if (Connectivity().isNotOffline) {
       Navigator.push(context, CupertinoPageRoute(builder: (context) => CreateEventPanel()));
     }
@@ -561,12 +588,12 @@ class _BrowsePanelState extends State<BrowsePanel> implements NotificationsListe
   }
 
   void _navigateCreateStadiumPoll() {
-    Analytics.instance.logSelect(target: "Create Stadium Poll");
+    Analytics().logSelect(target: "Create Stadium Poll");
     Navigator.push(context, CupertinoPageRoute(builder: (context) => CreateStadiumPollPanel()));
   }
 
   void _navigateStateFarmWayfinding() {
-    Analytics.instance.logSelect(target: "State Farm Wayfinding");
+    Analytics().logSelect(target: "State Farm Wayfinding");
     NativeCommunicator().launchMap(target: {
       'latitude': 40.096247,
       'longitude': -88.235923,
@@ -575,57 +602,50 @@ class _BrowsePanelState extends State<BrowsePanel> implements NotificationsListe
   }
 
   void _navigateGroups() {
-    Analytics.instance.logSelect(target: "Groups");
+    Analytics().logSelect(target: "Groups");
     if(Auth2().isOidcLoggedIn) {
-      Navigator.push(
-          context, CupertinoPageRoute(builder: (context) => GroupsHomePanel()));
-    } else {
-      if (!_groupsLogin) {
-        setState(() {
-          _groupsLogin = true;
-        });
-        Auth2().authenticateWithOidc().then((success) {
-          setState(() {
-            _groupsLogin = false;
-          });
+      Navigator.push(context, CupertinoPageRoute(builder: (context) => GroupsHomePanel()));
+    } else if (_groupsLogin != true) {
+      setState(() { _groupsLogin = true; });
+      Auth2().authenticateWithOidc().then((bool? success) {
+        if (mounted) {
+          setState(() { _groupsLogin = false; });
           if (success == true) {
-            Navigator.push(
-                context,
-                CupertinoPageRoute(builder: (context) => GroupsHomePanel()));
+            Navigator.push(context, CupertinoPageRoute(builder: (context) => GroupsHomePanel()));
           } else if (success == false) {
-            AppAlert.showDialogResult(context, Localization().getStringEx("panel.browse.button.groups.login.error", "Unable to login"));
+            AppAlert.showDialogResult(context, Localization().getStringEx("logic.general.login_failed", "Unable to login. Please try again later."));
           }
-        });
-      }
+        }
+      });
     }
   }
 
   void _navigateCampusGuide() {
-    Analytics.instance.logSelect(target: "Campus Guide");
+    Analytics().logSelect(target: "Campus Guide");
     Navigator.push(context, CupertinoPageRoute(builder: (context) => CampusGuidePanel()));
   }
 
   void _navigateInbox() {
-    Analytics.instance.logSelect(target: "Inbox");
+    Analytics().logSelect(target: "Inbox");
     Navigator.push(context, CupertinoPageRoute(builder: (context) => InboxHomePanel()));
   }
 
   void _navigatePrivacyCenter() {
-    Analytics.instance.logSelect(target: "Privacy Center");
+    Analytics().logSelect(target: "Privacy Center");
     Navigator.push(context, CupertinoPageRoute(builder: (context) =>SettingsPrivacyCenterPanel()));
   }
 
   void _onFeedbackTap() {
-    Analytics.instance.logSelect(target: "Provide Feedback");
+    Analytics().logSelect(target: "Provide Feedback");
 
     if (Connectivity().isNotOffline && (Config().feedbackUrl != null)) {
-      String email = Auth2().email;
-      String name =  Auth2().fullName;
-      String phone = Auth2().phone;
+      String? email = Auth2().email;
+      String? name =  Auth2().fullName;
+      String? phone = Auth2().phone;
       String params = _constructFeedbackParams(email, phone, name);
-      String feedbackUrl = Config().feedbackUrl + params;
+      String feedbackUrl = Config().feedbackUrl! + params;
 
-      String panelTitle = Localization().getStringEx('panel.settings.feedback.label.title', 'PROVIDE FEEDBACK');
+      String? panelTitle = Localization().getStringEx('panel.settings.feedback.label.title', 'PROVIDE FEEDBACK');
       Navigator.push(
           context, CupertinoPageRoute(builder: (context) => WebPanel(url: feedbackUrl, title: panelTitle,)));
     }
@@ -634,7 +654,50 @@ class _BrowsePanelState extends State<BrowsePanel> implements NotificationsListe
     }
   }
 
-  String _constructFeedbackParams(String email, String phone, String name) {
+
+  bool get _canCrisisHelp => StringUtils.isNotEmpty(Config().crisisHelpUrl);
+
+  void _navigateCrisisHelp() {
+    Analytics().logSelect(target: "Crisis Help");
+
+    if (Connectivity().isOffline) {
+      AppAlert.showOfflineMessage(context, Localization().getStringEx('panel.browse.label.offline.crisis_help', 'Crisis Help is not available while offline.'));
+    }
+    else if (StringUtils.isNotEmpty(Config().crisisHelpUrl)) {
+      url_launcher.launch(Config().crisisHelpUrl!);
+    }
+  }
+
+  bool get _canFAQs => StringUtils.isNotEmpty(Config().faqsUrl);
+
+  void _onFAQsTap() {
+    Analytics().logSelect(target: "FAQs");
+
+    if (Connectivity().isOffline) {
+      AppAlert.showOfflineMessage(context, Localization().getStringEx('panel.browse.label.offline.faqs', 'FAQs is not available while offline.'));
+    }
+    else if (StringUtils.isNotEmpty(Config().faqsUrl)) {
+      Navigator.push(context, CupertinoPageRoute(builder: (context) => WebPanel(
+        url: Config().faqsUrl,
+        title: Localization().getStringEx('panel.settings.faqs.label.title', 'FAQs'),
+      )));
+    }
+  }
+
+  bool get _canDateCat => StringUtils.isNotEmpty(Config().dateCatalogUrl);
+
+  void _onDateCatTap() {
+    Analytics().logSelect(target: "Due Date Catalog");
+    
+    if (Connectivity().isOffline) {
+      AppAlert.showOfflineMessage(context, Localization().getStringEx('panel.browse.label.offline.date_cat', 'Due Date Catalog not available while offline.'));
+    }
+    else if (StringUtils.isNotEmpty(Config().dateCatalogUrl)) {
+      url_launcher.launch(Config().dateCatalogUrl!);
+    }
+  }
+
+  String _constructFeedbackParams(String? email, String? phone, String? name) {
     Map params = Map();
     params['email'] = Uri.encodeComponent(email != null ? email : "");
     params['phone'] = Uri.encodeComponent(phone != null ? phone : "");
@@ -652,7 +715,7 @@ class _BrowsePanelState extends State<BrowsePanel> implements NotificationsListe
   }
 
   Future<void> _navigateToSaferIllinois() async{
-    Analytics.instance.logSelect(target: "Safer Illinois");
+    Analytics().logSelect(target: "Safer Illinois");
     try {
 
       if (await url_launcher.canLaunch(_saferIllonoisAppDeeplink)) {
@@ -693,7 +756,7 @@ class _BrowsePanelState extends State<BrowsePanel> implements NotificationsListe
   }
 
   void _navigateToAddIlliniCash(){
-    Analytics.instance.logSelect(target: "Add Illini Cash");
+    Analytics().logSelect(target: "Add Illini Cash");
     Navigator.push(context, CupertinoPageRoute(settings: RouteSettings(), builder: (context) => SettingsAddIlliniCashPanel()));
   }
 
@@ -704,6 +767,7 @@ class _BrowsePanelState extends State<BrowsePanel> implements NotificationsListe
     if ((name == Connectivity.notifyStatusChanged) ||
         (name == Localization.notifyStringsUpdated) ||
         (name == FlexUI.notifyChanged) ||
+        (name == Config.notifyConfigChanged) ||
         (name == Styles.notifyChanged))
     {
       setState(() { });
@@ -715,15 +779,15 @@ class _BrowsePanelState extends State<BrowsePanel> implements NotificationsListe
 
 class _RibbonButton extends StatelessWidget {
   final Image icon;
-  final Image accessoryIcon;
-  final String title;
-  final String hint;
-  final GestureTapCallback onTap;
+  final Image? accessoryIcon;
+  final String? title;
+  final String? hint;
+  final GestureTapCallback? onTap;
   final EdgeInsets padding;
 
-  _RibbonButton({@required this.icon,
-    @required this.title,
-    @required this.hint,
+  _RibbonButton({required this.icon,
+    required this.title,
+    required this.hint,
     this.onTap,
     this.padding = const EdgeInsets.symmetric(horizontal: 0),
     this.accessoryIcon,
@@ -752,12 +816,12 @@ class _RibbonButton extends StatelessWidget {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     child: Text(
-                      title,
+                      title!,
                       textAlign: TextAlign.start,
                       style: TextStyle(
-                          color: Styles().colors.fillColorPrimary,
+                          color: Styles().colors!.fillColorPrimary,
                           fontSize: 16,
-                          fontFamily: Styles().fontFamilies.bold),
+                          fontFamily: Styles().fontFamilies!.bold),
                     ),
                   ),
                 ),
@@ -774,14 +838,14 @@ class _RibbonButton extends StatelessWidget {
 // _GridSquareButton
 
 class _GridSquareButton extends StatelessWidget {
-  final String title;
-  final String hint;
-  final String icon;
-  final Color color;
-  final Color textColor;
-  final GestureTapCallback onTap;
+  final String? title;
+  final String? hint;
+  final String? icon;
+  final Color? color;
+  final Color? textColor;
+  final GestureTapCallback? onTap;
 
-  _GridSquareButton({this.title, this.hint = '', this.icon, this.color, this.textColor = Colors.white, this.onTap});
+  _GridSquareButton({this.title, this.hint = '', this.icon, this.color = Colors.white, this.textColor = Colors.white, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -801,17 +865,17 @@ class _GridSquareButton extends StatelessWidget {
                           color: color,
                           //border: Border.all(color: Colors.grey, width: 1),
                           borderRadius: BorderRadius.circular(6),
-                          boxShadow: [BoxShadow(color: Styles().colors.blackTransparent018, spreadRadius: 2.0, blurRadius: 6.0, offset: Offset(2, 2))]
+                          boxShadow: [BoxShadow(color: Styles().colors!.blackTransparent018!, spreadRadius: 2.0, blurRadius: 6.0, offset: Offset(2, 2))]
             ),
             child: Padding(padding: EdgeInsets.all(12), child: Stack(children: <Widget>[
-              Align(alignment: Alignment.topLeft, child: Text(title,
+              Align(alignment: Alignment.topLeft, child: Text(title!,
                 style: TextStyle(
-                    fontFamily: Styles().fontFamilies.bold,
+                    fontFamily: Styles().fontFamilies!.bold,
                     color: textColor,
                     fontSize: 20,),
               ),),
               Align(alignment: Alignment.bottomRight, child:
-                Image.asset(icon, color: color, colorBlendMode:BlendMode.multiply),
+                Image.asset(icon!, color: color, colorBlendMode:BlendMode.multiply),
               ),
               
             ],),)

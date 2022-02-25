@@ -1,36 +1,36 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:illinois/model/Groups.dart';
+import 'package:rokwire_plugin/model/group.dart';
+import 'package:illinois/ext/Group.dart';
 import 'package:illinois/service/Analytics.dart';
-import 'package:illinois/service/Groups.dart';
-import 'package:illinois/service/Localization.dart';
-import 'package:illinois/service/Styles.dart';
+import 'package:rokwire_plugin/service/groups.dart';
+import 'package:rokwire_plugin/service/localization.dart';
+import 'package:rokwire_plugin/service/styles.dart';
 import 'package:illinois/ui/widgets/HeaderBar.dart';
 import 'package:illinois/ui/widgets/TabBarWidget.dart';
 import 'package:illinois/ui/groups/GroupWidgets.dart';
-import 'package:illinois/utils/Utils.dart';
+import 'package:rokwire_plugin/utils/utils.dart';
 
 class GroupAllEventsPanel extends StatefulWidget implements AnalyticsPageAttributes {
-  final Group group;
+  final Group? group;
 
-  const GroupAllEventsPanel({Key key, this.group}) : super(key: key);
+  const GroupAllEventsPanel({Key? key, this.group}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _GroupAllEventsState();
 
   @override
-  Map<String, dynamic> get analyticsPageAttributes => group?.analyticsAttributes;
+  Map<String, dynamic>? get analyticsPageAttributes => group?.analyticsAttributes;
 }
 
 class _GroupAllEventsState extends State<GroupAllEventsPanel>{
-  List<GroupEvent>   _groupEvents;
+  List<GroupEvent>?   _groupEvents;
 
   @override
   void initState() {
-    Groups().loadEvents(widget.group).then((Map<int, List<GroupEvent>> eventsMap) {
+    Groups().loadEvents(widget.group).then((Map<int, List<GroupEvent>>? eventsMap) {
       if (mounted) {
         setState(() {
-          _groupEvents = AppCollection.isCollectionNotEmpty(eventsMap?.values) ? eventsMap.values.first : null;
+          _groupEvents = CollectionUtils.isNotEmpty(eventsMap?.values) ? eventsMap!.values.first : null;
         });
       }
     });
@@ -40,15 +40,8 @@ class _GroupAllEventsState extends State<GroupAllEventsPanel>{
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: SimpleHeaderBarWithBack(
-        context: context,
-        titleWidget: Text(Localization().getStringEx("panel.groups_all_events.label.heading","Upcoming Events") + "(${_groupEvents?.length ?? ""})",
-          style: TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontFamily: Styles().fontFamilies.extraBold,
-              letterSpacing: 1.0),
-        ),
+      appBar: HeaderBar(
+        title: Localization().getStringEx("panel.groups_all_events.label.heading","Upcoming Events") + "(${_groupEvents?.length ?? ""})",
       ),
       body:SingleChildScrollView(child:
          Column(
@@ -60,7 +53,7 @@ class _GroupAllEventsState extends State<GroupAllEventsPanel>{
           ],
         ),
       ),
-      backgroundColor: Styles().colors.background,
+      backgroundColor: Styles().colors!.background,
       bottomNavigationBar: TabBarWidget(),
     );
   }
@@ -70,7 +63,7 @@ class _GroupAllEventsState extends State<GroupAllEventsPanel>{
     bool isCurrentUserAdmin = widget.group?.currentUserIsAdmin ?? false;
 
     if (_groupEvents != null) {
-      for (GroupEvent groupEvent in _groupEvents) {
+      for (GroupEvent? groupEvent in _groupEvents!) {
         content.add(GroupEventCard(groupEvent: groupEvent, group: widget.group, isAdmin: isCurrentUserAdmin));
       }
     }

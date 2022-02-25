@@ -15,16 +15,15 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:illinois/service/Localization.dart';
+import 'package:rokwire_plugin/service/localization.dart';
 import 'package:illinois/service/Analytics.dart';
 import 'package:illinois/service/Onboarding2.dart';
 import 'package:illinois/ui/onboarding2/Onboarding2PrivacyPanel.dart';
-import 'package:illinois/ui/widgets/ScalableWidgets.dart';
-import 'package:illinois/ui/widgets/SwipeDetector.dart';
-import 'package:illinois/service/Styles.dart';
-import 'package:illinois/ui/widgets/TrianglePainter.dart';
+import 'package:rokwire_plugin/ui/widgets/rounded_button.dart';
+import 'package:rokwire_plugin/ui/widgets/swipe_detector.dart';
+import 'package:rokwire_plugin/service/styles.dart';
+import 'package:rokwire_plugin/ui/widgets/triangle_painter.dart';
 
 import 'Onboarding2Widgets.dart';
 
@@ -35,7 +34,7 @@ class Onboarding2ImprovePanel extends StatefulWidget{
 }
 
 class _Onboarding2ImprovePanelState extends State<Onboarding2ImprovePanel> {
-  bool _toggled = false;
+  bool? _toggled = false;
 
   @override
   void initState() {
@@ -51,7 +50,7 @@ class _Onboarding2ImprovePanelState extends State<Onboarding2ImprovePanel> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Styles().colors.background,
+        backgroundColor: Styles().colors!.background,
         body: SafeArea(child:SwipeDetector(
             onSwipeLeft: () => _goNext(context),
             onSwipeRight: () => _goBack(context),
@@ -60,7 +59,7 @@ class _Onboarding2ImprovePanelState extends State<Onboarding2ImprovePanel> {
               Expanded(child:
                 SingleChildScrollView(child:
                 Container(
-                    color: Styles().colors.white,
+                    color: Styles().colors!.white,
                     child:Column(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: <Widget>[
@@ -70,24 +69,24 @@ class _Onboarding2ImprovePanelState extends State<Onboarding2ImprovePanel> {
                               child:Row(children: [
                                 Expanded(
                                     flex:1,
-                                    child: Container(color: Styles().colors.fillColorPrimary,)
+                                    child: Container(color: Styles().colors!.fillColorPrimary,)
                                 ),
                                 Container(width: 2,),
                                 Expanded(
                                     flex:1,
-                                    child: Container(color: Styles().colors.fillColorPrimary,)
+                                    child: Container(color: Styles().colors!.fillColorPrimary,)
                                 ),
                                 Container(width: 2,),
                                 Expanded(
                                     flex:1,
-                                    child: Container(color: Styles().colors.fillColorPrimary,)
+                                    child: Container(color: Styles().colors!.fillColorPrimary,)
                                 ),
                               ],)
                           ),
                           Row(children:[
                             Onboarding2BackButton(padding: const EdgeInsets.only(left: 17, top: 11, right: 20, bottom: 15),
                                 onTap: () {
-                                  Analytics.instance.logSelect(target: "Back");
+                                  Analytics().logSelect(target: "Back");
                                   _goBack(context);
                                 }),
                           ],),
@@ -102,12 +101,12 @@ class _Onboarding2ImprovePanelState extends State<Onboarding2ImprovePanel> {
                                 child: Align(
                                     alignment: Alignment.center,
                                     child: Text(
-                                        _title,
+                                        _title!,
                                         textAlign: TextAlign.center,
                                         style: TextStyle(
-                                            color: Styles().colors.fillColorPrimary,
+                                            color: Styles().colors!.fillColorPrimary,
                                             fontSize: 24,
-                                            fontFamily: Styles().fontFamilies.bold,
+                                            fontFamily: Styles().fontFamilies!.bold,
                                             height: 1.2
                                         ))
                                 ),
@@ -120,12 +119,12 @@ class _Onboarding2ImprovePanelState extends State<Onboarding2ImprovePanel> {
                                 child: Align(
                                     alignment: Alignment.topCenter,
                                     child: Text(
-                                      _description,
+                                      _description!,
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
-                                          fontFamily: Styles().fontFamilies.regular,
+                                          fontFamily: Styles().fontFamilies!.regular,
                                           fontSize: 16,
-                                          color: Styles().colors.fillColorPrimary),
+                                          color: Styles().colors!.fillColorPrimary),
                                     )),
                               )),
                           Container(height: 10,),
@@ -146,12 +145,12 @@ class _Onboarding2ImprovePanelState extends State<Onboarding2ImprovePanel> {
                                       child:Column(
                                           children:[
                                             CustomPaint(
-                                              painter: TrianglePainter(painterColor: Styles().colors.background, left: false),
+                                              painter: TrianglePainter(painterColor: Styles().colors!.background, horzDir: TriangleHorzDirection.leftToRight),
                                               child: Container(
                                                 height: 100,
                                               ),
                                             ),
-                                            Container(height: 100, color: Styles().colors.background,)
+                                            Container(height: 100, color: Styles().colors!.background,)
                                           ]),
                                     ),
                                   ),
@@ -183,14 +182,14 @@ class _Onboarding2ImprovePanelState extends State<Onboarding2ImprovePanel> {
                         context: context,
                       ),
                     ),
-                    ScalableRoundedButton(
+                    RoundedButton(
                       label: Localization().getStringEx('panel.onboarding2.improve.button.continue.title', 'Continue'),
                       hint: Localization().getStringEx('panel.onboarding2.improve.button.continue.hint', ''),
                       fontSize: 16,
-                      padding: EdgeInsets.symmetric(vertical: 12),
-                      backgroundColor: Styles().colors.white,
-                      borderColor: Styles().colors.fillColorSecondaryVariant,
-                      textColor: Styles().colors.fillColorPrimary,
+                      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      backgroundColor: Styles().colors!.white,
+                      borderColor: Styles().colors!.fillColorSecondaryVariant,
+                      textColor: Styles().colors!.fillColorPrimary,
                       onTap: () => _goNext(context),
                     )
                   ],
@@ -201,7 +200,7 @@ class _Onboarding2ImprovePanelState extends State<Onboarding2ImprovePanel> {
 
   void _onToggleTap(){
     setState(() {
-      _toggled = !_toggled;
+      _toggled = !_toggled!;
     });
   }
 
@@ -241,19 +240,19 @@ class _Onboarding2ImprovePanelState extends State<Onboarding2ImprovePanel> {
     );
   }
 
-  String get _title{
+  String? get _title{
     return Localization().getStringEx('panel.onboarding2.improve.label.title', 'Share your activity history to improve recommendations?');
   }
 
-  String get _description{
+  String? get _description{
     return Localization().getStringEx('panel.onboarding2.improve.label.description', 'The more you and others share, the more relevant info you get.');
   }
   
-  String get _toggledButtonTitle{
+  String? get _toggledButtonTitle{
     return Localization().getStringEx('panel.onboarding2.improve.button.toggle.title', "Share my activity.");
   }
   
-  String get _unToggledButtonTitle{
+  String? get _unToggledButtonTitle{
     return Localization().getStringEx('panel.onboarding2.improve.button.untoggle.title', 'Don’t share my activity.');
   }
 }

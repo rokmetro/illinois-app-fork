@@ -16,26 +16,26 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:illinois/service/ExploreService.dart';
-import 'package:illinois/service/Localization.dart';
-import 'package:illinois/model/Event.dart';
-import 'package:illinois/model/Explore.dart';
+import 'package:rokwire_plugin/service/events.dart';
+import 'package:rokwire_plugin/service/localization.dart';
+import 'package:rokwire_plugin/model/event.dart';
+import 'package:rokwire_plugin/model/explore.dart';
 import 'package:illinois/service/Analytics.dart';
 import 'package:illinois/ui/explore/ExploreDetailPanel.dart';
 import 'package:illinois/ui/events/CompositeEventsDetailPanel.dart';
 import 'package:illinois/ui/widgets/HeaderBar.dart';
 import 'package:illinois/ui/widgets/TabBarWidget.dart';
 import 'package:illinois/ui/explore/ExploreCard.dart';
-import 'package:illinois/utils/Utils.dart';
-import 'package:illinois/service/Styles.dart';
+import 'package:rokwire_plugin/utils/utils.dart';
+import 'package:rokwire_plugin/service/styles.dart';
 import 'package:sprintf/sprintf.dart';
 
 import 'athletics/AthleticsGameDetailPanel.dart';
 
 class SearchPanel extends StatefulWidget {
-  final Map<String, dynamic> searchData;
+  final Map<String, dynamic>? searchData;
 
-  const SearchPanel({Key key, this.searchData}) : super(key: key);
+  const SearchPanel({Key? key, this.searchData}) : super(key: key);
 
   @override
   _SearchPanelState createState() => _SearchPanelState();
@@ -43,11 +43,11 @@ class SearchPanel extends StatefulWidget {
 
 class _SearchPanelState extends State<SearchPanel> {
   TextEditingController _textEditingController = TextEditingController();
-  String _searchLabel = Localization().getStringEx('panel.search.label.search_for', 'Searching only Events Titles');
+  String? _searchLabel = Localization().getStringEx('panel.search.label.search_for', 'Searching only Events Titles');
   int _resultsCount = 0;
   bool _resultsCountLabelVisible = false;
   bool _loading = false;
-  List<Explore> _events;
+  List<Explore>? _events;
 
   @override
   void dispose() {
@@ -58,18 +58,11 @@ class _SearchPanelState extends State<SearchPanel> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: SimpleHeaderBarWithBack(
-        context: context,
-        titleWidget: Text(Localization().getStringEx("panel.search.header.title", "Search"),
-          style: TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 1.0),
-        ),
+      appBar: HeaderBar(
+        title: Localization().getStringEx("panel.search.header.title", "Search"),
       ),
       body: _buildContent(),
-      backgroundColor: Styles().colors.background,
+      backgroundColor: Styles().colors!.background,
       bottomNavigationBar: TabBarWidget(),
     );
   }
@@ -99,12 +92,12 @@ class _SearchPanelState extends State<SearchPanel> {
                           onChanged: (text) => _onTextChanged(text),
                           onSubmitted: (_) => _onTapSearch(),
                           autofocus: true,
-                          cursorColor: Styles().colors.fillColorSecondary,
+                          cursorColor: Styles().colors!.fillColorSecondary,
                           keyboardType: TextInputType.text,
                           style: TextStyle(
                               fontSize: 16,
-                              fontFamily: Styles().fontFamilies.regular,
-                              color: Styles().colors.textBackground),
+                              fontFamily: Styles().fontFamilies!.regular,
+                              color: Styles().colors!.textBackground),
                           decoration: InputDecoration(
                             border: InputBorder.none,
                           ),
@@ -124,6 +117,7 @@ class _SearchPanelState extends State<SearchPanel> {
                             'images/icon-x-orange.png',
                             width: 25,
                             height: 25,
+                            excludeFromSemantics: true
                           ),
                         ),
                       )
@@ -139,9 +133,10 @@ class _SearchPanelState extends State<SearchPanel> {
                           onTap: _onTapSearch,
                           child: Image.asset(
                             'images/icon-search.png',
-                            color: Styles().colors.fillColorSecondary,
+                            color: Styles().colors!.fillColorSecondary,
                             width: 25,
                             height: 25,
+                            excludeFromSemantics: true
                           ),
                         ),
                       ),
@@ -154,12 +149,12 @@ class _SearchPanelState extends State<SearchPanel> {
                   child: RichText(
                     text: TextSpan(
                       style: TextStyle(
-                          fontSize: 20, color: Styles().colors.fillColorPrimary),
+                          fontSize: 20, color: Styles().colors!.fillColorPrimary),
                       children: <TextSpan>[
                         TextSpan(
                             text: _searchLabel,
                             style: TextStyle(
-                              fontFamily: Styles().fontFamilies.semiBold,
+                              fontFamily: Styles().fontFamilies!.semiBold,
                             )),
                       ],
                     ),
@@ -168,11 +163,11 @@ class _SearchPanelState extends State<SearchPanel> {
                 visible: _resultsCountLabelVisible,
                 child: Padding(
                   padding: EdgeInsets.only(left: 16, right: 16, bottom: 24),
-                  child: Text(getResultsInfoText(),
+                  child: Text(getResultsInfoText()!,
                     style: TextStyle(
                         fontSize: 16,
-                        fontFamily: Styles().fontFamilies.regular,
-                        color: Styles().colors.textBackground),
+                        fontFamily: Styles().fontFamilies!.regular,
+                        color: Styles().colors!.textBackground),
                   ),
                 ),
               ),
@@ -182,7 +177,7 @@ class _SearchPanelState extends State<SearchPanel> {
     );
   }
 
-  String getResultsInfoText() {
+  String? getResultsInfoText() {
     if (_resultsCount == 0)
       return Localization().getStringEx('panel.search.label.not_found', 'No results found');
     else if (_resultsCount == 1)
@@ -202,8 +197,8 @@ class _SearchPanelState extends State<SearchPanel> {
         ),
       );
     }
-    int eventsCount = (_events != null) ? _events.length : 0;
-    Widget exploresContent;
+    int eventsCount = (_events != null) ? _events!.length : 0;
+    Widget? exploresContent;
     if (eventsCount > 0) {
       exploresContent = ListView.separated(
         physics: NeverScrollableScrollPhysics(),
@@ -213,7 +208,7 @@ class _SearchPanelState extends State<SearchPanel> {
             ),
         itemCount: eventsCount,
         itemBuilder: (context, index) {
-          Explore explore = _events[index];
+          Explore explore = _events![index];
           ExploreCard exploreView = ExploreCard(
               explore: explore,
               onTap: () => _onExploreTap(explore),
@@ -229,17 +224,17 @@ class _SearchPanelState extends State<SearchPanel> {
   }
 
   void _onExploreTap(Explore explore) {
-    Event event = (explore is Event) ? explore : null;
+    Event? event = (explore is Event) ? explore : null;
 
     if (event?.isComposite ?? false) {
       Navigator.push(context, CupertinoPageRoute(builder: (context) => CompositeEventsDetailPanel(parentEvent: event)));
     }
     else if (event?.isGameEvent ?? false) {
       Navigator.push(context, CupertinoPageRoute(builder: (context) =>
-          AthleticsGameDetailPanel(gameId: event.speaker, sportName: event.registrationLabel,)));
+          AthleticsGameDetailPanel(gameId: event!.speaker, sportName: event.registrationLabel,)));
     }
     else {
-      String groupId = AppJson.stringValue(widget.searchData!= null ? widget.searchData["group_id"] : null);
+      String? groupId = JsonUtils.stringValue(widget.searchData!= null ? widget.searchData!["group_id"] : null);
       Navigator.push(context, CupertinoPageRoute(builder: (context) =>
           ExploreDetailPanel(explore: explore, browseGroupId: groupId,))).
             then(
@@ -252,18 +247,18 @@ class _SearchPanelState extends State<SearchPanel> {
     }
   }
 
-  void _searchEvents(String keyword) {
+  void _searchEvents(String? keyword) {
     if (keyword == null) {
       return;
     }
     keyword = keyword.trim();
-    if (AppString.isStringEmpty(keyword)) {
+    if (StringUtils.isEmpty(keyword)) {
       return;
     }
-    ExploreService().loadEvents(searchText: keyword, eventFilter: EventTimeFilter.upcoming,).then((events) => _onEventsSearchFinished(events));
+    Events().loadEvents(searchText: keyword, eventFilter: EventTimeFilter.upcoming,).then((events) => _onEventsSearchFinished(events));
   }
 
-  void _onEventsSearchFinished(List<Explore> events) {
+  void _onEventsSearchFinished(List<Explore>? events) {
     _events = events;
     _resultsCount = _events?.length ?? 0;
     _resultsCountLabelVisible = true;
@@ -279,8 +274,8 @@ class _SearchPanelState extends State<SearchPanel> {
   }
 
   void _onTapClear() {
-    Analytics.instance.logSelect(target: "Clear");
-    if (AppString.isStringEmpty(_textEditingController.text)) {
+    Analytics().logSelect(target: "Clear");
+    if (StringUtils.isEmpty(_textEditingController.text)) {
       Navigator.pop(context);
       return;
     }
@@ -293,11 +288,11 @@ class _SearchPanelState extends State<SearchPanel> {
   }
 
   void _onTapSearch() {
-    Analytics.instance.logSelect(target: "Search");
+    Analytics().logSelect(target: "Search");
     FocusScope.of(context).requestFocus(new FocusNode());
     _setLoading(true);
     String searchValue = _textEditingController.text;
-    if (AppString.isStringEmpty(searchValue)) {
+    if (StringUtils.isEmpty(searchValue)) {
       return;
     }
     _searchEvents(searchValue);

@@ -21,20 +21,22 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:illinois/main.dart';
-import 'package:illinois/model/Auth2.dart';
-import 'package:illinois/model/Poll.dart';
+import 'package:illinois/ui/canvas/CanvasCalendarEventDetailPanel.dart';
+import 'package:rokwire_plugin/model/auth2.dart';
+import 'package:rokwire_plugin/model/poll.dart';
 import 'package:illinois/service/DeviceCalendar.dart';
-import 'package:illinois/service/ExploreService.dart';
+import 'package:rokwire_plugin/service/events.dart';
 import 'package:illinois/service/FlexUI.dart';
 import 'package:illinois/service/FirebaseMessaging.dart';
-import 'package:illinois/service/Groups.dart';
-import 'package:illinois/service/Polls.dart';
-import 'package:illinois/service/Service.dart';
+import 'package:rokwire_plugin/service/groups.dart';
+import 'package:rokwire_plugin/service/polls.dart';
+import 'package:illinois/utils/AppUtils.dart';
+import 'package:rokwire_plugin/service/service.dart';
 import 'package:illinois/service/Sports.dart';
 import 'package:illinois/service/Storage.dart';
 import 'package:illinois/service/Analytics.dart';
-import 'package:illinois/service/Localization.dart';
-import 'package:illinois/service/NotificationService.dart';
+import 'package:rokwire_plugin/service/localization.dart';
+import 'package:rokwire_plugin/service/notification_service.dart';
 import 'package:illinois/service/Guide.dart';
 import 'package:illinois/ui/SavedPanel.dart';
 import 'package:illinois/ui/athletics/AthleticsGameDetailPanel.dart';
@@ -51,26 +53,27 @@ import 'package:illinois/ui/polls/PollBubbleResultPanel.dart';
 import 'package:illinois/ui/widgets/CalendarSelectionDialog.dart';
 import 'package:illinois/ui/widgets/TabBarWidget.dart';
 import 'package:illinois/ui/widgets/PopupDialog.dart';
-import 'package:illinois/ui/widgets/RoundedButton.dart';
-import 'package:illinois/utils/Utils.dart';
-import 'package:illinois/service/Styles.dart';
+import 'package:rokwire_plugin/ui/widgets/rounded_button.dart';
+import 'package:rokwire_plugin/utils/utils.dart';
+import 'package:rokwire_plugin/service/styles.dart';
+import 'package:illinois/service/Canvas.dart';
 
 enum RootTab { Home, Athletics, Explore, Wallet, Browse }
 
 class _PanelData {
-  _RootPanelState _panelState;
+  _RootPanelState? _panelState;
 
-  RootTab         _rootTab;
-  ExploreTab      _exploreTab;
-  ExploreFilter   _exploreInitialFilter;
+  RootTab?         _rootTab;
+  ExploreTab?      _exploreTab;
+  ExploreFilter?   _exploreInitialFilter;
 }
 
 class RootPanel extends StatefulWidget {
   final _PanelData _data = _PanelData();
 
-  void selectTab({RootTab rootTab, ExploreTab exploreTab, ExploreFilter exploreInitialFilter, bool showHeaderBack = false}) {
-    if ((_data._panelState != null) && _data._panelState.mounted && (rootTab != null)) {
-      _data._panelState.selectTab(rootTab: rootTab, exploreTab: exploreTab, exploreInitialFilter: exploreInitialFilter);
+  void selectTab({RootTab? rootTab, ExploreTab? exploreTab, ExploreFilter? exploreInitialFilter, bool? showHeaderBack = false}) {
+    if ((_data._panelState != null) && _data._panelState!.mounted && (rootTab != null)) {
+      _data._panelState!.selectTab(rootTab: rootTab, exploreTab: exploreTab, exploreInitialFilter: exploreInitialFilter);
     }
     else {
       _data._rootTab = rootTab;
@@ -84,7 +87,7 @@ class RootPanel extends StatefulWidget {
     return _data._panelState = _RootPanelState();
   }
 
-  _RootPanelState get panelState {
+  _RootPanelState? get panelState {
     return _data._panelState;
   }
 }
@@ -94,7 +97,7 @@ class _RootPanelState extends State<RootPanel> with TickerProviderStateMixin imp
   List<RootTab>  _tabs = [];
   Map<RootTab, Widget> _panels = {};
 
-  TabController  _tabBarController;
+  TabController?  _tabBarController;
   int            _currentTabIndex = 0;
 
   _RootPanelState();
@@ -111,10 +114,11 @@ class _RootPanelState extends State<RootPanel> with TickerProviderStateMixin imp
       FirebaseMessaging.notifyGroupsNotification,
       FirebaseMessaging.notifyHomeNotification,
       FirebaseMessaging.notifyInboxNotification,
-      ExploreService.notifyEventDetail,
+      Events.notifyEventDetail,
       Sports.notifyGameDetail,
       Groups.notifyGroupDetail,
       Guide.notifyGuideDetail,
+      Canvas.notifyCanvasEventDetail,
       Localization.notifyStringsUpdated,
       Auth2UserPrefs.notifyFavoritesChanged,
       FlexUI.notifyChanged,
@@ -124,6 +128,7 @@ class _RootPanelState extends State<RootPanel> with TickerProviderStateMixin imp
       DeviceCalendar.notifyPromptPopup,
       DeviceCalendar.notifyCalendarSelectionPopup,
       DeviceCalendar.notifyShowConsoleMessage,
+      TabBarWidget.notifySelectionChanged,
     ]);
 
     _tabs = _getTabs();
@@ -137,7 +142,7 @@ class _RootPanelState extends State<RootPanel> with TickerProviderStateMixin imp
       }
 
       if (widget._data._rootTab == RootTab.Explore) {
-        ExplorePanel explorePanel = _panels[RootTab.Explore];
+        ExplorePanel? explorePanel = _panels[RootTab.Explore] as ExplorePanel?;
         explorePanel?.selectTab(widget._data._exploreTab, initialFilter: widget._data._exploreInitialFilter);
       }
 
@@ -182,7 +187,7 @@ class _RootPanelState extends State<RootPanel> with TickerProviderStateMixin imp
     else if(name == FirebaseMessaging.notifyAthleticsGameStarted) {
       _showAthleticsGameDetail(param);
     }
-    else if (name == ExploreService.notifyEventDetail) {
+    else if (name == Events.notifyEventDetail) {
       _onFirebaseEventDetail(param);
     }
     else if (name == Sports.notifyGameDetail) {
@@ -193,6 +198,9 @@ class _RootPanelState extends State<RootPanel> with TickerProviderStateMixin imp
     }
     else if (name == Guide.notifyGuideDetail) {
       _onGuideDetail(param);
+    }
+    else if (name == Canvas.notifyCanvasEventDetail) {
+      _onCanvasEventDetail(param);
     }
     else if (name == Localization.notifyStringsUpdated) {
       if (mounted) {
@@ -228,6 +236,17 @@ class _RootPanelState extends State<RootPanel> with TickerProviderStateMixin imp
     else if (name == FirebaseMessaging.notifyInboxNotification) {
       _onFirebaseInboxNotification();
     }
+    else if (name == TabBarWidget.notifySelectionChanged) {
+      _onTabSelectionChanged(param);
+    }
+  }
+
+  void _onTabSelectionChanged(int tabIndex) {
+    if (mounted) {
+      Navigator.of(context, rootNavigator: true).popUntil((route) => route.isFirst);
+      RootTab? tab = getRootTabByIndex(tabIndex);
+      selectTab(rootTab: tab);
+    }
   }
 
   @override
@@ -236,7 +255,7 @@ class _RootPanelState extends State<RootPanel> with TickerProviderStateMixin imp
     Analytics().accessibilityState = MediaQuery.of(context).accessibleNavigation;
 
     List<Widget> panels = [];
-    for (RootTab rootTab in _tabs) {
+    for (RootTab? rootTab in _tabs) {
       panels.add(_panels[rootTab] ?? Container());
     }
 
@@ -249,19 +268,19 @@ class _RootPanelState extends State<RootPanel> with TickerProviderStateMixin imp
                 physics: NeverScrollableScrollPhysics(), //disable scrolling
                 children: panels,
               ),
-              bottomNavigationBar: TabBarWidget(tabController: _tabBarController),
-              backgroundColor: Styles().colors.background,
-            ),
+            bottomNavigationBar: TabBarWidget(tabController: _tabBarController),
+            backgroundColor: Styles().colors!.background,
+          ),
         ),
         onWillPop: _onWillPop);
   }
 
   ///Public interface
-  void selectTab({RootTab rootTab, ExploreTab exploreTab, ExploreFilter exploreInitialFilter}) {
+  void selectTab({RootTab? rootTab, ExploreTab? exploreTab, ExploreFilter? exploreInitialFilter}) {
 
     int newTabIndex = _getIndexByRootTab(rootTab);
     if ((newTabIndex >= 0) && (newTabIndex != _currentTabIndex)) {
-      _tabBarController.animateTo(newTabIndex);
+      _tabBarController!.animateTo(newTabIndex);
       _selectTabAtIndex(newTabIndex);
     }
   }
@@ -273,9 +292,9 @@ class _RootPanelState extends State<RootPanel> with TickerProviderStateMixin imp
   void _selectTabAtIndex(int index) {
     if (_currentTabIndex != index) {
 
-      Widget tabPanel = _getTabPanelAtIndex(index);
+      Widget? tabPanel = _getTabPanelAtIndex(index);
       if (tabPanel != null) {
-        Analytics.instance.logPage(name:tabPanel?.runtimeType?.toString());
+        Analytics().logPage(name:tabPanel.runtimeType.toString());
       }
 
       if (mounted) {
@@ -289,20 +308,20 @@ class _RootPanelState extends State<RootPanel> with TickerProviderStateMixin imp
     }
   }
 
-  RootTab getRootTabByIndex(int index) {
+  RootTab? getRootTabByIndex(int index) {
     return ((0 <= index) && (index < _tabs.length)) ? _tabs[index] : null;
   }
 
-  int _getIndexByRootTab(RootTab rootTab) {
-    return _tabs.indexOf(rootTab);
+  int _getIndexByRootTab(RootTab? rootTab) {
+    return (rootTab != null) ? _tabs.indexOf(rootTab) : -1;
   }
 
-  Widget _getTabPanelAtIndex(int index) {
-    RootTab rootTab = getRootTabByIndex(index);
+  Widget? _getTabPanelAtIndex(int index) {
+    RootTab? rootTab = getRootTabByIndex(index);
     return (rootTab != null) ? _panels[rootTab] : null;
   }
 
-  Widget get currentTabPanel {
+  Widget? get currentTabPanel {
     return _getTabPanelAtIndex(_currentTabIndex);
   }
 
@@ -311,13 +330,14 @@ class _RootPanelState extends State<RootPanel> with TickerProviderStateMixin imp
       selectTab(rootTab: RootTab.Home);
       return Future.value(false);
     }
-    return showDialog(
+    bool? result = await showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
         return _buildExitDialog(context);
       },
     );
+    return result ?? false;
   }
 
   Widget _buildExitDialog(BuildContext context) {
@@ -334,7 +354,7 @@ class _RootPanelState extends State<RootPanel> with TickerProviderStateMixin imp
               children: <Widget>[
                 Expanded(
                   child: Container(
-                    color: Styles().colors.fillColorPrimary,
+                    color: Styles().colors!.fillColorPrimary,
                     child: Padding(
                       padding: EdgeInsets.all(8),
                       child: Center(
@@ -354,7 +374,7 @@ class _RootPanelState extends State<RootPanel> with TickerProviderStateMixin imp
                   "app.exit_dialog.message", "Are you sure you want to exit?"),
               textAlign: TextAlign.center,
               style: TextStyle(
-                  fontFamily: Styles().fontFamilies.bold,
+                  fontFamily: Styles().fontFamilies!.bold,
                   fontSize: 16,
                   color: Colors.black),
             ),
@@ -366,24 +386,24 @@ class _RootPanelState extends State<RootPanel> with TickerProviderStateMixin imp
                 children: <Widget>[
                   RoundedButton(
                       onTap: () {
-                        Analytics.instance.logAlert(
+                        Analytics().logAlert(
                             text: "Exit", selection: "Yes");
                         Navigator.of(context).pop(true);
                       },
                       backgroundColor: Colors.transparent,
-                      borderColor: Styles().colors.fillColorSecondary,
-                      textColor: Styles().colors.fillColorPrimary,
+                      borderColor: Styles().colors!.fillColorSecondary,
+                      textColor: Styles().colors!.fillColorPrimary,
                       label: Localization().getStringEx("dialog.yes.title", 'Yes')),
                   Container(height: 10,),
                   RoundedButton(
                       onTap: () {
-                        Analytics.instance.logAlert(
+                        Analytics().logAlert(
                             text: "Exit", selection: "No");
                         Navigator.of(context).pop(false);
                       },
                       backgroundColor: Colors.transparent,
-                      borderColor: Styles().colors.fillColorSecondary,
-                      textColor: Styles().colors.fillColorPrimary,
+                      borderColor: Styles().colors!.fillColorSecondary,
+                      textColor: Styles().colors!.fillColorPrimary,
                       label: Localization().getStringEx("dialog.no.title", 'No'))
                 ],
               ),
@@ -421,8 +441,7 @@ class _RootPanelState extends State<RootPanel> with TickerProviderStateMixin imp
               Text(Localization().getStringEx('dialog.yes.title', 'Yes')),
               onPressed: () {
                 Navigator.of(context).pop();
-                  NotificationService().notify(
-                      DeviceCalendar.notifyPlaceEvent, data);
+                DeviceCalendar().placeEvent(data);
               }),
           TextButton(
               child: Text(Localization().getStringEx('dialog.no.title', 'No')),
@@ -431,8 +450,8 @@ class _RootPanelState extends State<RootPanel> with TickerProviderStateMixin imp
   }
 
   void _onFirebaseForegroundMessage(Map<String, dynamic> content) {
-    String body = content["body"];
-    Function completion = content["onComplete"];
+    String? body = content["body"];
+    Function? completion = content["onComplete"];
     AppAlert.showDialogResult(context, body).then((value){
       if(completion != null){
         completion();
@@ -441,8 +460,8 @@ class _RootPanelState extends State<RootPanel> with TickerProviderStateMixin imp
   }
 
   void _onFirebasePopupMessage(Map<String, dynamic> content) {
-    String displayText = content["display_text"];
-    String positiveButtonText = content["positive_button_text"];
+    String? displayText = content["display_text"];
+    String? positiveButtonText = content["positive_button_text"];
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -452,67 +471,81 @@ class _RootPanelState extends State<RootPanel> with TickerProviderStateMixin imp
     );
   }
 
-  Future<void> _onFirebaseEventDetail(Map<String, dynamic> content) async {
-    String eventId = (content != null) ? AppJson.stringValue(content['event_id']) : null;
-    if (AppString.isStringNotEmpty(eventId)) {
+  Future<void> _onFirebaseEventDetail(Map<String, dynamic>? content) async {
+    String? eventId = (content != null) ? JsonUtils.stringValue(content['event_id']) : null;
+    if (StringUtils.isNotEmpty(eventId)) {
       ExplorePanel.presentDetailPanel(context, eventId: eventId);
     }
   }
 
   
-  Future<void> _onFirebaseGameDetail(Map<String, dynamic> content) async {
-    String gameId = (content != null) ? AppJson.stringValue(content['game_id']) : null;
-    String sport = (content != null) ? AppJson.stringValue(content['sport']) : null;
-    if (AppString.isStringNotEmpty(gameId) && AppString.isStringNotEmpty(sport)) {
+  Future<void> _onFirebaseGameDetail(Map<String, dynamic>? content) async {
+    String? gameId = (content != null) ? JsonUtils.stringValue(content['game_id']) : null;
+    String? sport = (content != null) ? JsonUtils.stringValue(content['sport']) : null;
+    if (StringUtils.isNotEmpty(gameId) && StringUtils.isNotEmpty(sport)) {
       Navigator.push(context, CupertinoPageRoute(builder: (context) => AthleticsGameDetailPanel(sportName: sport, gameId: gameId,)));
     }
   }
 
-  Future<void> _onGroupDetail(Map<String, dynamic> content) async {
-    String groupId = (content != null) ? AppJson.stringValue(content['group_id']) : null;
+  Future<void> _onGroupDetail(Map<String, dynamic>? content) async {
+    String? groupId = (content != null) ? JsonUtils.stringValue(content['group_id']) : null;
     _presentGroupDetailPanel(groupId);
   }
 
-  Future<void> _onGuideDetail(Map<String, dynamic> content) async {
-    String guideId = (content != null) ? AppJson.stringValue(content['guide_id']) : null;
-    if(AppString.isStringNotEmpty(guideId)){
-      WidgetsBinding.instance.addPostFrameCallback((_) { //Fix navigator.dart failed assertion line 5307
+  Future<void> _onGuideDetail(Map<String, dynamic>? content) async {
+    String? guideId = (content != null) ? JsonUtils.stringValue(content['guide_id']) : null;
+    if(StringUtils.isNotEmpty(guideId)){
+      WidgetsBinding.instance!.addPostFrameCallback((_) { // Fix navigator.dart failed assertion line 5307
         Navigator.of(context).push(CupertinoPageRoute(builder: (context) =>
-            GuideDetailPanel(guideEntryId: guideId,)));});
+          GuideDetailPanel(guideEntryId: guideId,)));
+      });
+      if (mounted) {
+        setState(() {}); // Force the postFrameCallback invokation.
+      }
     }
   }
 
-  void _showAthleticsGameDetail(Map<String, dynamic> athleticsGameDetails) {
+  Future<void> _onCanvasEventDetail(Map<String, dynamic>? content) async {
+    String? eventId = (content != null) ? JsonUtils.stringValue(content['event_id']) : null;
+    if (StringUtils.isNotEmpty(eventId)) {
+      int? eventIdValue = int.tryParse(eventId!);
+      if (eventIdValue != null) {
+        Navigator.push(context, CupertinoPageRoute(builder: (context) => CanvasCalendarEventDetailPanel(eventId: eventIdValue)));
+      }
+    }
+  }
+
+  void _showAthleticsGameDetail(Map<String, dynamic>? athleticsGameDetails) {
     if (athleticsGameDetails == null) {
       return;
     }
-    String sportShortName = athleticsGameDetails["Path"];
-    String gameId = athleticsGameDetails["GameId"];
-    if (AppString.isStringEmpty(sportShortName) || AppString.isStringEmpty(gameId)) {
+    String? sportShortName = athleticsGameDetails["Path"];
+    String? gameId = athleticsGameDetails["GameId"];
+    if (StringUtils.isEmpty(sportShortName) || StringUtils.isEmpty(gameId)) {
       return;
     }
     Navigator.push(context, CupertinoPageRoute(builder: (context) => AthleticsGameDetailPanel(sportName: sportShortName, gameId: gameId,)));
   }
   
   void _showPresentPoll() {
-    Poll presentPoll = Polls().presentPoll;
-    if (presentPoll != null) {
+    Poll? presentingPoll = Polls().presentingPoll;
+    if (presentingPoll != null) {
       Timer(Duration(milliseconds: 500), (){
-        if (presentPoll.status == PollStatus.opened) {
-          _presentPollVote(presentPoll.pollId);
+        if (presentingPoll.status == PollStatus.opened) {
+          _presentPollVote(presentingPoll.pollId);
         }
-        else if (presentPoll.status == PollStatus.closed) {
-          _presentPollResult(presentPoll.pollId);
+        else if (presentingPoll.status == PollStatus.closed) {
+          _presentPollResult(presentingPoll.pollId);
         }
       });
     }
   }
 
-  void _presentPollVote(String pollId) {
+  void _presentPollVote(String? pollId) {
     Navigator.push(context, PageRouteBuilder( opaque: false, pageBuilder: (context, _, __) => PollBubblePromptPanel(pollId: pollId)));
   }
 
-  void _presentPollResult(String pollId) {
+  void _presentPollResult(String? pollId) {
     Navigator.push(context, PageRouteBuilder( opaque: false, pageBuilder: (context, _, __) => PollBubbleResultPanel(pollId: pollId)));
   }
 
@@ -535,7 +568,7 @@ class _RootPanelState extends State<RootPanel> with TickerProviderStateMixin imp
         ]);
   }
 
-  static List<String> _getTabbarCodes() {
+  static List<String>? _getTabbarCodes() {
     try {
       dynamic tabsList = FlexUI()['tabbar'];
       return (tabsList is List) ? tabsList.cast<String>() : null;
@@ -566,26 +599,26 @@ class _RootPanelState extends State<RootPanel> with TickerProviderStateMixin imp
   void _updatePanels(List<RootTab> tabs) {
     for (RootTab rootTab in tabs) {
       if (_panels[rootTab] == null) {
-      Widget panel = _createPanelForTab(rootTab);
-      if (panel != null) {
-        _panels[rootTab] = panel;
-      }
+        Widget? panel = _createPanelForTab(rootTab);
+        if (panel != null) {
+          _panels[rootTab] = panel;
+        }
       }
     }
   }
 
   static List<RootTab> _getTabs() {
     List<RootTab> tabs = [];
-    List<String> codes = _getTabbarCodes();
+    List<String>? codes = _getTabbarCodes();
     if (codes != null) {
       for (String code in codes) {
-        tabs.add(rootTabFromString(code));
+        ListUtils.add(tabs, rootTabFromString(code));
       }
     }
     return tabs;
   }
 
-  static Widget _createPanelForTab(RootTab rootTab) {
+  static Widget? _createPanelForTab(RootTab? rootTab) {
     if (rootTab == RootTab.Home) {
       return HomePanel();
     }
@@ -607,47 +640,41 @@ class _RootPanelState extends State<RootPanel> with TickerProviderStateMixin imp
   }
 
   void _onFirebaseGroupsNotification(param) {
-    if(param is Map<String, dynamic>){
-      String groupId = param["entity_id"];
+    if (param is Map<String, dynamic>) {
+      String? groupId = param["entity_id"];
       _presentGroupDetailPanel(groupId);
     }
   }
 
-  void _presentGroupDetailPanel(String groupId) {
-    if (AppString.isStringNotEmpty(groupId)) {
-      Groups().loadGroup(groupId).then((value) {
-        if (value != null) {
-          Navigator.push(context, CupertinoPageRoute(builder: (context) => GroupDetailPanel(group: value)));
-        } else {
-          AppAlert.showDialogResult(context, Localization().getStringEx("panel.group_detail.label.error_message", "Failed to load group data."));
-        }
-      });
+  void _presentGroupDetailPanel(String? groupId) {
+    if (StringUtils.isNotEmpty(groupId)) {
+      Navigator.push(context, CupertinoPageRoute(builder: (context) => GroupDetailPanel(groupIdentifier: groupId)));
+    } else {
+      AppAlert.showDialogResult(context, Localization().getStringEx("panel.group_detail.label.error_message", "Failed to load group data."));
     }
   }
 
   void _onFirebaseAthleticsNewsNotification(param) {
     if (param is Map<String, dynamic>) {
-      String newsId = param["news_id"];
-      Sports().loadNewsArticle(newsId).then((article) {
-        if (article != null) {
-          Navigator.push(context, CupertinoPageRoute(builder: (context) => AthleticsNewsArticlePanel(article: article)));
-        }
-      });
+      String? newsId = param["news_id"];
+      if (StringUtils.isNotEmpty(newsId)) {
+        Navigator.push(context, CupertinoPageRoute(builder: (context) => AthleticsNewsArticlePanel(articleId: newsId)));
+      }
     }
   }
 
   void _onFirebaseHomeNotification() {
     // Pop to Home Panel and select the first tab
-    Navigator.of(context)?.popUntil((route) => route.isFirst);
+    Navigator.of(context).popUntil((route) => route.isFirst);
     selectTab(rootTab: RootTab.Home);
   }
 
   void _onFirebaseInboxNotification() {
-    Navigator.of(context)?.push(CupertinoPageRoute(builder: (context) => InboxHomePanel()));
+    Navigator.of(context).push(CupertinoPageRoute(builder: (context) => InboxHomePanel()));
   }
 }
 
-RootTab rootTabFromString(String value) {
+RootTab? rootTabFromString(String? value) {
   if (value != null) {
     if (value == 'home') {
       return RootTab.Home;
@@ -674,8 +701,8 @@ class _FavoritesSavedDialog extends StatefulWidget {
     return _FavoritesSavedDialogState();
   }
 
-  static void show(BuildContext context) {
-    bool favoriteDialogWasShown = Storage().favoritesDialogWasVisible;
+  static void show(BuildContext? context) {
+    bool favoriteDialogWasShown = (Storage().favoritesDialogWasVisible == true);
     if (favoriteDialogWasShown || context == null) {
       return;
     }
@@ -702,8 +729,8 @@ class _FavoritesSavedDialogState extends State<_FavoritesSavedDialog> {
           padding: EdgeInsets.symmetric(horizontal: 15),
           child: Container(
               decoration: BoxDecoration(
-                color: Styles().colors.fillColorPrimary,
-                border: Border.all(color: Styles().colors.fillColorPrimary, width: 2.0),
+                color: Styles().colors!.fillColorPrimary,
+                border: Border.all(color: Styles().colors!.fillColorPrimary!, width: 2.0),
                 borderRadius: BorderRadius.circular(4.0),
               ),
               child: Padding(
@@ -714,11 +741,11 @@ class _FavoritesSavedDialogState extends State<_FavoritesSavedDialog> {
                           flex: 5,
                           child: Text(
                             Localization().getStringEx('widget.favorites_saved_dialog.title', 'This starred item has been added to your saved list')
-                                + (DeviceCalendar().canAddToCalendar? Localization().getStringEx("widget.favorites_saved_dialog.calendar.title"," and also your calendar.") :""),
+                                + (DeviceCalendar().canAddToCalendar? Localization().getStringEx("widget.favorites_saved_dialog.calendar.title", " and if it is an event, also your calendar") :"") + ".",
                             style: TextStyle(
-                              color: Styles().colors.white,
+                              color: Styles().colors!.white,
                               fontSize: 16,
-                              fontFamily: Styles().fontFamilies.bold,
+                              fontFamily: Styles().fontFamilies!.bold,
                             ),
                           )),
                       InkWell(onTap: _onTapClose, child:
@@ -733,12 +760,12 @@ class _FavoritesSavedDialogState extends State<_FavoritesSavedDialog> {
                         child: Text(
                           Localization().getStringEx("widget.favorites_saved_dialog.button.view", "View"),
                           style: TextStyle(
-                              color: Styles().colors.white,
+                              color: Styles().colors!.white,
                               fontSize: 14,
-                              fontFamily: Styles().fontFamilies.medium,
+                              fontFamily: Styles().fontFamilies!.medium,
                               decoration: TextDecoration.underline,
                               decorationThickness: 1,
-                              decorationColor: Styles().colors.fillColorSecondary),
+                              decorationColor: Styles().colors!.fillColorSecondary),
                         ),
                       ),
                     ))
@@ -747,12 +774,12 @@ class _FavoritesSavedDialogState extends State<_FavoritesSavedDialog> {
   }
 
   void _onTapClose() {
-    Analytics.instance.logAlert(text: "Event Saved", selection: "close");
+    Analytics().logAlert(text: "Event Saved", selection: "close");
     Navigator.pop(context, "");
   }
 
   void _onViewAll() {
-    Analytics.instance.logAlert(text: "Event Saved", selection: "View All");
+    Analytics().logAlert(text: "Event Saved", selection: "View All");
     Navigator.pop(context, "");
     Navigator.push(context, CupertinoPageRoute(builder: (context) => SavedPanel()));
   }

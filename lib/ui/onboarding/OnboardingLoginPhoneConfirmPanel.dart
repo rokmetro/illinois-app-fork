@@ -14,24 +14,24 @@
  * limitations under the License.
  */
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:illinois/service/Auth2.dart';
-import 'package:illinois/service/Onboarding.dart';
-import 'package:illinois/service/Localization.dart';
+import 'package:rokwire_plugin/model/auth2.dart';
+import 'package:rokwire_plugin/service/auth2.dart';
+import 'package:rokwire_plugin/service/onboarding.dart';
+import 'package:rokwire_plugin/service/localization.dart';
 import 'package:illinois/service/Analytics.dart';
 import 'package:illinois/ui/onboarding/OnboardingBackButton.dart';
-import 'package:illinois/ui/widgets/ScalableWidgets.dart';
-import 'package:illinois/utils/Utils.dart';
-import 'package:illinois/service/Styles.dart';
+import 'package:rokwire_plugin/ui/widgets/rounded_button.dart';
+import 'package:rokwire_plugin/utils/utils.dart';
+import 'package:rokwire_plugin/service/styles.dart';
 
 import 'package:sprintf/sprintf.dart';
 
 class OnboardingLoginPhoneConfirmPanel extends StatefulWidget with OnboardingPanel {
 
-  final Map<String, dynamic> onboardingContext;
-  final String phoneNumber;
-  final ValueSetter<dynamic> onFinish;
+  final Map<String, dynamic>? onboardingContext;
+  final String? phoneNumber;
+  final ValueSetter<dynamic>? onFinish;
 
   OnboardingLoginPhoneConfirmPanel({this.onboardingContext, this.phoneNumber, this.onFinish});
 
@@ -40,20 +40,27 @@ class OnboardingLoginPhoneConfirmPanel extends StatefulWidget with OnboardingPan
 
   @override
   bool get onboardingCanDisplay {
-    return (onboardingContext != null) && onboardingContext['shouldVerifyPhone'] == true;
+    return (onboardingContext != null) && onboardingContext!['shouldVerifyPhone'] == true;
   }
 }
 
 class _OnboardingLoginPhoneConfirmPanelState extends State<OnboardingLoginPhoneConfirmPanel> {
   TextEditingController _codeController = TextEditingController();
-  String _verificationErrorMsg;
+  String? _verificationErrorMsg;
 
   bool _isLoading = false;
+  bool _link = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _link = widget.onboardingContext?["link"] ?? false;
+  }
 
   @override
   Widget build(BuildContext context) {
-    String phoneNumber = (widget.onboardingContext != null) ? widget.onboardingContext["phone"] : widget.phoneNumber;
-    String maskedPhoneNumber = AppString.getMaskedPhoneNumber(phoneNumber);
+    String? phoneNumber = (widget.onboardingContext != null) ? widget.onboardingContext!["phone"] : widget.phoneNumber;
+    String maskedPhoneNumber = StringUtils.getMaskedPhoneNumber(phoneNumber);
     String description = sprintf(
         Localization().getStringEx(
             'panel.onboarding.confirm_phone.description.send', 'A one time code has been sent to %s. Enter your code below to continue.'),
@@ -79,7 +86,7 @@ class _OnboardingLoginPhoneConfirmPanelState extends State<OnboardingLoginPhoneC
                         "Confirm your code"),
                     textAlign: TextAlign.center,
                     style:
-                        TextStyle(fontSize: 36, color: Styles().colors.fillColorPrimary),
+                        TextStyle(fontSize: 36, color: Styles().colors!.fillColorPrimary),
                   ),
                 ),
                 Container(
@@ -92,8 +99,8 @@ class _OnboardingLoginPhoneConfirmPanelState extends State<OnboardingLoginPhoneC
                     textAlign: TextAlign.center,
                     style: TextStyle(
                         fontSize: 18,
-                        color: Styles().colors.fillColorPrimary,
-                        fontFamily: Styles().fontFamilies.regular),
+                        color: Styles().colors!.fillColorPrimary,
+                        fontFamily: Styles().fontFamilies!.regular),
                   ),
                 ),
                 Container(
@@ -108,8 +115,8 @@ class _OnboardingLoginPhoneConfirmPanelState extends State<OnboardingLoginPhoneC
                     textAlign: TextAlign.left,
                     style: TextStyle(
                         fontSize: 16,
-                        color: Styles().colors.fillColorPrimary,
-                        fontFamily: Styles().fontFamilies.bold),
+                        color: Styles().colors!.fillColorPrimary,
+                        fontFamily: Styles().fontFamilies!.bold),
                   ),
                 ),
                 Padding(
@@ -123,12 +130,12 @@ class _OnboardingLoginPhoneConfirmPanelState extends State<OnboardingLoginPhoneC
                         controller: _codeController,
                         autofocus: false,
                         onSubmitted: (_) => _clearErrorMsg,
-                        cursorColor: Styles().colors.textBackground,
+                        cursorColor: Styles().colors!.textBackground,
                         keyboardType: TextInputType.number,
                         style: TextStyle(
                             fontSize: 16,
-                            fontFamily: Styles().fontFamilies.regular,
-                            color: Styles().colors.textBackground),
+                            fontFamily: Styles().fontFamilies!.regular,
+                            color: Styles().colors!.textBackground),
                         decoration: InputDecoration(
                           enabledBorder: OutlineInputBorder(
                             borderSide: BorderSide(
@@ -143,32 +150,47 @@ class _OnboardingLoginPhoneConfirmPanelState extends State<OnboardingLoginPhoneC
                       ),
                     )),
                 Visibility(
-                  visible: AppString.isStringNotEmpty(_verificationErrorMsg),
+                  visible: StringUtils.isNotEmpty(_verificationErrorMsg),
                   child: Padding(
                     padding: EdgeInsets.symmetric(vertical: 12, horizontal: 12),
                     child: Text(
-                      AppString.getDefaultEmptyString(
-                          value: _verificationErrorMsg),
+                      StringUtils.ensureNotEmpty(
+                          _verificationErrorMsg),
                       style: TextStyle(
                           color: Colors.red,
                           fontSize: 14,
-                          fontFamily: Styles().fontFamilies.medium),
+                          fontFamily: Styles().fontFamilies!.medium),
                     ),
                   ),
                 ),
                 ]))),
                 Container(child:
-                ScalableRoundedButton(
+                RoundedButton(
                     label: Localization().getStringEx(
                         "panel.onboarding.confirm_phone.button.confirm.label",
                         "Confirm phone number"),
                     hint: Localization().getStringEx(
                         "panel.onboarding.confirm_phone.button.confirm.hint", ""),
-                    borderColor: Styles().colors.fillColorSecondary,
-                    backgroundColor: Styles().colors.background,
-                    textColor: Styles().colors.fillColorPrimary,
+                    borderColor: Styles().colors!.fillColorSecondary,
+                    backgroundColor: Styles().colors!.background,
+                    textColor: Styles().colors!.fillColorPrimary,
                     onTap: () => _onTapConfirm())
-                )
+                ),
+                Visibility(
+                  visible: _link,
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 8.0),
+                    child: RoundedButton(
+                      label: Localization().getStringEx(
+                          "panel.onboarding.confirm_phone.button.link.cancel.label", "Cancel"),
+                      hint: Localization().getStringEx(
+                          "panel.onboarding.confirm_phone.button.link.cancel.hint", ""),
+                      borderColor: Styles().colors!.fillColorSecondary,
+                      backgroundColor: Styles().colors!.background,
+                      textColor: Styles().colors!.fillColorPrimary,
+                      onTap: () => _onTapCancel())
+                  ),
+                ),
               ],
             ),),),
           Visibility(
@@ -180,7 +202,7 @@ class _OnboardingLoginPhoneConfirmPanelState extends State<OnboardingLoginPhoneC
           OnboardingBackButton(
             padding: const EdgeInsets.only(left: 10, top: 30, right: 20, bottom: 20),
             onTap:() {
-              Analytics.instance.logSelect(target: "Back");
+              Analytics().logSelect(target: "Back");
               Navigator.pop(context);
             }),
 
@@ -195,37 +217,89 @@ class _OnboardingLoginPhoneConfirmPanelState extends State<OnboardingLoginPhoneC
       return;
     }
 
-    Analytics.instance.logSelect(target: "Confirm phone number");
+    Analytics().logSelect(target: "Confirm phone number");
     _clearErrorMsg();
     _validateCode();
-    if (AppString.isStringNotEmpty(_verificationErrorMsg)) {
+    if (StringUtils.isNotEmpty(_verificationErrorMsg)) {
       return;
     }
-    String phoneNumber = ((widget.onboardingContext != null) ? widget.onboardingContext["phone"] : null) ?? widget.phoneNumber;
+    String? phoneNumber = ((widget.onboardingContext != null) ? widget.onboardingContext!["phone"] : null) ?? widget.phoneNumber;
     setState(() {
       _isLoading = true;
     });
 
-    Auth2().handlePhoneAuthentication(phoneNumber, _codeController.text).then((success) {
+    if (!_link) {
+      Auth2().handlePhoneAuthentication(phoneNumber, _codeController.text).then((result) {
+        if(mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+          _onPhoneVerified(result);
+        }
+      });
+    } else {
+      Map<String, dynamic> creds = {
+        "phone": phoneNumber,
+        "code": _codeController.text,
+      };
+      Map<String, dynamic> params = {};
+      Auth2().linkAccountAuthType(Auth2LoginType.phoneTwilio, creds, params).then((result) {
+        if(mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+          if (result == Auth2LinkResult.succeded) {
+            _onPhoneVerified(Auth2PhoneSendCodeResult.succeded);
+          } else if (result == Auth2LinkResult.failedInvalid) {
+            _onPhoneVerified(Auth2PhoneSendCodeResult.failedInvalid);
+          } else {
+            _onPhoneVerified(Auth2PhoneSendCodeResult.failed);
+          }
+        }
+      });
+    }
+  }
+
+  void _onTapCancel() {
+    String phoneNumber = ((widget.onboardingContext != null) ? widget.onboardingContext!["phone"] : null) ?? widget.phoneNumber ?? '';
+    setState(() {
+      _isLoading = true;
+    });
+
+    Auth2().unlinkAccountAuthType(Auth2LoginType.phoneTwilio, phoneNumber).then((success) {
       if(mounted) {
         setState(() {
           _isLoading = false;
         });
-        _onPhoneVerified(success);
+        if (!success) {
+          setState(() {
+            _verificationErrorMsg = Localization().getStringEx("panel.onboarding.confirm_phone.link.cancel.text", "Failed to remove phone number from your account.");
+          });
+        }
+        else {
+          _finishedPhoneVerification();
+        }
       }
     });
   }
 
-  void _onPhoneVerified(bool success) {
-    if (!success) {
+  void _onPhoneVerified(Auth2PhoneSendCodeResult result) {
+    if (result == Auth2PhoneSendCodeResult.failed) {
       setState(() {
-        _verificationErrorMsg = Localization().getStringEx(
-            "panel.onboarding.confirm_phone.validation.server_error.text",
-            "Failed to verify code");
+        _verificationErrorMsg = Localization().getStringEx("panel.onboarding.confirm_phone.validation.server_error.text", "Failed to verify code. An unexpected error occurred.");
       });
+    } else if (result == Auth2PhoneSendCodeResult.failedInvalid) {
+      setState(() {
+        _verificationErrorMsg = Localization().getStringEx("panel.onboarding.confirm_phone.validation.invalid.text", "Incorrect code.");
+      });
+    } else {
+      _finishedPhoneVerification();
     }
-    else if (widget.onboardingContext != null) {
-      Function onSuccess = widget.onboardingContext["onContinueAction"]; // Hook this panels to Onboarding2
+  }
+
+  void _finishedPhoneVerification() {
+    if (widget.onboardingContext != null) {
+      Function? onSuccess = widget.onboardingContext!["onContinueAction"]; // Hook this panels to Onboarding2
       if(onSuccess!=null){
         onSuccess();
       } else {
@@ -234,13 +308,13 @@ class _OnboardingLoginPhoneConfirmPanelState extends State<OnboardingLoginPhoneC
 
     }
     else if (widget.onFinish != null) {
-      widget.onFinish(widget);
+      widget.onFinish!(widget);
     }
   }
 
   void _validateCode() {
     String phoneNumberValue = _codeController.text;
-    if (AppString.isStringEmpty(phoneNumberValue)) {
+    if (StringUtils.isEmpty(phoneNumberValue)) {
       setState(() {
         _verificationErrorMsg = Localization().getStringEx(
             "panel.onboarding.confirm_phone.validation.phone_number.text",

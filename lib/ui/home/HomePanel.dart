@@ -18,16 +18,16 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:illinois/service/Analytics.dart';
-import 'package:illinois/service/AppLivecycle.dart';
-import 'package:illinois/service/Assets.dart';
+import 'package:illinois/ui/home/HomeCanvasCoursesWidget.dart';
+import 'package:illinois/ui/home/HomeGies2Widget.dart';
+import 'package:rokwire_plugin/service/app_livecycle.dart';
+import 'package:rokwire_plugin/service/assets.dart';
 import 'package:illinois/service/FlexUI.dart';
 import 'package:illinois/service/LiveStats.dart';
-import 'package:illinois/service/Localization.dart';
-import 'package:illinois/service/NotificationService.dart';
+import 'package:rokwire_plugin/service/localization.dart';
+import 'package:rokwire_plugin/service/notification_service.dart';
 import 'package:illinois/service/Storage.dart';
 import 'package:illinois/ui/SavedPanel.dart';
 import 'package:illinois/ui/SearchPanel.dart';
@@ -50,7 +50,7 @@ import 'package:illinois/ui/home/HomeVoterRegistrationWidget.dart';
 import 'package:illinois/ui/home/HomeUpcomingEventsWidget.dart';
 import 'package:illinois/ui/settings/SettingsHomePanel.dart';
 import 'package:illinois/ui/widgets/FlexContentWidget.dart';
-import 'package:illinois/service/Styles.dart';
+import 'package:rokwire_plugin/service/styles.dart';
 
 
 class HomePanel extends StatefulWidget {
@@ -60,8 +60,8 @@ class HomePanel extends StatefulWidget {
 
 class _HomePanelState extends State<HomePanel> with AutomaticKeepAliveClientMixin<HomePanel> implements NotificationsListener {
   
-  List<dynamic> _contentListCodes;
-  StreamController<void> _refreshController;
+  List<dynamic>? _contentListCodes;
+  StreamController<void> _refreshController = StreamController.broadcast();
   GlobalKey _giesWidgetKey = GlobalKey();
 
   @override
@@ -75,7 +75,6 @@ class _HomePanelState extends State<HomePanel> with AutomaticKeepAliveClientMixi
       HomeGiesWidget.notifyPageChanged,
     ]);
     _contentListCodes = _buildContentListCodes() ?? [];
-    _refreshController = StreamController.broadcast();
     super.initState();
   }
 
@@ -103,7 +102,7 @@ class _HomePanelState extends State<HomePanel> with AutomaticKeepAliveClientMixi
           SliverList(
             delegate: SliverChildListDelegate(<Widget>[
               Container(
-                color: Styles().colors.background,
+                color: Styles().colors!.background,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -114,7 +113,7 @@ class _HomePanelState extends State<HomePanel> with AutomaticKeepAliveClientMixi
           ),
         ],
       ),),
-      backgroundColor: Styles().colors.background,
+      backgroundColor: Styles().colors!.background,
     );
   }
 
@@ -122,8 +121,8 @@ class _HomePanelState extends State<HomePanel> with AutomaticKeepAliveClientMixi
 
     List<Widget> widgets = [];
 
-    for (dynamic code in _contentListCodes) {
-      Widget widget;
+    for (dynamic code in _contentListCodes!) {
+      Widget? widget;
 
       if (code == 'game_day') {
         widget = HomeGameDayWidget(refreshController: _refreshController);
@@ -158,8 +157,14 @@ class _HomePanelState extends State<HomePanel> with AutomaticKeepAliveClientMixi
       else if (code == 'twitter') {
         widget = HomeTwitterWidget(refreshController: _refreshController);
       }
-      else if (code == 'gies') {
+      else if (code == 'gies') { //TBD deprecate and use gies2 instead
         widget = HomeGiesWidget(key: _giesWidgetKey, refreshController: _refreshController);
+      }
+      else if (code == 'gies2') {
+        widget = HomeGies2Widget(refreshController: _refreshController);
+      }
+      else if (code == 'canvas_courses') {
+        widget = HomeCanvasCoursesWidget(refreshController: _refreshController);
       }
       else if (code == 'voter_registration') {
         widget = HomeVoterRegistrationWidget();
@@ -203,9 +208,9 @@ class _HomePanelState extends State<HomePanel> with AutomaticKeepAliveClientMixi
     }
   }
 
-  List<dynamic> _buildContentListCodes({String source = 'home'}) {
-    List<dynamic> result;
-    List<dynamic> contentList = FlexUI()[source];
+  List<dynamic>? _buildContentListCodes({String source = 'home'}) {
+    List<dynamic>? result;
+    List<dynamic>? contentList = FlexUI()[source];
     if (contentList != null) {
       result = [];
       for (String contentEntry in contentList) {
@@ -227,8 +232,8 @@ class _HomePanelState extends State<HomePanel> with AutomaticKeepAliveClientMixi
   }
 
   void _ensureGiesVisible() {
-    if (_giesWidgetKey?.currentContext != null) {
-      Scrollable.ensureVisible(_giesWidgetKey.currentContext, duration: Duration(milliseconds: 300));
+    if (_giesWidgetKey.currentContext != null) {
+      Scrollable.ensureVisible(_giesWidgetKey.currentContext!, duration: Duration(milliseconds: 300));
     }
   }
 
@@ -272,17 +277,17 @@ class _SliverHomeHeaderBar extends SliverAppBar {
   final bool settingsVisible;
 
   _SliverHomeHeaderBar(
-      {@required this.context,  this.searchVisible = false, this.savedVisible = false, this.settingsVisible = false})
+      {required this.context,  this.searchVisible = false, this.savedVisible = false, this.settingsVisible = false})
       : super(
       pinned: true,
       floating: true,
       primary:true,
-      backgroundColor: Styles().colors.fillColorPrimaryVariant,
+      backgroundColor: Styles().colors!.fillColorPrimaryVariant,
       title: ExcludeSemantics(
           child: IconButton(
               icon: Image.asset('images/block-i-orange.png'),
               onPressed: () {
-                Analytics.instance.logSelect(target: "Home");
+                Analytics().logSelect(target: "Home");
                 Navigator.of(context).popUntil((route) => route.isFirst);
 //                NativeCommunicator().launchTest();
               }
@@ -299,7 +304,7 @@ class _SliverHomeHeaderBar extends SliverAppBar {
                 child: IconButton(
                     icon: Image.asset('images/icon-search.png'),
                     onPressed: () {
-                      Analytics.instance.logSelect(target: "Search");
+                      Analytics().logSelect(target: "Search");
                       Navigator.push(
                           context,
                           CupertinoPageRoute(
@@ -315,7 +320,7 @@ class _SliverHomeHeaderBar extends SliverAppBar {
               excludeSemantics: true,
               child: InkWell(
               onTap: () {
-                Analytics.instance.logSelect(target: "Saved");
+                Analytics().logSelect(target: "Saved");
                 Navigator.push(
                     context,
                     CupertinoPageRoute(
@@ -329,9 +334,9 @@ class _SliverHomeHeaderBar extends SliverAppBar {
                     'headerbar.saved.title', 'Saved'),
                     style: TextStyle(color: Colors.white,
                         fontSize: 16,
-                        fontFamily: Styles().fontFamilies.semiBold,
+                        fontFamily: Styles().fontFamilies!.semiBold,
                         decoration: TextDecoration.underline,
-                        decorationColor: Styles().colors.fillColorSecondary,
+                        decorationColor: Styles().colors!.fillColorSecondary,
                         decorationThickness: 1,
                         decorationStyle: TextDecorationStyle.solid)),),))),
 
@@ -346,7 +351,7 @@ class _SliverHomeHeaderBar extends SliverAppBar {
               child: IconButton(
                   icon: Image.asset('images/settings-white.png'),
                   onPressed: () {
-                    Analytics.instance.logSelect(target: "Settings");
+                    Analytics().logSelect(target: "Settings");
                     Navigator.push(context, CupertinoPageRoute(builder: (context) => SettingsHomePanel()));
                   })))
 

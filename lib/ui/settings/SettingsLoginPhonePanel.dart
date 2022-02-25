@@ -17,14 +17,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:illinois/service/Analytics.dart';
-import 'package:illinois/service/AppNavigation.dart';
-import 'package:illinois/service/Connectivity.dart';
-import 'package:illinois/service/Localization.dart';
-import 'package:illinois/service/Styles.dart';
+import 'package:rokwire_plugin/service/app_navigation.dart';
+import 'package:illinois/utils/AppUtils.dart';
+import 'package:rokwire_plugin/service/connectivity.dart';
+import 'package:rokwire_plugin/service/localization.dart';
+import 'package:rokwire_plugin/service/styles.dart';
 import 'package:illinois/ui/onboarding/OnboardingBackButton.dart';
 import 'package:illinois/ui/onboarding/OnboardingLoginPhoneVerifyPanel.dart';
-import 'package:illinois/ui/widgets/RoundedButton.dart';
-import 'package:illinois/utils/Utils.dart';
+import 'package:rokwire_plugin/ui/widgets/rounded_button.dart';
 
 class SettingsLoginPhonePanel extends StatefulWidget{
   _SettingsLoginPhonePanelState createState() => _SettingsLoginPhonePanelState();
@@ -48,7 +48,7 @@ class _SettingsLoginPhonePanelState extends State<SettingsLoginPhonePanel> {
     String titleString = Localization().getStringEx('panel.settings.login.phone.label.title', 'Verify your phone number');
     String skipTitle = Localization().getStringEx('panel.settings.login.phone.button.dont_continue.title', 'Not right now');
     return Scaffold(
-        backgroundColor: Styles().colors.background,
+        backgroundColor: Styles().colors!.background,
         body: Stack(
           children: <Widget>[
             Column(
@@ -65,7 +65,7 @@ class _SettingsLoginPhonePanelState extends State<SettingsLoginPhonePanel> {
                     OnboardingBackButton(
                         padding: const EdgeInsets.only(left: 10, top: 30, right: 20, bottom: 20),
                         onTap: () {
-                          Analytics.instance.logSelect(target: "Back");
+                          Analytics().logSelect(target: "Back");
                           Navigator.pop(context);
                         }),
                   ],
@@ -81,7 +81,7 @@ class _SettingsLoginPhonePanelState extends State<SettingsLoginPhonePanel> {
                       padding: EdgeInsets.symmetric(horizontal: 18),
                       child: Center(
                         child: Text(titleString,
-                            textAlign: TextAlign.center, style: TextStyle(fontFamily: Styles().fontFamilies.bold, fontSize: 36, color: Styles().colors.fillColorPrimary)),
+                            textAlign: TextAlign.center, style: TextStyle(fontFamily: Styles().fontFamilies!.bold, fontSize: 36, color: Styles().colors!.fillColorPrimary)),
                       )),
                 ),
                 Container(
@@ -90,7 +90,7 @@ class _SettingsLoginPhonePanelState extends State<SettingsLoginPhonePanel> {
                 Padding(
                     padding: EdgeInsets.symmetric(horizontal: 32),
                     child: Text(Localization().getStringEx('panel.settings.login.phone.label.description', 'This saves your preferences so you can have the same experience on more than one device.'),
-                        textAlign: TextAlign.center, style: TextStyle(fontFamily: Styles().fontFamilies.regular, fontSize: 20, color: Styles().colors.fillColorPrimary))),
+                        textAlign: TextAlign.center, style: TextStyle(fontFamily: Styles().fontFamilies!.regular, fontSize: 20, color: Styles().colors!.fillColorPrimary))),
                 Container(
                   height: 32,
                 ),
@@ -104,9 +104,9 @@ class _SettingsLoginPhonePanelState extends State<SettingsLoginPhonePanel> {
                     child: RoundedButton(
                         label: Localization().getStringEx('panel.settings.login.phone.button.continue.title', 'Verify My Phone Number'),
                         hint: Localization().getStringEx('panel.settings.login.phone.button.continue.hint', ''),
-                        borderColor: Styles().colors.fillColorSecondary,
-                        backgroundColor: Styles().colors.background,
-                        textColor: Styles().colors.fillColorPrimary,
+                        borderColor: Styles().colors!.fillColorSecondary,
+                        backgroundColor: Styles().colors!.background,
+                        textColor: Styles().colors!.fillColorPrimary,
                         onTap: () => _onLoginTapped()),
                   ),
                 ),
@@ -126,10 +126,10 @@ class _SettingsLoginPhonePanelState extends State<SettingsLoginPhonePanel> {
                                   skipTitle,
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                    color: Styles().colors.fillColorPrimary,
+                                    color: Styles().colors!.fillColorPrimary,
                                     decoration: TextDecoration.underline,
-                                    decorationColor: Styles().colors.fillColorSecondary,
-                                    fontFamily: Styles().fontFamilies.medium,
+                                    decorationColor: Styles().colors!.fillColorSecondary,
+                                    fontFamily: Styles().fontFamilies!.medium,
                                     fontSize: 16,
                                   ),
                                 ),
@@ -150,7 +150,7 @@ class _SettingsLoginPhonePanelState extends State<SettingsLoginPhonePanel> {
   }
 
   void _onLoginTapped() {
-    Analytics.instance.logSelect(target: "Phone Verification");
+    Analytics().logSelect(target: "Phone Verification");
     if (Connectivity().isNotOffline) {
       Navigator.push(context, CupertinoPageRoute(settings: RouteSettings(), builder: (context) => OnboardingLoginPhoneVerifyPanel(onFinish: _didPhoneVer,)));
     } else {
@@ -159,7 +159,7 @@ class _SettingsLoginPhonePanelState extends State<SettingsLoginPhonePanel> {
   }
 
   void _didPhoneVer(_) {
-    Navigator.of(context)?.popUntil((Route route){
+    Navigator.of(context).popUntil((Route route){
       return AppNavigation.routeRootWidget(route, context: context)?.runtimeType == widget.runtimeType;
     });
     Navigator.pop(context,true);

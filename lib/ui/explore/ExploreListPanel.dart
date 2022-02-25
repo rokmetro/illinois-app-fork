@@ -16,22 +16,22 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:illinois/service/ExploreService.dart';
-import 'package:illinois/service/Localization.dart';
-import 'package:illinois/model/Event.dart';
-import 'package:illinois/model/Explore.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:rokwire_plugin/service/localization.dart';
+import 'package:rokwire_plugin/model/event.dart';
+import 'package:rokwire_plugin/model/explore.dart';
 import 'package:illinois/service/Analytics.dart';
 import 'package:illinois/ui/explore/ExploreDetailPanel.dart';
 import 'package:illinois/ui/widgets/HeaderBar.dart';
 import 'package:illinois/ui/widgets/TabBarWidget.dart';
 import 'package:illinois/ui/explore/ExploreCard.dart';
-import 'package:illinois/service/Styles.dart';
-import 'package:location/location.dart';
+import 'package:rokwire_plugin/service/styles.dart';
 import 'package:illinois/ui/athletics/AthleticsGameDetailPanel.dart';
+import 'package:rokwire_plugin/utils/utils.dart';
 
 class ExploreListPanel extends StatefulWidget implements AnalyticsPageAttributes {
-  final List<Explore> explores;
-  final LocationData initialLocationData;
+  final List<Explore>? explores;
+  final Position? initialLocationData;
 
   ExploreListPanel({this.explores, this.initialLocationData});
 
@@ -40,9 +40,9 @@ class ExploreListPanel extends StatefulWidget implements AnalyticsPageAttributes
       _ExploreListPanelState();
 
   @override
-  Map<String, dynamic> get analyticsPageAttributes {
-    if ((explores != null) && explores.isNotEmpty) {
-      return { Analytics.LogAttributeLocation : explores.first.exploreLocation?.description };
+  Map<String, dynamic>? get analyticsPageAttributes {
+    if ((explores != null) && explores!.isNotEmpty) {
+      return { Analytics.LogAttributeLocation : explores!.first.exploreLocation?.description };
     }
     else {
       return null;
@@ -53,7 +53,7 @@ class ExploreListPanel extends StatefulWidget implements AnalyticsPageAttributes
 
 class _ExploreListPanelState extends State<ExploreListPanel> {
 
-  List<Explore> _explores;
+  List<Explore>? _explores;
 
   @override
   void initState() {
@@ -61,25 +61,18 @@ class _ExploreListPanelState extends State<ExploreListPanel> {
     if (widget.explores != null) {
       _explores = widget.explores;
       //Sort "only for when we go to details from map view and there is a list of items because of the map grouping"
-      ExploreService().sortEvents(_explores);
+      SortUtils.sort(_explores);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: SimpleHeaderBarWithBack(
-        context: context,
-        titleWidget: Text(Localization().getStringEx("panel.explore_list.header.title", "Explore"),
-          style: TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 1.0),
-        ),
+      appBar: HeaderBar(
+        title: Localization().getStringEx("panel.explore_list.header.title", "Explore"),
       ),
       body: _buildBody(),
-      backgroundColor: Styles().colors.background,
+      backgroundColor: Styles().colors!.background,
       bottomNavigationBar: TabBarWidget(),
     );
   }
@@ -98,7 +91,7 @@ class _ExploreListPanelState extends State<ExploreListPanel> {
   }
 
   Widget _buildListViewWidget() {
-    if (_explores == null || _explores.length == 0) {
+    if (_explores == null || _explores!.length == 0) {
       return Container();
     }
     return ListView.separated(
@@ -108,9 +101,9 @@ class _ExploreListPanelState extends State<ExploreListPanel> {
           Divider(
             color: Colors.transparent,
           ),
-      itemCount: _explores.length,
+      itemCount: _explores!.length,
       itemBuilder: (context, index) {
-        Explore explore = _explores[index];
+        Explore explore = _explores![index];
         ExploreCard exploreView = ExploreCard(
             explore: explore,
             onTap: () => _onExploreTap(explore),
@@ -124,13 +117,13 @@ class _ExploreListPanelState extends State<ExploreListPanel> {
   }
 
   void _onExploreTap(Explore explore) {
-    Analytics.instance.logSelect(target: explore.exploreTitle);
+    Analytics().logSelect(target: explore.exploreTitle);
 
     //show the detail panel
-    Event event = (explore is Event) ? explore : null;
+    Event? event = (explore is Event) ? explore : null;
     if (event?.isGameEvent ?? false) {
       Navigator.push(context, CupertinoPageRoute(builder: (context) =>
-          AthleticsGameDetailPanel(gameId: event.speaker, sportName: event.registrationLabel,)));
+          AthleticsGameDetailPanel(gameId: event!.speaker, sportName: event.registrationLabel,)));
     }
     else {
       Navigator.push(context, CupertinoPageRoute(builder: (context) =>

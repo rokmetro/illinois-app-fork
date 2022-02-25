@@ -16,11 +16,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:illinois/service/Config.dart';
-import 'package:illinois/service/Localization.dart';
+import 'package:rokwire_plugin/service/localization.dart';
 import 'package:illinois/service/Storage.dart';
-import 'package:illinois/ui/widgets/RoundedButton.dart';
-import 'package:illinois/utils/Utils.dart';
-import 'package:illinois/service/Styles.dart';
+import 'package:rokwire_plugin/ui/widgets/rounded_button.dart';
+import 'package:rokwire_plugin/utils/utils.dart';
+import 'package:rokwire_plugin/service/styles.dart';
 
 class HomeUpgradeVersionWidget extends StatefulWidget {
   @override
@@ -37,7 +37,7 @@ class _HomeUpgradeVersionWidgetState extends State<HomeUpgradeVersionWidget> {
       child: Column(
         children: <Widget>[
           Container(
-            color: Styles().colors.lightGray,
+            color: Styles().colors!.lightGray,
             padding: EdgeInsets.only(left: 16, top: 12, right: 12, bottom: 24),
             child: Semantics(
                 container: true,
@@ -53,7 +53,7 @@ class _HomeUpgradeVersionWidgetState extends State<HomeUpgradeVersionWidget> {
                         maxLines: 10,
                         style: TextStyle(
                           color: Color(0xff494949),
-                          fontFamily: Styles().fontFamilies.medium,
+                          fontFamily: Styles().fontFamilies!.medium,
                           fontSize: 16,
                         ),
                       ),
@@ -62,10 +62,10 @@ class _HomeUpgradeVersionWidgetState extends State<HomeUpgradeVersionWidget> {
                       children: <Widget>[
                         RoundedButton(
                           label: Localization().getStringEx('widget.home_upgrade_version.button.got_it', 'Got It'),
-                          padding: EdgeInsets.symmetric(horizontal: 16),
-                          textColor: Styles().colors.fillColorPrimary,
-                          borderColor: Styles().colors.fillColorSecondary,
-                          backgroundColor: Styles().colors.white,
+                          textColor: Styles().colors!.fillColorPrimary,
+                          borderColor: Styles().colors!.fillColorSecondary,
+                          backgroundColor: Styles().colors!.white,
+                          contentWeight: 0.0,
                           onTap: _onTapGotIt,
                         )
                       ],
@@ -75,7 +75,7 @@ class _HomeUpgradeVersionWidgetState extends State<HomeUpgradeVersionWidget> {
           ),
           Container(
             height: 1,
-            color: Styles().colors.fillColorPrimaryVariant,
+            color: Styles().colors!.fillColorPrimaryVariant,
           ),
         ],
       ),
@@ -83,8 +83,8 @@ class _HomeUpgradeVersionWidgetState extends State<HomeUpgradeVersionWidget> {
   }
 
   bool _isUpgradeMessageWidgetVisible() {
-    String lastUserLoginVersion = Storage().userLoginVersion;
-    String currentVersion = Config().appVersion;
+    String? lastUserLoginVersion = Storage().userLoginVersion;
+    String? currentVersion = Config().appVersion;
     if (AppVersion.matchVersions(currentVersion, '1.2') &&
         ((lastUserLoginVersion == null) || (AppVersion.compareVersions(lastUserLoginVersion, currentVersion) < 0))) {
       return true;

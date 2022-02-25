@@ -15,18 +15,17 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:illinois/service/Analytics.dart';
-import 'package:illinois/service/LocationServices.dart';
-import 'package:illinois/service/Onboarding.dart';
-import 'package:illinois/service/Localization.dart';
+import 'package:rokwire_plugin/service/location_services.dart';
+import 'package:rokwire_plugin/service/onboarding.dart';
+import 'package:rokwire_plugin/service/localization.dart';
 import 'package:illinois/ui/onboarding/OnboardingBackButton.dart';
-import 'package:illinois/service/Styles.dart';
-import 'package:illinois/ui/widgets/ScalableWidgets.dart';
-import 'package:illinois/ui/widgets/SwipeDetector.dart';
+import 'package:rokwire_plugin/service/styles.dart';
+import 'package:rokwire_plugin/ui/widgets/rounded_button.dart';
+import 'package:rokwire_plugin/ui/widgets/swipe_detector.dart';
 
 class OnboardingAuthLocationPanel extends StatelessWidget with OnboardingPanel {
-  final Map<String, dynamic> onboardingContext;
+  final Map<String, dynamic>? onboardingContext;
   OnboardingAuthLocationPanel({this.onboardingContext});
 
   @override
@@ -36,7 +35,7 @@ class OnboardingAuthLocationPanel extends StatelessWidget with OnboardingPanel {
         'panel.onboarding.location.button.dont_allow.title',
         'Not right now');
     return Scaffold(
-        backgroundColor: Styles().colors.background,
+        backgroundColor: Styles().colors!.background,
         body: SwipeDetector(
             onSwipeLeft: () => _goNext(context),
             onSwipeRight: () => _goBack(context),
@@ -55,7 +54,7 @@ class OnboardingAuthLocationPanel extends StatelessWidget with OnboardingPanel {
                       OnboardingBackButton(
                         padding: const EdgeInsets.only(left: 10, top: 30, right: 20, bottom: 20),
                         onTap:() {
-                          Analytics.instance.logSelect(target: "Back");
+                          Analytics().logSelect(target: "Back");
                           _goBack(context);
                         }),
                     ]),
@@ -71,9 +70,9 @@ class OnboardingAuthLocationPanel extends StatelessWidget with OnboardingPanel {
                               child: Text(titleText,
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                    fontFamily: Styles().fontFamilies.bold,
+                                    fontFamily: Styles().fontFamilies!.bold,
                                     fontSize: 32,
-                                    color: Styles().colors.fillColorPrimary),
+                                    color: Styles().colors!.fillColorPrimary),
                               )),
                         )),
                     Container(
@@ -86,12 +85,12 @@ class OnboardingAuthLocationPanel extends StatelessWidget with OnboardingPanel {
                         child: Text(
                           Localization().getStringEx(
                               'panel.onboarding.location.label.description',
-                              "Share your location to know what's nearest to you while on campus. Bluetooth-enabled features such as Quick Polls require permission to access your location in the background."),
+                              "Share your location to know what's nearest to you while on campus."),
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                              fontFamily: Styles().fontFamilies.regular,
+                              fontFamily: Styles().fontFamilies!.regular,
                               fontSize: 20,
-                              color: Styles().colors.fillColorPrimary),
+                              color: Styles().colors!.fillColorPrimary),
                         ),
                       )),
                     ]),
@@ -101,21 +100,21 @@ class OnboardingAuthLocationPanel extends StatelessWidget with OnboardingPanel {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    ScalableRoundedButton(
+                    RoundedButton(
                       label: Localization().getStringEx(
                           'panel.onboarding.location.button.allow.title',
                           'Share my Location'),
                       hint: Localization().getStringEx(
                           'panel.onboarding.location.button.allow.hint',
                           ''),
-                      borderColor: Styles().colors.fillColorSecondary,
-                      backgroundColor: Styles().colors.background,
-                      textColor: Styles().colors.fillColorPrimary,
+                      borderColor: Styles().colors!.fillColorSecondary,
+                      backgroundColor: Styles().colors!.background,
+                      textColor: Styles().colors!.fillColorPrimary,
                       onTap: () => _requestLocation(context),
                     ),
                     GestureDetector(
                       onTap: () {
-                        Analytics.instance.logSelect(target: 'Not right now') ;
+                        Analytics().logSelect(target: 'Not right now') ;
                         return  _goNext(context);
                       },
                       child: Semantics(
@@ -130,11 +129,11 @@ class OnboardingAuthLocationPanel extends StatelessWidget with OnboardingPanel {
                               child: Text(
                                 notRightNow,
                                 style: TextStyle(
-                                    fontFamily: Styles().fontFamilies.medium,
+                                    fontFamily: Styles().fontFamilies!.medium,
                                     fontSize: 16,
-                                    color: Styles().colors.fillColorPrimary,
+                                    color: Styles().colors!.fillColorPrimary,
                                     decoration: TextDecoration.underline,
-                                    decorationColor: Styles().colors.fillColorSecondary,
+                                    decorationColor: Styles().colors!.fillColorSecondary,
                                     decorationThickness: 1,
                                     decorationStyle:
                                         TextDecorationStyle.solid),
@@ -148,28 +147,28 @@ class OnboardingAuthLocationPanel extends StatelessWidget with OnboardingPanel {
   }
 
   void _requestLocation(BuildContext context) async {
-    Analytics.instance.logSelect(target: 'Share My locaiton') ;
-    await LocationServices.instance.status.then((LocationServicesStatus status){
-      if (status == LocationServicesStatus.ServiceDisabled) {
-        LocationServices.instance.requestService();
+    Analytics().logSelect(target: 'Share My locaiton') ;
+    await LocationServices().status.then((LocationServicesStatus? status){
+      if (status == LocationServicesStatus.serviceDisabled) {
+        LocationServices().requestService();
       }
-      else if (status == LocationServicesStatus.PermissionNotDetermined) {
-        LocationServices.instance.requestPermission().then((LocationServicesStatus status) {
+      else if (status == LocationServicesStatus.permissionNotDetermined) {
+        LocationServices().requestPermission().then((LocationServicesStatus? status) {
           _goNext(context);
         });
       }
-      else if (status == LocationServicesStatus.PermissionDenied) {
+      else if (status == LocationServicesStatus.permissionDenied) {
         String message = Localization().getStringEx('panel.onboarding.location.label.access_denied', 'You have already denied access to this app.');
         showDialog(context: context, builder: (context) => _buildDialogWidget(context, message:message, pushNext : false ));
       }
-      else if (status == LocationServicesStatus.PermissionAllowed) {
+      else if (status == LocationServicesStatus.permissionAllowed) {
         String message = Localization().getStringEx('panel.onboarding.location.label.access_granted', 'You have already granted access to this app.');
         showDialog(context: context, builder: (context) => _buildDialogWidget(context, message:message, pushNext : true ));
       }
     });
   }
 
-  Widget _buildDialogWidget(BuildContext context, {String message, bool pushNext}) {
+  Widget _buildDialogWidget(BuildContext context, {required String message, bool? pushNext}) {
     String okTitle = Localization().getStringEx('dialog.ok.title', 'OK');
     return Dialog(
       child: Padding(
@@ -187,7 +186,7 @@ class OnboardingAuthLocationPanel extends StatelessWidget with OnboardingPanel {
                 message,
                 textAlign: TextAlign.left,
                 style: TextStyle(
-                    fontFamily: Styles().fontFamilies.medium,
+                    fontFamily: Styles().fontFamilies!.medium,
                     fontSize: 16,
                     color: Colors.black),
               ),
@@ -197,8 +196,8 @@ class OnboardingAuthLocationPanel extends StatelessWidget with OnboardingPanel {
               children: <Widget>[
                 TextButton(
                     onPressed: () {
-                      Analytics.instance.logAlert(text: message, selection:okTitle);
-                      if (pushNext) {
+                      Analytics().logAlert(text: message, selection:okTitle);
+                      if (pushNext!) {
                         _goNext(context, replace : true);
                       }
                       else {

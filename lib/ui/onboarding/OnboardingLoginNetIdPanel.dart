@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:illinois/service/Auth2.dart';
+import 'package:rokwire_plugin/service/auth2.dart';
 import 'package:illinois/service/FlexUI.dart';
-import 'package:illinois/service/Onboarding.dart';
-import 'package:illinois/service/Localization.dart';
+import 'package:rokwire_plugin/service/onboarding.dart';
+import 'package:rokwire_plugin/service/localization.dart';
 import 'package:illinois/service/Analytics.dart';
 import 'package:illinois/ui/onboarding/OnboardingBackButton.dart';
-import 'package:illinois/service/Styles.dart';
+import 'package:rokwire_plugin/service/styles.dart';
 import 'package:illinois/ui/onboarding2/Onboarding2Widgets.dart';
-import 'package:illinois/ui/widgets/ScalableWidgets.dart';
+import 'package:rokwire_plugin/ui/widgets/rounded_button.dart';
 
 class OnboardingLoginNetIdPanel extends StatefulWidget with OnboardingPanel {
-  final Map<String, dynamic> onboardingContext;
+  final Map<String, dynamic>? onboardingContext;
   OnboardingLoginNetIdPanel({this.onboardingContext});
   _OnboardingLoginNetIdPanelState createState() => _OnboardingLoginNetIdPanelState();
 }
@@ -48,9 +47,9 @@ class _OnboardingLoginNetIdPanelState extends State<OnboardingLoginNetIdPanel> {
   @override
   Widget build(BuildContext context) {
     String titleString = Localization().getStringEx('panel.onboarding.login.netid.label.title', 'Connect your NetID');
-    String skipTitle = Localization().getStringEx('panel.onboarding.login.netid.button.dont_continue.title', 'Not right now');
+    String? skipTitle = Localization().getStringEx('panel.onboarding.login.netid.button.dont_continue.title', 'Not right now');
     return Scaffold(
-        backgroundColor: Styles().colors.background,
+        backgroundColor: Styles().colors!.background,
         body: Stack(
           children: <Widget>[
         Column(children: [
@@ -70,7 +69,7 @@ class _OnboardingLoginNetIdPanelState extends State<OnboardingLoginNetIdPanel> {
                       OnboardingBackButton(
                           padding: const EdgeInsets.only(left: 10, top: 30, right: 20, bottom: 20),
                           onTap: () {
-                            Analytics.instance.logSelect(target: "Back");
+                            Analytics().logSelect(target: "Back");
                             Navigator.pop(context);
                           }),
                     ],
@@ -86,7 +85,7 @@ class _OnboardingLoginNetIdPanelState extends State<OnboardingLoginNetIdPanel> {
                         padding: EdgeInsets.symmetric(horizontal: 18),
                         child: Center(
                           child: Text(titleString,
-                              textAlign: TextAlign.center, style: TextStyle(fontFamily: Styles().fontFamilies.bold, fontSize: 36, color: Styles().colors.fillColorPrimary)),
+                              textAlign: TextAlign.center, style: TextStyle(fontFamily: Styles().fontFamilies!.bold, fontSize: 36, color: Styles().colors!.fillColorPrimary)),
                         )),
                   ),
                   Container(
@@ -95,7 +94,7 @@ class _OnboardingLoginNetIdPanelState extends State<OnboardingLoginNetIdPanel> {
                   Padding(
                       padding: EdgeInsets.symmetric(horizontal: 32),
                       child: Text(Localization().getStringEx('panel.onboarding.login.netid.label.description', 'Log in with your NetID to use academic and residence hall specific features.'),
-                          textAlign: TextAlign.center, style: TextStyle(fontFamily: Styles().fontFamilies.regular, fontSize: 20, color: Styles().colors.fillColorPrimary))),
+                          textAlign: TextAlign.center, style: TextStyle(fontFamily: Styles().fontFamilies!.regular, fontSize: 20, color: Styles().colors!.fillColorPrimary))),
                   Container(
                     height: 32,
                   ),
@@ -106,14 +105,14 @@ class _OnboardingLoginNetIdPanelState extends State<OnboardingLoginNetIdPanel> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                ScalableRoundedButton(
+                RoundedButton(
                   label: Localization().getStringEx('panel.onboarding.login.netid.button.continue.title', 'Sign in with NetID'),
                   hint: Localization().getStringEx('panel.onboarding.login.netid.button.continue.hint', ''),
                   fontSize: 16,
-                  padding: EdgeInsets.symmetric(vertical: 12),
-                  borderColor: Styles().colors.fillColorSecondary,
-                  backgroundColor: Styles().colors.white,
-                  textColor: Styles().colors.fillColorPrimary,
+                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  borderColor: Styles().colors!.fillColorSecondary,
+                  backgroundColor: Styles().colors!.white,
+                  textColor: Styles().colors!.fillColorPrimary,
                   onTap: _onLoginTapped,
                 ),
                 Onboarding2UnderlinedButton(
@@ -131,7 +130,7 @@ class _OnboardingLoginNetIdPanelState extends State<OnboardingLoginNetIdPanel> {
                       alignment: Alignment.bottomCenter,
                       child: Padding(
                         padding: EdgeInsets.all(24),
-                        child: ScalableRoundedButton(
+                        child: RoundedButton(
                             label: Localization().getStringEx('panel.onboarding.login.netid.button.continue.title', 'Log in with NetID'),
                             hint: Localization().getStringEx('panel.onboarding.login.netid.button.continue.hint', ''),
                             borderColor: Styles().colors.fillColorSecondary,
@@ -193,9 +192,9 @@ class _OnboardingLoginNetIdPanelState extends State<OnboardingLoginNetIdPanel> {
             Padding(
               padding: EdgeInsets.symmetric(vertical: 26),
               child: Text(
-                Localization().getStringEx('panel.onboarding.login.label.login_failed', 'Unable to login. Please try again later'),
+                Localization().getStringEx('logic.general.login_failed', 'Unable to login. Please try again later.'),
                 textAlign: TextAlign.left,
-                style: TextStyle(fontFamily: Styles().fontFamilies.medium, fontSize: 16, color: Colors.black),
+                style: TextStyle(fontFamily: Styles().fontFamilies!.medium, fontSize: 16, color: Colors.black),
               ),
             ),
             Row(
@@ -203,7 +202,7 @@ class _OnboardingLoginNetIdPanelState extends State<OnboardingLoginNetIdPanel> {
               children: <Widget>[
                 TextButton(
                     onPressed: () {
-                      Analytics.instance.logAlert(text: "Unable to login", selection: "Ok");
+                      Analytics().logAlert(text: "Unable to login", selection: "Ok");
                       Navigator.pop(context);
                       //_finish();
                     },
@@ -217,36 +216,40 @@ class _OnboardingLoginNetIdPanelState extends State<OnboardingLoginNetIdPanel> {
   }
 
   void _onLoginTapped() {
-    Analytics.instance.logSelect(target: 'Log in with NetID');
-    setState(() { _progress = true; });
-    Auth2().authenticateWithOidc().then((bool result) {
-      if (mounted) {
-        if (result == true) {
-          FlexUI().update().then((_){
+    Analytics().logSelect(target: 'Log in with NetID');
+    if (_progress != true) {
+      setState(() { _progress = true; });
+      Auth2().authenticateWithOidc().then((bool? result) {
+        if (mounted) {
+          if (result == true) {
+            FlexUI().update().then((_) {
+              if (mounted) {
+                setState(() { _progress = false; });
+                Function? onSuccess = (widget.onboardingContext != null) ? widget.onboardingContext!["onContinueAction"] : null; // Hook this panels to Onboarding2
+                if (onSuccess != null) {
+                  onSuccess();
+                } else {
+                  Onboarding().next(context, widget);
+                }
+              }
+            });
+          }
+          else if (result == false) {
             setState(() { _progress = false; });
-            Function onSuccess = (widget.onboardingContext != null) ? widget.onboardingContext["onContinueAction"] : null; // Hook this panels to Onboarding2
-            if (onSuccess != null) {
-              onSuccess();
-            } else {
-              Onboarding().next(context, widget);
-            }
-          });
+            showDialog(context: context, builder: (context) => _buildDialogWidget(context));
+          }
+          else {
+            // login canceled
+            setState(() { _progress = false; });
+          }
         }
-        else if (result == false) {
-          setState(() { _progress = false; });
-          showDialog(context: context, builder: (context) => _buildDialogWidget(context));
-        }
-        else {
-          // login canceled
-          setState(() { _progress = false; });
-        }
-      }
-    });
+      });
+    }
   }
 
   void _onSkipTapped() {
-    Analytics.instance.logSelect(target: 'Not right now');
-    Function onSuccess = widget.onboardingContext!=null? widget.onboardingContext["onContinueAction"] : null; // Hook this panels to Onboarding2
+    Analytics().logSelect(target: 'Not right now');
+    Function? onSuccess = widget.onboardingContext!=null? widget.onboardingContext!["onContinueAction"] : null; // Hook this panels to Onboarding2
     if(onSuccess!=null){
       onSuccess();
     } else {
