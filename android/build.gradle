@@ -15,6 +15,7 @@
  */
 
 buildscript {
+    ext.kotlin_version = '1.6.10'
     ext {
         gradle_version = '4.2.2'
     }
@@ -27,6 +28,7 @@ buildscript {
         classpath 'com.google.gms:google-services:4.3.4'
         classpath "com.android.tools.build:gradle:$gradle_version"
         classpath 'com.google.firebase:firebase-crashlytics-gradle:2.4.1'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 

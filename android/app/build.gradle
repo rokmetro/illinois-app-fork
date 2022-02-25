@@ -53,6 +53,11 @@ if (keysPropertiesFile.exists()) {
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.google.firebase.crashlytics'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
+apply plugin: 'kotlin-android'
+
+sourceSets {
+    main.java.srcDirs += 'src/main/kotlin'
+}
 
 repositories{
     maven { url 'http://maven.mapsindoors.com/' }
@@ -60,7 +65,7 @@ repositories{
 }
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 31
 
     lintOptions {
         disable 'InvalidPackage'
@@ -136,6 +141,7 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
     //Common dependencies
     implementation 'com.google.android.material:material:1.1.0'
