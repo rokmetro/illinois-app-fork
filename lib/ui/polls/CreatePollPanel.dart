@@ -16,9 +16,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:illinois/ui/groups/GroupWidgets.dart';
 import 'package:rokwire_plugin/model/group.dart';
 import 'package:rokwire_plugin/model/poll.dart';
 import 'package:rokwire_plugin/service/auth2.dart';
+import 'package:rokwire_plugin/service/groups.dart';
 import 'package:rokwire_plugin/service/localization.dart';
 import 'package:illinois/utils/AppUtils.dart';
 import 'package:rokwire_plugin/service/log.dart';
@@ -50,6 +52,8 @@ class _CreatePollPanelState extends State<CreatePollPanel> {
   bool _selectedRepeatVotes = false;
   bool _selectedHideResult = false;
   PollStatus? _progressPollStatus;
+  //Groups
+  List<Member>? _groupMembersSelection;
 
   @override
   void initState() {
@@ -82,6 +86,7 @@ class _CreatePollPanelState extends State<CreatePollPanel> {
                 _buildOptionsList(),
                 _buildSettingsHeader(),
                 _buildSettingsList(),
+                _buildGroupMembersSelection(),
                 _buildButtonsTab()
               ])))));
   }
@@ -150,7 +155,7 @@ class _CreatePollPanelState extends State<CreatePollPanel> {
         hint: Localization().getStringEx("panel.create_poll.hint.question", "Ask people near you…"),
         textController: _questionController,
         maxLength: 120,
-        height: 120,
+        minLines: 3,
         enabled: (_progressPollStatus == null),
       )),
     );
@@ -266,6 +271,21 @@ class _CreatePollPanelState extends State<CreatePollPanel> {
         ));
   }
 
+  Widget _buildGroupMembersSelection(){
+    return Container(
+        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        color: Colors.white,
+        child: GroupMembersSelectionWidget(
+        selectedMembers: _groupMembersSelection,
+        allMembers: GroupMembersSelectionWidget.constructAllMembersAllowedToPost(widget.group),
+        groupId: widget.group?.id,
+        onSelectionChanged: (members){
+          setState(() {
+            _groupMembersSelection = members;
+          });
+        },));
+  }
+
   List<Widget> _buildSettingsButtons() {
     TextStyle _textStyle = TextStyle(color: Styles().colors!.fillColorPrimary, fontSize: 16, fontFamily: Styles().fontFamilies!.medium);
     BorderRadius rounding = BorderRadius.all(Radius.circular(5));
@@ -322,44 +342,40 @@ class _CreatePollPanelState extends State<CreatePollPanel> {
   Widget _buildButtonsTab() {
     return Container(
         child: Padding(
-      padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: 16),
-      child: Container(
-          child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Expanded(child:
-            RoundedButton(
-              label: Localization().getStringEx("panel.create_poll.setting.button.save.title", "Save"),
-              backgroundColor: Colors.white,
-              borderColor: Styles().colors!.fillColorPrimary,
-              textColor: Styles().colors!.fillColorPrimary,
-              progress: (_progressPollStatus == PollStatus.created),
-              onTap: () {
-                _onCreatePoll(status: PollStatus.created);
-              },
-//                  height: 48,
-            ),
-          ),
-          Container(
-            width: 6,
-          ),
-          Expanded(child:
-            RoundedButton(
-              label: Localization().getStringEx("panel.create_poll.setting.start.preview.title", "Start Poll"),
-              backgroundColor: Colors.white,
-              borderColor: Styles().colors!.fillColorSecondary,
-              textColor: Styles().colors!.fillColorPrimary,
-              progress: (_progressPollStatus == PollStatus.opened),
-              onTap: () {
-                _onCreatePoll(status: PollStatus.opened);
-              },
-//                height: 48,
-            ),
-          ),
-        ],
-      )),
-    ));
+            padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: 16),
+            child: Container(
+                child: Column(children: [
+              Row(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: <Widget>[
+                Expanded(
+                    child: RoundedButton(
+                        label: Localization().getStringEx("panel.create_poll.setting.button.save.title", "Save"),
+                        backgroundColor: Colors.white,
+                        borderColor: Styles().colors!.fillColorPrimary,
+                        textColor: Styles().colors!.fillColorPrimary,
+                        progress: (_progressPollStatus == PollStatus.created),
+                        onTap: () {
+                          _onCreatePoll(status: PollStatus.created);
+                        })),
+                Container(width: 6),
+                Expanded(
+                    child: RoundedButton(
+                        label: Localization().getStringEx("panel.create_poll.setting.start.preview.title", "Start Poll"),
+                        backgroundColor: Colors.white,
+                        borderColor: Styles().colors!.fillColorSecondary,
+                        textColor: Styles().colors!.fillColorPrimary,
+                        progress: (_progressPollStatus == PollStatus.opened),
+                        onTap: () {
+                          _onCreatePoll(status: PollStatus.opened);
+                        }))
+              ]),
+              Padding(
+                  padding: EdgeInsets.only(top: 10),
+                  child: Text(
+                    Localization()
+                        .getStringEx("panel.create_poll.description.non_editable.text", "Once started, you can no longer edit the poll."),
+                    style: TextStyle(color: Styles().colors!.textBackground, fontSize: 14, fontFamily: Styles().fontFamilies!.regular),
+                  ))
+            ]))));
   }
 
   void _onTapCancel() {
@@ -435,8 +451,14 @@ class _CreatePollPanelState extends State<CreatePollPanel> {
       setState(() {
         _progressPollStatus = status;
       });
-      Polls().create(poll).then((_){
-        Navigator.pop(context);
+      Polls().create(poll).then((Poll poll){
+        if(widget.group?.id != null && poll.pollId != null) {
+          Groups().linkPollToGroup(groupId: widget.group!.id!, pollId: poll.pollId!, toMembers: _groupMembersSelection).then((success) {
+            Navigator.pop(context);
+          });
+        } else {
+          Navigator.pop(context);
+        }
       }).catchError((e){
         Log.d(e);
         String? errorMessage = Localization().getStringEx("panel.create_poll.message.error.default", "Failed to create poll. Please fill all fields and try again.");
@@ -460,10 +482,11 @@ class PollOptionView extends StatefulWidget {
   final String? hint;
   final TextEditingController? textController;
   final int maxLength;
-  final double height;
+  final int minLines;
+  final int maxLines;
   final bool enabled;
 
-  const PollOptionView({Key? key, this.title, this.textController, this.maxLength = 25, this.height = 48, this.hint, this.enabled = true}) : super(key: key);
+  const PollOptionView({Key? key, this.title, this.textController, this.maxLength = 45, this.minLines = 1, this.maxLines = 10, this.hint, this.enabled = true}) : super(key: key);
 
   @override
   _PollOptionViewState createState() {
@@ -478,45 +501,29 @@ class _PollOptionViewState extends State<PollOptionView> {
   Widget build(BuildContext context) {
     String counterHint = Localization().getStringEx("panel.create_poll_panel.counter.hint", "maximum, %s, characters");
     String votesCount = widget.maxLength.toStringAsFixed(0);
-    return Container(
-        child: Column(
-      children: <Widget>[
-        Semantics(label: widget.title,hint: sprintf(counterHint,['$votesCount']) ,excludeSemantics: true,child:
-        Padding(
-            padding: EdgeInsets.only(bottom: 8, top: 24),
-            child: Row(children: <Widget>[
-              Expanded(
-                  child: Text(
-                widget.title!,
-                textAlign: TextAlign.left,
-                style: TextStyle(color: Styles().colors!.fillColorPrimary, fontSize: 12, fontFamily: Styles().fontFamilies!.bold, letterSpacing: 0.86),
-              )),
-              Text(
-                _getCounterText(),
-                style: TextStyle(
-                  color: Styles().colors!.mediumGray,
-                  fontSize: 14,
-                  fontFamily: Styles().fontFamilies!.regular,
-                ),
-              )
-            ]))),
+    return Column(children: <Widget>[
+        Semantics(label: widget.title, hint: sprintf(counterHint,['$votesCount']) , excludeSemantics: true, child:
+          Padding(padding: EdgeInsets.only(bottom: 8, top: 24), child:
+            Row(children: <Widget>[
+              Expanded(child:
+                Text(widget.title!, textAlign: TextAlign.left, style: TextStyle(color: Styles().colors!.fillColorPrimary, fontSize: 12, fontFamily: Styles().fontFamilies!.bold, letterSpacing: 0.86),
+                )
+              ),
+              Text(_getCounterText(), style: TextStyle( color: Styles().colors!.mediumGray, fontSize: 14, fontFamily: Styles().fontFamilies!.regular, ), )
+            ])
+          )
+        ),
         Container(
           padding: EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(border: Border.all(color: Styles().colors!.fillColorPrimary!, width: 1)),
-          height: widget.height/2 + (16*MediaQuery.of(context).textScaleFactor),
-          width: double.infinity,
-          child: Semantics(
-              label: widget.title,
-              hint: Localization().getStringEx("panel.create_poll_panel.hint", ""),
-              textField: true,
-              excludeSemantics: true,
-              child: TextField(
+          child: Semantics(label: widget.title, hint: Localization().getStringEx("panel.create_poll_panel.hint", ""), textField: true, excludeSemantics: true, child:
+            TextField(
                 controller: widget.textController,
                 onChanged: (String text) {
                   setState(() {});
                 },
-                minLines: 4,
-                maxLines: 10,
+                minLines: widget.minLines,
+                maxLines: widget.maxLength,
                 decoration: InputDecoration(hintText: widget.hint, border: InputBorder.none, counterText: ""),
                 maxLength: widget.maxLength,
                 maxLengthEnforcement: MaxLengthEnforcement.enforced,
@@ -526,7 +533,7 @@ class _PollOptionViewState extends State<PollOptionView> {
               )),
         )
       ],
-    ));
+    );
   }
 
   _getCounterText() {

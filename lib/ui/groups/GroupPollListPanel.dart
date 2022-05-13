@@ -19,12 +19,13 @@ import 'package:rokwire_plugin/model/group.dart';
 import 'package:illinois/ext/Group.dart';
 import 'package:rokwire_plugin/model/poll.dart';
 import 'package:illinois/service/Analytics.dart';
+import 'package:rokwire_plugin/service/groups.dart';
 import 'package:rokwire_plugin/service/localization.dart';
 import 'package:rokwire_plugin/service/notification_service.dart';
 import 'package:rokwire_plugin/service/polls.dart';
 import 'package:rokwire_plugin/service/styles.dart';
 import 'package:illinois/ui/widgets/HeaderBar.dart';
-import 'package:illinois/ui/widgets/TabBarWidget.dart';
+import 'package:illinois/ui/widgets/TabBar.dart' as uiuc;
 import 'package:illinois/ui/groups/GroupWidgets.dart';
 import 'package:rokwire_plugin/utils/utils.dart';
 import 'package:illinois/service/Polls.dart' as illinois;
@@ -43,7 +44,7 @@ class GroupPollListPanel extends StatefulWidget implements AnalyticsPageAttribut
 
 class _GroupPollListPanelState extends State<GroupPollListPanel> implements NotificationsListener {
   List<Poll>? _polls;
-  String? _pollsCursor;
+  PollsCursor? _pollsCursor;
   String? _pollsError;
   bool _pollsLoading = false;
 
@@ -71,7 +72,7 @@ class _GroupPollListPanelState extends State<GroupPollListPanel> implements Noti
           ]))
         ]),
         backgroundColor: Styles().colors!.background,
-        bottomNavigationBar: TabBarWidget());
+        bottomNavigationBar: uiuc.TabBar());
   }
 
   Widget _buildPollsContent() {
@@ -153,7 +154,7 @@ class _GroupPollListPanelState extends State<GroupPollListPanel> implements Noti
       String? groupId = widget.group.id;
       if (StringUtils.isNotEmpty(groupId)) {
         _setGroupPollsLoading(true);
-        Polls().getGroupPolls([groupId!], cursor: _pollsCursor)?.then((PollsChunk? result) {
+        Groups().loadGroupPolls({groupId!}, cursor: _pollsCursor)?.then((PollsChunk? result) {
           if (result != null) {
             if (_polls == null) {
               _polls = [];
