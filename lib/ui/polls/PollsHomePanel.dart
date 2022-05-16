@@ -91,7 +91,7 @@ class _PollsHomePanelState extends State<PollsHomePanel> implements Notification
     _recentLocalPolls = Polls().localRecentPolls();
     _selectPollType(_couldCreatePoll ? _PollType.values[Storage().selectedPollType ?? 0] : _PollType.recentPolls);
 
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       _evalBleDescriptionHeight();
     });
 
@@ -854,7 +854,7 @@ class _PollCardState extends State<_PollCard>{
 
   @override
   void initState() {
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       _evalProgressWidths();
     });
     super.initState();
@@ -883,7 +883,7 @@ class _PollCardState extends State<_PollCard>{
       pollStatus = Localization().getStringEx("panel.polls_home.card.state.text.open","Polls open");
       if (_canVote) {
         footerWidgets.add(_createVoteButton());
-        footerWidgets.add(Container(height:8));  
+        footerWidgets.add(Container(height:8));
       }
       if (poll.isMine) {
         footerWidgets.add(_createEndPollButton());

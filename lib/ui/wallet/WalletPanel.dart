@@ -69,7 +69,7 @@ class _WalletPanelState extends State<WalletPanel> implements NotificationsListe
     _loadLibraryBarcode();
 
     if (widget.ensureVisibleCard != null) {
-      WidgetsBinding.instance!.addPostFrameCallback((_) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
         _ensureVisibleCard(widget.ensureVisibleCard);
       });
     }

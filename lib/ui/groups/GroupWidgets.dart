@@ -807,7 +807,7 @@ class _GroupCardState extends State<GroupCard> {
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       _evalContentSize();
     });
   }
@@ -2059,7 +2059,7 @@ class _GroupPollVoteCardState extends State<GroupPollVoteCard> implements Notifi
       Polls.notifyVoteChanged,
       Polls.notifyStatusChanged,
     ]);
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       _evalProgressWidths();
     });
     super.initState();
@@ -2596,7 +2596,7 @@ class _GroupPollCardState extends State<GroupPollCard>{
 
   @override
   void initState() {
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       _evalProgressWidths();
     });
     super.initState();

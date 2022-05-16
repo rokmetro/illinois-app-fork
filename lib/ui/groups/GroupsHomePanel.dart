@@ -680,7 +680,7 @@ class _GroupTabButtonState extends State<_GroupTabButton> {
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       _evalContentSize();
     });
   }
