@@ -1080,7 +1080,7 @@ class _SettingsHomePanelState extends State<SettingsHomePanel> implements Notifi
       RoundedButton(
         backgroundColor: Styles().colors!.white,
         borderColor: Styles().colors!.white,
-        textColor: UiColors.fromHex("#f54400"),
+        textColor: Styles().colors?.fillColorSecondary,
         fontSize: 16,
         fontFamily: Styles().fontFamilies!.regular,
         label: Localization().getStringEx("panel.settings.privacy_center.button.delete_data.title", "Delete My Account"),

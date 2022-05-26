@@ -326,7 +326,7 @@ class _BrowsePanelState extends State<BrowsePanel> with AutomaticKeepAliveClient
   Widget? _buildBrowseSecondaryEntry(String code) {
     if (code == 'settings') {
       return _RibbonButton(
-        icon: Image.asset('images/icon-settings.png'),
+        icon: 'images/icon-settings.png',
         title: Localization().getStringEx("panel.browse.button.settings.title","Settings"),
         hint: Localization().getStringEx("panel.browse.button.settings.hint",""),
         padding: _ribbonButtonPadding,
@@ -335,8 +335,8 @@ class _BrowsePanelState extends State<BrowsePanel> with AutomaticKeepAliveClient
     }
     else if (code == 'my_illini') {
       return _RibbonButton(
-        icon: Image.asset('images/icon-my-illini.png'),
-        accessoryIcon: Image.asset('images/link-out.png'),
+        icon: 'images/icon-my-illini.png',
+        accessoryIcon: 'images/link-out.png',
         title: Localization().getStringEx('panel.browse.button.my_illini.title', 'My Illini'),
         hint: Localization().getStringEx('panel.browse.button.my_illini.hint', ''),
         padding: _ribbonButtonPadding,
@@ -345,7 +345,7 @@ class _BrowsePanelState extends State<BrowsePanel> with AutomaticKeepAliveClient
     }
     else if (code == 'illini_cash') {
       return _RibbonButton(
-        icon: Image.asset('images/icon-cost.png'),
+        icon: 'images/icon-cost.png',
         title: Localization().getStringEx('panel.browse.button.illini_cash.title', 'Illini Cash'),
         hint: Localization().getStringEx('panel.browse.button.illini_cash.hint', ''),
         padding: _ribbonButtonPadding,
@@ -356,14 +356,14 @@ class _BrowsePanelState extends State<BrowsePanel> with AutomaticKeepAliveClient
       return _RibbonButton(
         title: Localization().getStringEx('panel.browse.button.add_illini_cash.title', 'Add Illini Cash'),
         hint: Localization().getStringEx('panel.browse.button.add_illini_cash.hint', ''),
-        icon: Image.asset('images/icon-illini-cash.png'),
+        icon: 'images/icon-illini-cash.png',
         padding: _ribbonButtonPadding,
         onTap: () => _navigateToAddIlliniCash(),
       );
     }
     else if (code == 'meal_plan') {
       return _RibbonButton(
-        icon: Image.asset('images/icon-dining-orange.png'),
+        icon: 'images/icon-dining-orange.png',
         title: Localization().getStringEx('panel.browse.button.meal_plan.title', 'Meal Plan'),
         hint: Localization().getStringEx('panel.browse.button.meal_plan.hint', ''),
         padding: _ribbonButtonPadding,
@@ -372,7 +372,7 @@ class _BrowsePanelState extends State<BrowsePanel> with AutomaticKeepAliveClient
     }
     else if (code == 'laundry') {
       return _RibbonButton(
-        icon: Image.asset('images/icon-washer.png'),
+        icon: 'images/icon-washer.png',
         title: Localization().getStringEx('panel.browse.button.laundry.title', 'Laundry'),
         hint: Localization().getStringEx('panel.browse.button.laundry.hint', ''),
         padding: _ribbonButtonPadding,
@@ -381,7 +381,7 @@ class _BrowsePanelState extends State<BrowsePanel> with AutomaticKeepAliveClient
     }
     else if (code == 'parking') {
       return _RibbonButton(
-        icon: Image.asset('images/icon-parking.png'),
+        icon: 'images/icon-parking.png',
         title: Localization().getStringEx('panel.browse.button.parking.title', 'State Farm Event Parking'),
         hint: Localization().getStringEx('panel.browse.button.parking.hint',''),
         padding: _ribbonButtonPadding,
@@ -390,7 +390,7 @@ class _BrowsePanelState extends State<BrowsePanel> with AutomaticKeepAliveClient
     }
     else if (code == 'create_event') {
       return _RibbonButton(
-        icon: Image.asset('images/icon-create-event.png'),
+        icon: 'images/icon-create-event.png',
         title: Localization().getStringEx('panel.browse.button.create_event.title', 'Create an event'),
         hint: Localization().getStringEx('panel.browse.button.create_event.hint', ''),
         padding: _ribbonButtonPadding,
@@ -399,7 +399,7 @@ class _BrowsePanelState extends State<BrowsePanel> with AutomaticKeepAliveClient
     }
     else if (code == 'create_stadium_poll') {
       return _RibbonButton(
-        icon: Image.asset('images/icon-settings.png'),
+        icon: 'images/icon-settings.png',
         title: Localization().getStringEx('panel.browse.button.create_stadium_poll.title', 'Create Stadium Poll'),
         hint: Localization().getStringEx('panel.browse.button.create_stadium_poll.hint',''),
         padding: _ribbonButtonPadding,
@@ -408,7 +408,7 @@ class _BrowsePanelState extends State<BrowsePanel> with AutomaticKeepAliveClient
     }
     else if (code == 'state_farm_wayfinding') {
       return _RibbonButton(
-        icon: Image.asset('images/icon-settings.png'),
+        icon: 'images/icon-settings.png',
         title: Localization().getStringEx('panel.browse.button.state_farm_wayfinding.title', 'State Farm Wayfinding'),
         hint: Localization().getStringEx('panel.browse.button.state_farm_wayfinding.hint',''),
         padding: _ribbonButtonPadding,
@@ -417,8 +417,8 @@ class _BrowsePanelState extends State<BrowsePanel> with AutomaticKeepAliveClient
     }
     else if (code == 'feedback') {
       return _RibbonButton(
-        icon: Image.asset('images/icon-feedback.png'),
-        accessoryIcon: Image.asset('images/link-out.png'),
+        icon: 'images/icon-feedback.png',
+        accessoryIcon: 'images/link-out.png',
         title: Localization().getStringEx('panel.browse.button.feedback.title', 'Provide Feedback'),
         hint: Localization().getStringEx('panel.browse.button.feedback.hint', ''),
         padding: _ribbonButtonPadding,
@@ -427,8 +427,8 @@ class _BrowsePanelState extends State<BrowsePanel> with AutomaticKeepAliveClient
     }
     else if ((code == 'faqs') && _canFAQs) {
       return _RibbonButton(
-        icon: Image.asset('images/icon-faqs.png'),
-        accessoryIcon: Image.asset('images/link-out.png'),
+        icon: 'images/icon-faqs.png',
+        accessoryIcon: 'images/link-out.png',
         title: Localization().getStringEx('panel.browse.button.faqs.title', 'FAQs'),
         hint: Localization().getStringEx('panel.browse.button.faqs.hint', ''),
         padding: _ribbonButtonPadding,
@@ -437,8 +437,8 @@ class _BrowsePanelState extends State<BrowsePanel> with AutomaticKeepAliveClient
     }
     else if ((code == 'date_cat') && _canDateCat) {
       return _RibbonButton(
-        icon: Image.asset('images/icon-settings.png'),
-        accessoryIcon: Image.asset('images/link-out.png'),
+        icon: 'images/icon-settings.png',
+        accessoryIcon: 'images/link-out.png',
         title: Localization().getStringEx('panel.browse.button.date_cat.title', 'Due Date Catalog'),
         hint: Localization().getStringEx('panel.browse.button.date_cat.hint', ''),
         padding: _ribbonButtonPadding,
@@ -447,7 +447,7 @@ class _BrowsePanelState extends State<BrowsePanel> with AutomaticKeepAliveClient
     }
     else if ((code == 'video_tutorial') && _canVideoTutorial) {
       return _RibbonButton(
-        icon: Image.asset('images/icon-settings.png'),
+        icon: 'images/icon-settings.png',
         title: Localization().getStringEx('panel.browse.button.video_tutorial.title', 'Video Tutorial'),
         hint: Localization().getStringEx('panel.browse.button.video_tutorial.hint', ''),
         padding: _ribbonButtonPadding,
@@ -792,8 +792,8 @@ class _BrowsePanelState extends State<BrowsePanel> with AutomaticKeepAliveClient
 // _RibbonButton
 
 class _RibbonButton extends StatelessWidget {
-  final Image icon;
-  final Image? accessoryIcon;
+  final String icon;
+  final String? accessoryIcon;
   final String? title;
   final String? hint;
   final GestureTapCallback? onTap;
@@ -825,7 +825,7 @@ class _RibbonButton extends StatelessWidget {
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                icon,
+                Image.asset(icon, color: Styles().colors?.fillColorSecondary, colorBlendMode: BlendMode.srcIn),
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -839,7 +839,7 @@ class _RibbonButton extends StatelessWidget {
                     ),
                   ),
                 ),
-                accessoryIcon ?? Image.asset('images/chevron-right.png')
+                Image.asset(accessoryIcon ?? 'images/chevron-right.png', color: Styles().colors?.fillColorSecondary, colorBlendMode: BlendMode.srcIn)
               ],
             ),
           ),
@@ -891,7 +891,7 @@ class _GridSquareButton extends StatelessWidget {
                     fontSize: 20,),
               ),),
               Align(alignment: Alignment.bottomRight, child:
-                Image.asset(icon!, color: color, colorBlendMode:BlendMode.multiply),
+                Image.asset(icon!, color: Styles().colors?.fillColorSecondary, colorBlendMode: BlendMode.srcIn),
               ),
               
             ],),)
