@@ -102,12 +102,13 @@ class _Onboarding2LoginPhoneOrEmailPanelState extends State<Onboarding2LoginPhon
 
     return Scaffold(backgroundColor: Styles().colors!.background, body:
       Stack(children: <Widget>[
-        Styles().images?.getImage("header-login", fit: BoxFit.fitWidth, width: MediaQuery.of(context).size.width, excludeFromSemantics: true) ?? Container(),
         SafeArea(child:
           Column(children:[
+            Container(height: 80),
+            Styles().images?.getImage("header-login", excludeFromSemantics: true) ?? Container(),
             Expanded(child:
               SingleChildScrollView(child:
-                Padding(padding: EdgeInsets.only(left: 18, right: 18, top: (148 + 24).toDouble(), bottom: 24), child:
+                Padding(padding: EdgeInsets.only(left: 18, right: 18, top: 24, bottom: 24), child:
                   Column(crossAxisAlignment: CrossAxisAlignment.start, children: <Widget>[
                     Semantics(
                       header: true,

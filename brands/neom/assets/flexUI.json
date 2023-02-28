@@ -61,14 +61,14 @@
 			"notifications.preferences": ["groups", "pause"],
 
 			"academics": ["skills_self_evaluation"],
-			"academics.skills_self_evaluation.features": ["authentication"],
+			"academics.skills_self_evaluation.features": ["authentication", "login"],
 
-			"polls.features": ["authentication"],
+			"polls.features": ["authentication", "login"],
 
 			"wellness": ["daily_tips", "rings", "todo", "health_screener", "resources", "struggling"],
 			"wellness.appointments.features": ["authentication", "netid_login"],
 			"wellness.health_screener": ["history"],
-			"wellness.health_screener.features": ["student", "authentication"],
+			"wellness.health_screener.features": ["student", "authentication", "login"],
 
 			"explore.list": ["events"],
 			"explore.map":  ["buildings"],
@@ -89,7 +89,7 @@
 			"campus_guide.features":["groups", "quick_polls", "saved"],
 
 			"features": ["analytics", "location_services", "personalization", "authentication", "notifications", "payment_information", "sharing",
-				"new_student", "student"],
+				"new_student", "student", "login", "netid_login"],
 
 			"launch":["emergency"]
 
@@ -100,9 +100,9 @@
 				"student_courses"                         : ["student"],
 
 				"onboarding.login_netid"                  : ["student", "OR", "employee"],
-				"onboarding.login_phone"                  : ["NOT", ["employee", "OR", "student"]],
-				"onboarding.verify_phone"                 : ["NOT", ["employee", "OR", "student"]],
-				"onboarding.confirm_phone"                : ["NOT", ["employee", "OR", "student"]],
+				"onboarding.login_phone"                  : null,
+				"onboarding.verify_phone"                 : null,
+				"onboarding.confirm_phone"                : null,
 
 				"onboarding.sport_prefs"                  : ["fan"],
 
@@ -186,6 +186,7 @@
 
 				"onboarding.research_questionnaire"   : { "shibbolethLoggedIn": true },
 
+				"features.login"                	  : { "loggedIn": true },
 				"features.netid_login"                : { "shibbolethLoggedIn": true }
 			},
 			"platform":{
