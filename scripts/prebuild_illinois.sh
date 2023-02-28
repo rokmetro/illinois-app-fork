@@ -1,2 +1,2 @@
 #!/bin/bash
-cp -R ./brands/neom/. ./app/
+cp -R ./brands/illinois/. ./app/

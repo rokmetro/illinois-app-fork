@@ -65,7 +65,7 @@ android {
     }
     
     defaultConfig {
-        applicationId "com.rokmetro.university.neom"
+        applicationId "edu.illinois.rokwire"
         minSdkVersion 23
         targetSdkVersion 33
         versionCode flutterVersionCode.toInteger()
@@ -127,7 +127,7 @@ android {
         }
         illinois {
             dimension "product"
-            applicationId "com.rokmetro.university.neom"
+            applicationId "edu.illinois.rokwire"
 
             def illinoisKeysProperties = new Properties()
             def illinoisKeysPropertiesFile = rootProject.file('app/src/illinois/keys.properties')
@@ -137,6 +137,19 @@ android {
                 }
             }
             manifestPlaceholders = [mapsApiKey: "${illinoisKeysProperties.getProperty('googleMapsApiKey')}"]
+        }
+        neom {
+            dimension "product"
+            applicationId "com.rokmetro.university.neom"
+
+            def keysProperties = new Properties()
+            def keysPropertiesFile = rootProject.file('app/src/neom/keys.properties')
+            if (keysPropertiesFile.exists()) {
+                keysPropertiesFile.withReader('UTF-8') { reader ->
+                    keysProperties.load(reader)
+                }
+            }
+            manifestPlaceholders = [mapsApiKey: "${keysProperties.getProperty('googleMapsApiKey')}"]
         }
     }
 
