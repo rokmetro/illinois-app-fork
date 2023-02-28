@@ -43,14 +43,14 @@
 			},
 			"home": {
 				"tout": {
-					"morning": ["https://www.neom.com/content/dam/neom/newsroom/gallery/news-en/hrh-announces-theline-designs-cover.jpg", "https://www.neom.com/content/dam/neom/newsroom/gallery/news-en/oxagon-hackathon-pr-cover.jpg", "https://www.neom.com/content/dam/neom/newsroom/gallery/news-en/the-line-exhibition-riyadh-cover.jpg", "https://www.neom.com/content/dam/neom/newsroom/gallery/news-en/progress-jan-2023-v2-gallery.jpg", "https://www.neom.com/content/dam/neom/newsroom/gallery/neom-islands/Marc-Le-Cornu_DJI_0334_Yabou_-Island_lowres_TOURISM1.jpg", "https://www.neom.com/content/dam/neom/newsroom/gallery/neom-islands/benthouard_2019_NEOM_1326_Yabou%E2%80%99%20Island_TOURISM_lowres1.JPG", "https://www.neom.com/content/dam/neom/newsroom/gallery/news-en/the-line-public-exhibition-cover.jpg"],
-					"afternoon": ["https://www.neom.com/content/dam/neom/newsroom/gallery/news-en/hrh-announces-theline-designs-cover.jpg", "https://www.neom.com/content/dam/neom/newsroom/gallery/news-en/oxagon-hackathon-pr-cover.jpg", "https://www.neom.com/content/dam/neom/newsroom/gallery/news-en/the-line-exhibition-riyadh-cover.jpg", "https://www.neom.com/content/dam/neom/newsroom/gallery/news-en/progress-jan-2023-v2-gallery.jpg", "https://www.neom.com/content/dam/neom/newsroom/gallery/neom-islands/Marc-Le-Cornu_DJI_0334_Yabou_-Island_lowres_TOURISM1.jpg", "https://www.neom.com/content/dam/neom/newsroom/gallery/neom-islands/benthouard_2019_NEOM_1326_Yabou%E2%80%99%20Island_TOURISM_lowres1.JPG", "https://www.neom.com/content/dam/neom/newsroom/gallery/news-en/the-line-public-exhibition-cover.jpg"],
-					"evening": ["https://www.neom.com/content/dam/neom/newsroom/gallery/news-en/hrh-announces-theline-designs-cover.jpg", "https://www.neom.com/content/dam/neom/newsroom/gallery/news-en/oxagon-hackathon-pr-cover.jpg", "https://www.neom.com/content/dam/neom/newsroom/gallery/news-en/the-line-exhibition-riyadh-cover.jpg", "https://www.neom.com/content/dam/neom/newsroom/gallery/news-en/progress-jan-2023-v2-gallery.jpg", "https://www.neom.com/content/dam/neom/newsroom/gallery/neom-islands/Marc-Le-Cornu_DJI_0334_Yabou_-Island_lowres_TOURISM1.jpg", "https://www.neom.com/content/dam/neom/newsroom/gallery/neom-islands/benthouard_2019_NEOM_1326_Yabou%E2%80%99%20Island_TOURISM_lowres1.JPG", "https://www.neom.com/content/dam/neom/newsroom/gallery/news-en/the-line-public-exhibition-cover.jpg"],
-					"night": ["https://www.neom.com/content/dam/neom/newsroom/gallery/news-en/hrh-announces-theline-designs-cover.jpg", "https://www.neom.com/content/dam/neom/newsroom/gallery/news-en/oxagon-hackathon-pr-cover.jpg", "https://www.neom.com/content/dam/neom/newsroom/gallery/news-en/the-line-exhibition-riyadh-cover.jpg", "https://www.neom.com/content/dam/neom/newsroom/gallery/news-en/progress-jan-2023-v2-gallery.jpg", "https://www.neom.com/content/dam/neom/newsroom/gallery/neom-islands/Marc-Le-Cornu_DJI_0334_Yabou_-Island_lowres_TOURISM1.jpg", "https://www.neom.com/content/dam/neom/newsroom/gallery/neom-islands/benthouard_2019_NEOM_1326_Yabou%E2%80%99%20Island_TOURISM_lowres1.JPG", "https://www.neom.com/content/dam/neom/newsroom/gallery/news-en/the-line-public-exhibition-cover.jpg"]
+					"morning": ["https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/morning/UI-02-140617-134.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/morning/UI-02-150411-043.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/morning/UI-02-150604-060.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/morning/UI-02-200614-281.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/morning/UI-02-200925-200.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/morning/UI-02-210802-032.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/morning/UI-02-210902-025.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/morning/UI-08-190905-001.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/morning/UI-08-190905-023.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/morning/UI-08-200116-026-sunrise.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/morning/UI-08-201006-001.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/morning/UI-08-201014-001.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/morning/UI-08-210405-003.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/morning/UI-08-210715-009.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/morning/UI-08-210728-003.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/morning/UI-08-210803-074.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/morning/UI-08-210823-012-Boneyard.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/morning/UI-08-210823-013.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/morning/UI-08-211108-072.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/morning/UI-10-220316-mh-99.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/morning/UI-FZ-220414-025.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/morning/UI-FZ-220421-006.webp"],
+					"afternoon": ["https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/afternoon/UI-02-130812-167.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/afternoon/UI-02-140805-380.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/afternoon/UI-02-160107-117.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/afternoon/UI-02-180720-962.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/afternoon/UI-02-200724-209.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/afternoon/UI-02-200923-105.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/afternoon/UI-02-200923-132.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/afternoon/UI-03-150908-000.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/afternoon/UI-04-140723-003.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/afternoon/UI-04-191020-932.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/afternoon/UI-08-190429-014.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/afternoon/UI-08-191013-142.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/afternoon/UI-08-200428-051.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/afternoon/UI-08-200924-001.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/afternoon/UI-08-210413-039.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/afternoon/UI-08-210413-057.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/afternoon/UI-08-210430-021.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/afternoon/UI-08-210430-045.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/afternoon/UI-08-210616-014.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/afternoon/UI-08-210803-078.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/afternoon/UI-FZ-220414-020.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/afternoon/UI-FZ-220421-004.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/afternoon/UI-FZ-220421-019.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/afternoon/UI-FZ-220509-039.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/afternoon/UI-FZ-220509-042.webp"],
+					"evening": ["https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/evening/UI-02-170424-061.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/evening/UI-02-170827-183.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/evening/UI-02-210702-200.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/evening/UI-02-210930-035.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/evening/UI-03-171021-162.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/evening/UI-04-140527-993.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/evening/UI-04-140723-029.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/evening/UI-08-190920-000.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/evening/UI-08-200116-007.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/evening/UI-08-200116-030.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/evening/UI-08-200607-009-sunsetting.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/evening/UI-08-200612-011.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/evening/UI-08-200612-020.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/evening/UI-08-200723-002.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/evening/UI-08-200911-023.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/evening/UI-08-200925-022.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/evening/UI-08-201109-003.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/evening/UI-08-210803-015.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/evening/UI-08-210814-058.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/evening/UI-08-210819-103-evening.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/evening/UI-08-210917-004.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/evening/UI-08-220118-001.webp"],
+					"night": ["https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/evening/UI-02-170424-061.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/evening/UI-02-170827-183.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/evening/UI-02-210702-200.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/evening/UI-02-210930-035.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/evening/UI-03-171021-162.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/evening/UI-04-140527-993.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/evening/UI-04-140723-029.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/evening/UI-08-190920-000.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/evening/UI-08-200116-007.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/evening/UI-08-200116-030.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/evening/UI-08-200607-009-sunsetting.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/evening/UI-08-200612-011.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/evening/UI-08-200612-020.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/evening/UI-08-200723-002.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/evening/UI-08-200911-023.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/evening/UI-08-200925-022.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/evening/UI-08-201109-003.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/evening/UI-08-210803-015.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/evening/UI-08-210814-058.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/evening/UI-08-210819-103-evening.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/evening/UI-08-210917-004.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/favorites/tout/evening/UI-08-220118-001.webp"]
 				}
 			},
 			"browse": {
-				"tout": ["https://www.neom.com/content/dam/neom/newsroom/gallery/news-en/hrh-announces-theline-designs-cover.jpg", "https://www.neom.com/content/dam/neom/newsroom/gallery/news-en/oxagon-hackathon-pr-cover.jpg", "https://www.neom.com/content/dam/neom/newsroom/gallery/news-en/the-line-exhibition-riyadh-cover.jpg", "https://www.neom.com/content/dam/neom/newsroom/gallery/news-en/progress-jan-2023-v2-gallery.jpg", "https://www.neom.com/content/dam/neom/newsroom/gallery/neom-islands/Marc-Le-Cornu_DJI_0334_Yabou_-Island_lowres_TOURISM1.jpg", "https://www.neom.com/content/dam/neom/newsroom/gallery/neom-islands/benthouard_2019_NEOM_1326_Yabou%E2%80%99%20Island_TOURISM_lowres1.JPG", "https://www.neom.com/content/dam/neom/newsroom/gallery/news-en/the-line-public-exhibition-cover.jpg"]
+				"tout": ["https://rokwire-images.s3.us-east-2.amazonaws.com/browse/tout/UI-01-090611-004.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/browse/tout/UI-02-090428-104.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/browse/tout/UI-02-090805-329.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/browse/tout/UI-02-140813-815.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/browse/tout/UI-02-150930-435.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/browse/tout/UI-02-190619-053.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/browse/tout/UI-02-210726-677.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/browse/tout/UI-03-190627-057.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/browse/tout/UI-03-200210-145.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/browse/tout/UI-08-190214-034.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/browse/tout/UI-08-190402-004.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/browse/tout/UI-08-190402-017.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/browse/tout/UI-08-190610-074.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/browse/tout/UI-08-190612-013.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/browse/tout/UI-08-190612-017.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/browse/tout/UI-08-191002-006.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/browse/tout/UI-08-191108-010.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/browse/tout/UI-08-200127-001.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/browse/tout/UI-08-210730-052.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/browse/tout/UI-FZ-220408-034.webp", "https://rokwire-images.s3.us-east-2.amazonaws.com/browse/tout/UI-FZ-220420-001.webp"]
 			}
 		}
 	},
@@ -64,6 +64,145 @@
 			{"level":5, "key": "privacy.category.description.5", "text": "Access all features, get connected to campus, and let the app suggest tailored experiences that you and your friends can all enjoy."}
 		],
 		"categories":[
+			{
+				"title":"Events and Dining \nAround Campus",
+				"title_key": "privacy.category.event_and_dining.title",
+				"entries2": [
+					{
+						"min_level": 1,
+						"icon_resource": "view-dark",
+						"off_icon_resource": "view-dark",
+						"title" : "View Only",
+						"title_key" :"privacy.entry.event_and_dining.view.only.title",
+						"description" : "View events and dining locations around campus.",
+						"description_key" :"privacy.entry.event_and_dining.view.only.description",
+						"dataUsage" : "These features do not use or store your location.",
+						"dataUsage_key" :"privacy.entry.event_and_dining.view.only.data_usage"
+					},
+					{
+						"min_level": 2,
+						"icon_resource": "location-dark",
+						"off_icon_resource": "location-disabled-dark",
+						"title" : "Location Sharing",
+						"title_key" :"privacy.entry.event_and_dining.location.sharing.title",
+						"description" : "View events and dining locations near you.",
+						"description_key" :"privacy.entry.event_and_dining.location.sharing.description",
+						"dataUsage" : "This feature uses location services but does not store your location.",
+						"dataUsage_key" :"privacy.entry.event_and_dining.location.sharing.data_usage"
+					},
+					{
+						"min_level": 3,
+						"icon_resource": "sliders-dark",
+						"off_icon_resource": "sliders-disabled-dark",
+						"title" : "Personalizations",
+						"title_key" :"privacy.entry.event_and_dining.personalizations.title",
+						"description" : "View events and dining locations near you.",
+						"description_key" :"privacy.entry.event_and_dining.personalizations.description",
+						"dataUsage" : "This feature uses location services, personal information and items you have starred in the app.",
+						"dataUsage_key" :"privacy.entry.event_and_dining.personalizations.data_usage"
+					},
+					{
+						"min_level": 4,
+						"icon_resource": "notification-dark",
+						"off_icon_resource": "notification-disabled-dark",
+						"title" : "Notifications",
+						"title_key" :"privacy.entry.event_and_dining.notifications.title",
+						"description" : "Get notifications including reminders about events you have starred in the app.",
+						"description_key" :"privacy.entry.event_and_dining.notifications.description",
+						"dataUsage" : "This feature sends notifications utilizing location services, personal information and places you have starred in the app.",
+						"dataUsage_key" :"privacy.entry.event_and_dining.notifications.data_usage"
+					}
+				]
+			},
+			{
+				"title":"Athletics",
+				"title_key": "privacy.category.athletics.title",
+				"entries2": [
+					{
+						"min_level": 1,
+						"icon_resource": "view-dark",
+						"off_icon_resource": "view-dark",
+						"title" : "View Only",
+						"title_key" :"privacy.entry.athletics.view.only.title",
+						"description" : "See all upcoming schedules for athletic events, real-time scoring, rosters and athletic news.",
+						"description_key" :"privacy.entry.athletics.view.only.description",
+						"dataUsage" : "This feature does not use or store your location.",
+						"dataUsage_key" :"privacy.entry.athletics.view.only.data_usage"
+					},
+					{
+						"min_level": 2,
+						"icon_resource": "location-dark",
+						"off_icon_resource": "location-disabled-dark",
+						"title" : "Location Sharing",
+						"title_key" :"privacy.entry.athletics.location.sharing.title",
+						"description" : "Find seats, nearby restrooms & concession stands. See real-time parking availability and directions.",
+						"description_key" :"privacy.entry.athletics.location.sharing.description",
+						"dataUsage" : "This feature uses location services but does not store your location.",
+						"dataUsage_key" :"privacy.entry.athletics.location.sharing.data_usage"
+					},
+					{
+						"min_level": 3,
+						"icon_resource": "sliders-dark",
+						"off_icon_resource": "sliders-disabled-dark",
+						"title" : "Personalizations",
+						"title_key" :"privacy.entry.athletics.personalizations.title",
+						"description" : "Customize your experience to see schedules, rosters, scores and news for your favorite Illini teams.",
+						"description_key" :"privacy.entry.athletics.personalizations.description",
+						"dataUsage" : "This feature uses location services, personal preferences and events you have starred in the app.",
+						"dataUsage_key" :"privacy.entry.athletics.personalizations.data_usage"
+					},
+					{
+						"min_level": 4,
+						"icon_resource": "notification-dark",
+						"off_icon_resource": "notification-disabled-dark",
+						"title" : "Notifications",
+						"title_key" :"privacy.entry.athletics.notifications.title",
+						"description" : "Receive notifications of event start and final scores for your favorite teams.",
+						"description_key" :"privacy.entry.athletics.notifications.description",
+						"dataUsage" : "This feature uses location services, personal preferences and events you have starred in the app.",
+						"dataUsage_key" :"privacy.entry.athletics.notifications.data_usage"
+					},
+					{
+						"min_level": 4,
+						"icon_resource": "person-dark",
+						"off_icon_resource": "person-disabled-dark",
+						"title" : "Identity",
+						"title_key" :"privacy.entry.athletics.sharing.title",
+						"description" : "May store credit card information to buy tickets for athletic events.",
+						"description_key" :"privacy.entry.athletics.sharing.description",
+						"dataUsage" : "This feature uses location services, personal preferences, credit card information and starred items.",
+						"dataUsage_key" :"privacy.entry.athletics.sharing.data_usage"
+					}
+				]
+			},
+			{
+				"title":"Wallet",
+				"title_key": "privacy.category.wallet.title",
+				"entries2": [
+					{
+						"min_level": 4,
+						"icon_resource": "sliders-dark",
+						"off_icon_resource": "sliders-disabled-dark",
+						"title" : "Personalizations",
+						"title_key" :"privacy.entry.wallet.personalizations.title",
+						"description" : "Check your Illini ID, MTD bus pass, Illini Cash, Meal Plan balances and see past transactions.",
+						"description_key" :"privacy.entry.wallet.personalizations.description",
+						"dataUsage" : "These features use your personal university credentials.",
+						"dataUsage_key" :"privacy.entry.wallet.personalizations.data_usage"
+					},
+					{
+						"min_level": 4,
+						"icon_resource": "person-dark",
+						"off_icon_resource": "person-disabled-dark",
+						"title" : "Identity",
+						"title_key" :"privacy.entry.wallet.sharing.title",
+						"description" : "Check your Illini ID, MTD bus pass, Illini Cash, Meal Plan balances and see past transactions.",
+						"description_key" :"privacy.entry.wallet.sharing.description",
+						"dataUsage" : "These features use your personal university credentials.",
+						"dataUsage_key" :"privacy.entry.wallet.sharing.data_usage"
+					}
+				]
+			},
 			{
 				"title":"Health and Wellness",
 				"title_key": "privacy.category.health.title",
@@ -113,7 +252,7 @@
 						"off_icon_resource": "view-dark",
 						"title" : "View Only",
 						"title_key" :"privacy.entry.wayfinding.view.only.title",
-						"description" : "View a map of campus with places of interest, bus stops and schedules.",
+						"description" : "View a map of campus with places of interest, MTD bus stops and schedules.",
 						"description_key" :"privacy.entry.wayfinding.view.only.description",
 						"dataUsage" : "This feature does not use or store your location.",
 						"dataUsage_key" :"privacy.entry.wayfinding.view.only.data_usage"
@@ -124,7 +263,7 @@
 						"off_icon_resource": "location-disabled-dark",
 						"title" : "Location Sharing",
 						"title_key" :"privacy.entry.wayfinding.location.sharing.title",
-						"description" : "View a map of campus with places of interest, bus destinations and stops with bus directions.",
+						"description" : "View a map of campus with places of interest, MTD bus destinations and stops with bus directions.",
 						"description_key" :"privacy.entry.wayfinding.location.sharing.description",
 						"dataUsage" : "This feature uses location services but does not store your location.",
 						"dataUsage_key" :"privacy.entry.wayfinding.location.sharing.data_usage"
@@ -235,7 +374,7 @@
 						"off_icon_resource": "view-dark",
 						"title" : "View Only",
 						"title_key" :"privacy.entry.general.view.only.title",
-						"description" : "View your building access, campus guides, crisis help, campus reminders, due date catalog, the Twitter feed, etc.",
+						"description" : "View your building access, campus guides, crisis help, campus reminders, due date catalog, the Illinois Twitter feed, etc.",
 						"description_key" :"privacy.entry.general.view.only.description",
 						"dataUsage" : "Building access and due date catalog require a university sign in.",
 						"dataUsage_key" :"privacy.entry.general.view.only.data_usage"
@@ -246,7 +385,7 @@
 						"off_icon_resource": "location-disabled-dark",
 						"title" : "Location Sharing",
 						"title_key" :"privacy.entry.general.location.sharing.title",
-						"description" : "View your building access, campus guides, crisis help, campus reminders, due date catalog and the Twitter feed.",
+						"description" : "View your building access, campus guides, crisis help, campus reminders, due date catalog and the Illinois Twitter feed.",
 						"description_key" :"privacy.entry.general.location.sharing.description",
 						"dataUsage" : "Building access and due date catalog require a university sign in.",
 						"dataUsage_key" :"privacy.entry.general.location.sharing.data_usage"
@@ -257,7 +396,7 @@
 						"off_icon_resource": "sliders-disabled-dark",
 						"title" : "Personalizations",
 						"title_key" :"privacy.entry.general.personalizations.title",
-						"description" : "View your Research projects, building access, campus guides, crisis help, campus reminders, due date catalog, the Twitter feed, etc.",
+						"description" : "View your Research projects, building access, campus guides, crisis help, campus reminders, due date catalog, the Illinois Twitter feed, etc.",
 						"description_key" :"privacy.entry.general.personalizations.description",
 						"dataUsage" : "Research projects, building access and due date catalog require a university sign in. Your answers to a Research interest form are used to qualify you to participate in a research project.",
 						"dataUsage_key" :"privacy.entry.general.personalizations.data_usage"

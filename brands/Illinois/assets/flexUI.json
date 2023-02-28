@@ -60,6 +60,8 @@
 			"settings.login.linked.phone": ["info", "remove", "verify"],
 			"settings.login.linked.email": ["info", "remove", "verify"],
 
+			"notifications.preferences": ["appointments", "events", "athletics", "groups", "pause"],
+
 			"academics": ["gies_checklist", "new_student_checklist", "student_courses", "canvas_courses", "academics_events", "skills_self_evaluation", "due_date_catalog", "my_illini"],
 			"academics.skills_self_evaluation.features": ["authentication", "netid_login"],
 

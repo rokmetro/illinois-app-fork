@@ -58,6 +58,8 @@
 			"settings.login.linked.phone": ["info", "remove", "verify"],
 			"settings.login.linked.email": ["info", "remove", "verify"],
 
+			"notifications.preferences": ["groups", "pause"],
+
 			"academics": ["skills_self_evaluation"],
 			"academics.skills_self_evaluation.features": ["authentication"],
 

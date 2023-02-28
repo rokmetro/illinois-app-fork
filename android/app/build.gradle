@@ -65,7 +65,7 @@ android {
     }
     
     defaultConfig {
-        applicationId "edu.illinois.rokwire"
+        applicationId "com.rokmetro.university.neom"
         minSdkVersion 23
         targetSdkVersion 33
         versionCode flutterVersionCode.toInteger()
@@ -127,7 +127,7 @@ android {
         }
         illinois {
             dimension "product"
-            applicationId "edu.illinois.rokwire"
+            applicationId "com.rokmetro.university.neom"
 
             def illinoisKeysProperties = new Properties()
             def illinoisKeysPropertiesFile = rootProject.file('app/src/illinois/keys.properties')
