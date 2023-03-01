@@ -703,7 +703,7 @@ class _GroupAddImageWidgetState extends State<GroupAddImageWidget> {
             Container(
                 child: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
-                    children: <Widget>[
+                    children: [
                       Padding(
                           padding: EdgeInsets.all(10),
                           child: TextFormField(
