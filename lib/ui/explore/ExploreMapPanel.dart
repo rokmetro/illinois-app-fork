@@ -66,10 +66,9 @@ class _ExploreMapPanelState extends State<ExploreMapPanel>
   implements NotificationsListener {
 
   static const double _filterLayoutSortKey = 1.0;
-  static const ExploreItem _defaultExploreItem = ExploreItem.Events;
 
   List<ExploreItem> _exploreItems = [];
-  ExploreItem _selectedExploreItem = _defaultExploreItem;
+  late ExploreItem _selectedExploreItem;
   EventsDisplayType? _selectedEventsDisplayType;
 
   List<String>? _eventCategories;
@@ -147,6 +146,8 @@ class _ExploreMapPanelState extends State<ExploreMapPanel>
       RootPanel.notifyTabChanged,
       Storage.notifySettingChanged,
     ]);
+
+    _selectedExploreItem = _defaultExploreItem;
     
     _exploreItems = _buildExploreItems();
     _selectedExploreItem = _ensureExploreItem(widget.initialContent) ?? _ensureExploreItem(_lastExploreItem) ?? _defaultExploreItem;
@@ -179,6 +180,32 @@ class _ExploreMapPanelState extends State<ExploreMapPanel>
      NotificationService().unsubscribe(this);
     _mapExploreBarAnimationController?.dispose();
     super.dispose();
+  }
+
+  ExploreItem get _defaultExploreItem {
+    List<dynamic>? codes = FlexUI()['explore.map'];
+    if (codes != null) {
+      if (codes.contains('events')) {
+        return ExploreItem.Events;
+      } else if (codes.contains('buildings')) {
+        return ExploreItem.Buildings;
+      } else if (codes.contains('dining')) {
+        return ExploreItem.Dining;
+      } else if (codes.contains('laundry')) {
+        return ExploreItem.Laundry;
+      } else if (codes.contains('student_courses')) {
+        return ExploreItem.StudentCourse;
+      } else if (codes.contains('appointments')) {
+        return ExploreItem.Appointments;
+      } else if (codes.contains('mtd_stops')) {
+        return ExploreItem.MTDStops;
+      } else if (codes.contains('mtd_destinations')) {
+        return ExploreItem.MTDDestinations;
+      } else if (codes.contains('state_farm_wayfinding')) {
+        return ExploreItem.StateFarmWayfinding;
+      }
+    }
+    return ExploreItem.Events;
   }
 
   // NotificationsListener

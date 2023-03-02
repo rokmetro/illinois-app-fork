@@ -40,10 +40,10 @@
     "iconMedium"                            :"#FFFFFF",
     "iconDisabled"                          :"#BDBDBD",
 
-    "accentColor1"                          :"#D50032",
-    "accentColor2"                          :"#00AEC7",
-    "accentColor3"                          :"#BB16A3",
-    "accentColor4"                          :"#9318BB",
+    "accentColor1"                          :"#ebc03f",
+    "accentColor2"                          :"#ebc03f",
+    "accentColor3"                          :"#ebc03f",
+    "accentColor4"                          :"#ebc03f",
 
     "iconColor"                             :"#D50032",
 
@@ -51,10 +51,10 @@
 
     "transparentWalletColor"                : "#ff0f2040",
 
-    "eventColor"                            :"#D50032",
-    "diningColor"                           :"#FF7500",
-    "placeColor"                            :"#00AEC7",
-    "mtdColor"                              :"#2376E5",
+    "eventColor"                            :"#ebc03f",
+    "diningColor"                           :"#ebc03f",
+    "placeColor"                            :"#ebc03f",
+    "mtdColor"                              :"#ebc03f",
 
     "white"                                 :"#FFFFFF",
     "whiteTransparent01"                    :"#1AFFFFFF",

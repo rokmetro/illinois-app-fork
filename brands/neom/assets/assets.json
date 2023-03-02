@@ -853,9 +853,9 @@
 		"videos": [
 			{
 				"id": "video.tutorial.4.0",
-				"video_url": "https://rokwire-ios-beta.s3.us-east-2.amazonaws.com/Videos/illinois_app_4_0_overview.mp4",
-				"image_url": "https://rokwire-ios-beta.s3.us-east-2.amazonaws.com/Videos/illinois_app_4_0_overview.webp",
-				"cc_url": "https://rokwire-ios-beta.s3.us-east-2.amazonaws.com/Videos/illinois_app_4_0_overview.srt"
+				"video_url": "https://dev-rokmetro-assets.s3.us-east-2.amazonaws.com/university/neom/videos/neom-intro.mp4",
+				"image_url": "https://www.neom.com/content/dam/neom/newsroom/gallery/news-en/hrh-announces-theline-designs-cover.jpg",
+				"cc_url": ""
 			},
 			{
 				"id": "find.your.courses.4.1",

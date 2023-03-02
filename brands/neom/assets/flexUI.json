@@ -184,7 +184,7 @@
 				"settings.login.linked.email.info"          : { "emailLinked": true },
 				"settings.login.linked.email.remove"        : { "emailLinked": true },
 
-				"onboarding.research_questionnaire"   : { "shibbolethLoggedIn": true },
+				"onboarding.research_questionnaire"   : { "loggedIn": true, "shibbolethLoggedIn": null },
 
 				"features.login"                	  : { "loggedIn": true },
 				"features.netid_login"                : { "shibbolethLoggedIn": true }
