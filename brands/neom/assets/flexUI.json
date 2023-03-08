@@ -82,6 +82,8 @@
 			"calendar": ["settings"],
 			"calendar.settings": ["add", "prompt"],
 
+			"group": ["posts", "polls"],
+
 			"roles": ["student", "employee", "parent", "fan", "alumni", "visitor"],
 
 			"onboarding":["get_started", "video_tutorials", "privacy_statement", "privacy", "notifications_auth", "location_auth", "roles", "login_phone", "verify_phone", "confirm_phone", "research_questionnaire"],

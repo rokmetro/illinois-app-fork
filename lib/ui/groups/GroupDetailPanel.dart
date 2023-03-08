@@ -95,6 +95,10 @@ class _GroupDetailPanelState extends State<GroupDetailPanel> implements Notifica
   List<GroupPost>    _visibleGroupPosts = <GroupPost>[];
   List<Member>?      _groupAdmins;
 
+  bool               _eventsEnabled = false;
+  bool               _pollsEnabled = false;
+  bool               _postsEnabled = false;
+
   _DetailTab         _currentTab = _DetailTab.Events;
 
   GlobalKey          _lastPostKey = GlobalKey();
@@ -168,15 +172,15 @@ class _GroupDetailPanelState extends State<GroupDetailPanel> implements Notifica
   }
 
   bool get _canAddEvent {
-    return _isAdmin;
+    return _eventsEnabled && _isAdmin;
   }
 
   bool get _canCreatePost {
-    return _isAdmin || (_isMember && _group?.isMemberAllowedToCreatePost == true && FlexUI().isSharingAvailable);
+    return _postsEnabled && (_isAdmin || (_isMember && _group?.isMemberAllowedToCreatePost == true && FlexUI().isSharingAvailable));
   }
 
   bool get _canCreatePoll {
-    return _isAdmin || ((_group?.canMemberCreatePoll ?? false) && _isMember && FlexUI().isSharingAvailable);
+    return _pollsEnabled && (_isAdmin || ((_group?.canMemberCreatePoll ?? false) && _isMember && FlexUI().isSharingAvailable));
   }
 
   bool get _isResearchProject {
@@ -210,6 +214,10 @@ class _GroupDetailPanelState extends State<GroupDetailPanel> implements Notifica
       FlexUI.notifyChanged,
       Connectivity.notifyStatusChanged,
     ]);
+
+    _eventsEnabled = FlexUI()["group"]?.contains('events') ?? false;
+    _pollsEnabled = FlexUI()["group"]?.contains('polls') ?? false;
+    _postsEnabled = FlexUI()["group"]?.contains('posts') ?? false;
 
     _postId = widget.groupPostId;
     _loadGroup(loadEvents: true);
@@ -268,6 +276,9 @@ class _GroupDetailPanelState extends State<GroupDetailPanel> implements Notifica
   }
 
   void _loadEvents() {
+    if (!_eventsEnabled) {
+      return;
+    }
     setState(() {
       _updatingEvents = true;
     });
@@ -284,6 +295,9 @@ class _GroupDetailPanelState extends State<GroupDetailPanel> implements Notifica
   }
 
   void _refreshEvents() {
+    if (!_eventsEnabled) {
+      return;
+    }
     Groups().loadEvents(_group, limit: 3).then((Map<int, List<Event>>? eventsMap) {
       if (mounted) {
         setState(() {
@@ -296,6 +310,9 @@ class _GroupDetailPanelState extends State<GroupDetailPanel> implements Notifica
   }
 
   void _loadInitialPosts() {
+    if (!_postsEnabled) {
+      return;
+    }
     if ((_group != null) && _group!.currentUserIsMemberOrAdmin) {
       setState(() {
         _progress++;
@@ -377,6 +394,9 @@ class _GroupDetailPanelState extends State<GroupDetailPanel> implements Notifica
   }
 
   Future<void> _loadPolls() async {
+    if (!_pollsEnabled) {
+      return;
+    }
     String? groupId = _group?.id;
     if (StringUtils.isNotEmpty(groupId) && _group!.currentUserIsMemberOrAdmin) {
       _setPollsLoading(true);
@@ -833,12 +853,21 @@ class _GroupDetailPanelState extends State<GroupDetailPanel> implements Notifica
       String title;
       switch (tab) {
         case _DetailTab.Events:
+          if (!_eventsEnabled) {
+            continue;
+          }
           title = Localization().getStringEx("panel.group_detail.button.events.title", 'Events');
           break;
         case _DetailTab.Posts:
+          if (!_postsEnabled) {
+            continue;
+          }
           title = Localization().getStringEx("panel.group_detail.button.posts.title", 'Posts');
           break;
         case _DetailTab.Polls:
+          if (!_pollsEnabled) {
+            continue;
+          }
           title = Localization().getStringEx("panel.group_detail.button.polls.title", 'Polls');
           break;
         case _DetailTab.About:
@@ -884,6 +913,10 @@ class _GroupDetailPanelState extends State<GroupDetailPanel> implements Notifica
   }
 
   Widget _buildEvents() {
+    if (!_eventsEnabled) {
+      return Container();
+    }
+
     List<Widget> content = [];
 
 //    if (_isAdmin) {
@@ -934,6 +967,10 @@ class _GroupDetailPanelState extends State<GroupDetailPanel> implements Notifica
   }
 
   Widget _buildPosts() {
+    if (!_postsEnabled) {
+      return Container();
+    }
+
     List<Widget> postsContent = [];
 
     if (CollectionUtils.isEmpty(_visibleGroupPosts)) {
@@ -989,6 +1026,10 @@ class _GroupDetailPanelState extends State<GroupDetailPanel> implements Notifica
   }
 
   Widget _buildPolls() {
+    if (!_pollsEnabled) {
+      return Container();
+    }
+
     List<Widget> pollsContentList = [];
 
     if (CollectionUtils.isNotEmpty(_groupPolls)) {
