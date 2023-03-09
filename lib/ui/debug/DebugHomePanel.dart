@@ -160,13 +160,23 @@ class _DebugHomePanelState extends State<DebugHomePanel> implements Notification
                   Text('Beacon: $_beaconsStatus'),
                 ),
                 
-                Padding(padding: EdgeInsets.only(top: 16), child: Container(height: 1, color: Styles().colors!.surfaceAccent),),
+                Padding(padding: EdgeInsets.only(top: 16), child: Container(height: 1, color: Styles().colors?.surfaceAccent),),
 
                 ToggleRibbonButton(label: 'Disable live game check', toggled: Storage().debugDisableLiveGameCheck ?? false, onTap: _onDisableLiveGameCheckToggled),
                 ToggleRibbonButton(label: 'Display all times in Central Time', toggled: !Storage().useDeviceLocalTimeZone!, onTap: _onUseDeviceLocalTimeZoneToggled),
                 ToggleRibbonButton(label: 'Show map location source', toggled: Storage().debugMapLocationProvider ?? false, onTap: _onMapLocationProvider),
                 ToggleRibbonButton(label: 'Show map levels', toggled: Storage().debugMapShowLevels!, onTap: _onMapShowLevels),
-                    
+
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Row(mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text("Language: "),
+                      _buildLanguageSelection(),
+                    ],
+                  ),
+                ),
+
                 Container(color: Colors.white, child: Padding(padding: EdgeInsets.only(top: 16), child: Container(height: 1, color: Styles().colors!.surfaceAccent))),
                 Container(color: Colors.white, child:
                   Padding(padding: EdgeInsets.symmetric(horizontal: 10, vertical: 16), child:
@@ -741,6 +751,35 @@ class _DebugHomePanelState extends State<DebugHomePanel> implements Notification
           ),
         ])
       )
+    );
+  }
+
+  Widget _buildLanguageSelection() {
+    List<DropdownMenuItem<String?>> options = [
+      DropdownMenuItem<String?>(
+        value: null,
+        child: Text('Default'),
+      )
+    ];
+    options.addAll(Localization().supportedLocales().map<DropdownMenuItem<String?>>((Locale value) {
+      return DropdownMenuItem<String?>(
+        value: value.toString(),
+        child: Text(value.toString()),
+      );
+    }).toList());
+    return DropdownButton<String?>(
+      value: Storage().appSelectedLanguage,
+      onChanged: (String? value) {
+        setState(() {
+          Storage().appSelectedLanguage = value;
+          if (value != null) {
+            Localization().currentLocale = Locale(value);
+          } else {
+            Localization().currentLocale = null;
+          }
+        });
+      },
+      items: options,
     );
   }
 

@@ -126,76 +126,17 @@ class _GroupPostDetailPanelState extends State<GroupPostDetailPanel> implements 
 
   Widget _buildContent(){
     return Stack(children: [
-      Stack(alignment: Alignment.topCenter, children: [
-        SingleChildScrollView(key: _scrollContainerKey, controller: _scrollController, child:
+      SingleChildScrollView(key: _scrollContainerKey, controller: _scrollController, child:
         Column(children: [
-          Container(height: _sliverHeaderHeight ?? 0,),
+          Container(height: 16),
           _isEditMainPost || StringUtils.isNotEmpty(_post?.imageUrl)
             ? ImageChooserWidget(key: _postImageHolderKey, imageUrl: _post?.imageUrl, buttonVisible: _isEditMainPost, onImageChanged: (url) => _mainPostUpdateData?.imageUrl = url,)
             : Container(),
           _buildPostContent(),
           _buildRepliesSection(),
           _buildPostEdit(),
-          ],)),
-          Container(key: _sliverHeaderKey, color: Styles().colors!.background, padding: EdgeInsets.only(left: _outerPadding, bottom: 3), child:
-            Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
-              Row(children: [
-                Expanded(child:
-                  Semantics(sortKey: OrdinalSortKey(1), container: true, child:
-                    Text(StringUtils.ensureNotEmpty(_post?.subject), maxLines: 5, overflow: TextOverflow.ellipsis, style:
-                      TextStyle(fontFamily: Styles().fontFamilies!.bold, fontSize: 24, color: Styles().colors!.fillColorPrimary)
-                    )
-                  )
-                ),
-
-                Visibility(
-                  visible: Config().showGroupPostReactions && (widget.group?.currentUserHasPermissionToSendReactions == true),
-                  child: Padding(
-                    padding: EdgeInsets.only(left: 8, top: 22, bottom: 10, right: 8),
-                    child: GroupPostReaction(
-                      groupID: widget.group?.id,
-                      post: _post,
-                      reaction: thumbsUpReaction,
-                      accountIDs: _post?.reactions[thumbsUpReaction],
-                      selectedIconKey: 'thumbs-up-filled',
-                      deselectedIconKey: 'thumbs-up-outline-gray',
-                      // onTapEnabled: _canSendReaction,
-                    ),
-                  ),
-                ),
-
-                Visibility(visible: _isEditPostVisible && !widget.hidePostOptions, child:
-                  Semantics(container: true, sortKey: OrdinalSortKey(5), child:
-                    Container(child:
-                      Semantics(label: Localization().getStringEx('panel.group.detail.post.reply.edit.label', "Edit"), button: true, child:
-                        GestureDetector(onTap: _onTapEditMainPost, child:
-                          Padding(padding: EdgeInsets.only(left: 8, top: 22, bottom: 10, right: 8), child:
-                            Styles().images?.getImage('edit', excludeFromSemantics: true))))))),
-
-                Visibility(visible: _isDeletePostVisible && !widget.hidePostOptions, child:
-                  Semantics(container: true, sortKey: OrdinalSortKey(5), child:
-                    Container(child:
-                      Semantics(label: Localization().getStringEx('panel.group.detail.post.reply.delete.label', "Delete"), button: true, child:
-                        GestureDetector(onTap: _onTapDeletePost, child:
-                            Padding(padding: EdgeInsets.only(left: 8, top: 22, bottom: 10, right: 8), child:
-                              Styles().images?.getImage('trash', excludeFromSemantics: true))))))),
-
-                Visibility(visible: _isReportAbuseVisible && !widget.hidePostOptions, child:
-                  Semantics(label: Localization().getStringEx('panel.group.detail.post.button.report.label', "Report"), button: true, child:
-                    GestureDetector( onTap: () => _onTapReportAbusePostOptions(), child:
-                        Padding(padding: EdgeInsets.only(left: 8, top: 22, bottom: 10, right: 8), child:
-                          Styles().images?.getImage('feedback', excludeFromSemantics: true))))),
-
-                Visibility(visible: _isReplyVisible && !widget.hidePostOptions, child:
-                  Semantics(label: Localization().getStringEx('panel.group.detail.post.reply.reply.label', "Reply"), button: true, child:
-                    GestureDetector(onTap: _onTapHeaderReply, child:
-                        Padding(padding: EdgeInsets.only(left: 8, top: 22, bottom: 10, right: 16), child:
-                          Styles().images?.getImage('reply', excludeFromSemantics: true))))),
-
-              ]),
-            ])
-          )
-      ]),
+        ])
+      ),
       Visibility(
           visible: _loading,
           child: Center(child: CircularProgressIndicator())),
@@ -208,16 +149,85 @@ class _GroupPostDetailPanelState extends State<GroupPostDetailPanel> implements 
     return Semantics(
         sortKey: OrdinalSortKey(4),
         container: true,
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Padding(
-                  padding: EdgeInsets.only(
-                      left: _outerPadding,
-                      top: 0,
-                      right: _outerPadding),
-                  child: Card(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Material(elevation: 4, borderRadius: BorderRadius.circular(8),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Container(key: _sliverHeaderKey, child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16),
+                    child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Flexible(flex: 1,
+                          child: Text(StringUtils.ensureNotEmpty(_post?.member?.displayShortName),
+                              style: TextStyle(fontFamily: Styles().fontFamilies!.medium, fontSize: 14, color: Styles().colors!.fillColorPrimary)),
+                        ),
+                        SizedBox(width: 8),
+                        Flexible(flex: 1,
+                          child: Row(crossAxisAlignment: CrossAxisAlignment.center, mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                            Visibility(
+                              visible: Config().showGroupPostReactions && (widget.group?.currentUserHasPermissionToSendReactions == true),
+                              child: GroupPostReaction(
+                                groupID: widget.group?.id,
+                                post: _post,
+                                reaction: thumbsUpReaction,
+                                accountIDs: _post?.reactions[thumbsUpReaction],
+                                selectedIconKey: 'thumbs-up-filled',
+                                deselectedIconKey: 'thumbs-up-outline-gray',
+                                // onTapEnabled: _canSendReaction,
+                              ),
+                            ),
+
+                            Visibility(visible: _isEditPostVisible && !widget.hidePostOptions, child:
+                              Semantics(container: true, sortKey: OrdinalSortKey(5), child:
+                                Container(child:
+                                  Semantics(label: Localization().getStringEx('panel.group.detail.post.reply.edit.label', "Edit"), button: true, child:
+                                    GestureDetector(onTap: _onTapEditMainPost, child:
+                                      Styles().images?.getImage('edit', excludeFromSemantics: true)
+                                    )
+                                  )
+                                )
+                              )
+                            ),
+
+                            Visibility(visible: _isDeletePostVisible && !widget.hidePostOptions, child:
+                              Semantics(container: true, sortKey: OrdinalSortKey(5), child:
+                                Container(child:
+                                  Semantics(label: Localization().getStringEx('panel.group.detail.post.reply.delete.label', "Delete"), button: true, child:
+                                    GestureDetector(onTap: _onTapDeletePost, child:
+                                      Styles().images?.getImage('trash', excludeFromSemantics: true)))))),
+
+                            Visibility(visible: _isReportAbuseVisible && !widget.hidePostOptions, child:
+                              Semantics(label: Localization().getStringEx('panel.group.detail.post.button.report.label', "Report"), button: true, child:
+                                GestureDetector( onTap: () => _onTapReportAbusePostOptions(), child:
+                                  Styles().images?.getImage('feedback', excludeFromSemantics: true)))),
+
+                            Visibility(visible: _isReplyVisible && !widget.hidePostOptions, child:
+                              Semantics(label: Localization().getStringEx('panel.group.detail.post.reply.reply.label', "Reply"), button: true, child:
+                                GestureDetector(onTap: _onTapHeaderReply, child:
+                                  Styles().images?.getImage('reply', excludeFromSemantics: true)))),
+                          ]),
+                        ),
+                      ],
+                    ),
+                  ),
+                ])
+              ),
+                Padding(
+                    padding: EdgeInsets.only(
+                        left: _outerPadding,
+                        top: 0,
+                        right: _outerPadding),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        Semantics(sortKey: OrdinalSortKey(1), container: true, child:
+                          Text(StringUtils.ensureNotEmpty(_post?.subject), maxLines: 5, overflow: TextOverflow.ellipsis, style:
+                            TextStyle(fontFamily: Styles().fontFamilies!.bold, fontSize: 24, color: Styles().colors!.fillColorPrimary)
+                          )
+                        ),
+
                         Visibility(visible: !_isEditMainPost,
                             child: Semantics(
                                 container: true,
@@ -262,24 +272,8 @@ class _GroupPostDetailPanelState extends State<GroupPostDetailPanel> implements 
                                             backgroundColor: Styles().colors!.white,
                                             onTap: _onTapUpdateMainPost)),
                                   ])
-
-
                                 ])),
-                        Semantics(
-                            sortKey: OrdinalSortKey(2),
-                            container: true,
-                            child: Padding(
-                                padding: EdgeInsets.only(top: 4, right: _outerPadding),
-                                child: Text(
-                                    StringUtils.ensureNotEmpty(
-                                        _post?.member?.displayShortName ),
-                                    style: TextStyle(
-                                        fontFamily:
-                                        Styles().fontFamilies!.medium,
-                                        fontSize: 20,
-                                        color: Styles()
-                                            .colors!
-                                            .fillColorPrimary)))),
+
                         Semantics(
                             sortKey: OrdinalSortKey(3),
                             container: true,
@@ -309,10 +303,10 @@ class _GroupPostDetailPanelState extends State<GroupPostDetailPanel> implements 
                             });
                           },)
                       ],
-                    ),
-                  )),
-
-            ]));
+                    )),
+                ]),
+          ),
+        ));
   }
 
   void _loadMembersAllowedToPost() {
@@ -340,7 +334,7 @@ class _GroupPostDetailPanelState extends State<GroupPostDetailPanel> implements 
             bottom: _outerPadding),
         child: _buildRepliesWidget(replies: replies, focusedReplyId: _focusedReply?.id, showRepliesCount: _focusedReply == null));
   }
-  
+
   List<GroupPost> _generateFocusedThreadList(){
     List<GroupPost> result = [];
     if(CollectionUtils.isNotEmpty(widget.replyThread)){
@@ -349,7 +343,7 @@ class _GroupPostDetailPanelState extends State<GroupPostDetailPanel> implements 
     if(_focusedReply!=null){
       result.add(_focusedReply!);
     }
-    
+
     return result;
   }
 
@@ -436,7 +430,7 @@ class _GroupPostDetailPanelState extends State<GroupPostDetailPanel> implements 
       String? optionsIconPath;
       void Function()? optionsFunctionTap;
       if (_isReplyVisible) {
-        optionsIconPath = 'options';
+        optionsIconPath = 'more';
         optionsFunctionTap = () => _onTapReplyOptions(reply);
       }
       replyWidgetList.add(
@@ -826,7 +820,7 @@ class _GroupPostDetailPanelState extends State<GroupPostDetailPanel> implements 
   void _onTapSend() {
     Analytics().logSelect(target: 'Send');
     FocusScope.of(context).unfocus();
-    
+
     String? body = _replyEditData?.body;
     String? imageUrl;
 
@@ -838,7 +832,7 @@ class _GroupPostDetailPanelState extends State<GroupPostDetailPanel> implements 
       return;
     }
     String htmlModifiedBody = HtmlUtils.replaceNewLineSymbols(body);
-    
+
     _setLoading(true);
     if (_editingReply != null) {
       imageUrl = StringUtils.isNotEmpty(_replyEditData?.imageUrl) ? _replyEditData?.imageUrl : _editingReply?.imageUrl;
@@ -859,7 +853,7 @@ class _GroupPostDetailPanelState extends State<GroupPostDetailPanel> implements 
       else if (_post != null) {
         parentId = _post!.id;
       }
-      
+
       GroupPost post = GroupPost(parentId: parentId, body: htmlModifiedBody, private: true, imageUrl: imageUrl); // if no parentId then this is a new post for the group.
       Groups().createPost(widget.group?.id, post).then((succeeded) {
         _onSendFinished(succeeded);

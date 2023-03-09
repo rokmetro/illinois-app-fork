@@ -84,7 +84,7 @@ class _HomeWelcomeWidgetState extends State<HomeWelcomeWidget> {
               Padding(padding: EdgeInsets.only(left: 16), child:
                 Text(Localization().getStringEx("widget.home.welcome.text.title", 'Welcome to {{app_title}} {{app_version}}').
                   replaceAll('{{app_title}}', Localization().getStringEx('app.title', 'Illinois')).
-                  replaceAll('{{app_version}}', Config().appMasterVersion ?? ''),
+                  replaceAll('{{app_version}}', (int.tryParse(Config().appMasterVersion ?? '') ?? 0) > 1 ? Config().appMasterVersion ?? '' : ''),
                   style: TextStyle(color: Styles().colors!.textColorPrimary, fontFamily: Styles().fontFamilies!.extraBold, fontSize: 20, ),),
               ),
             ),

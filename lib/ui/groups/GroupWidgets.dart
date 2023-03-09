@@ -1410,110 +1410,107 @@ class _GroupReplyCardState extends State<GroupReplyCard> with NotificationsListe
     return Semantics(container: true, button: true,
       child:GestureDetector(
         onTap: widget.onCardTap ?? _onTapCard,
-         child:Container(
-        decoration: BoxDecoration(
-            color: Styles().colors!.white,
-            boxShadow: [BoxShadow(color: Styles().colors!.blackTransparent018!, spreadRadius: 2.0, blurRadius: 6.0, offset: Offset(2, 2))],
-            borderRadius: BorderRadius.all(Radius.circular(8))),
-        child: Padding(
-            padding: EdgeInsets.all(12),
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Row(children: [
-                Semantics( child:
-                  Text(StringUtils.ensureNotEmpty(widget.reply?.member?.displayShortName),
-                    style: Styles().textStyles?.getTextStyle("widget.card.title.small.fat")),
-                ),
-                Expanded(child: Container()),
-                Visibility(
-                  visible: Config().showGroupPostReactions &&
-                      (widget.group?.currentUserHasPermissionToSendReactions == true),
-                  child: GroupPostReaction(
-                    groupID: widget.group?.id,
-                    post: widget.reply,
-                    reaction: thumbsUpReaction,
-                    accountIDs: widget.reply?.reactions[thumbsUpReaction],
-                    selectedIconKey: 'thumbs-up-filled',
-                    deselectedIconKey: 'thumbs-up-outline-gray',
-                  ),
-                ),
-                Visibility(
-                    visible: StringUtils.isNotEmpty(widget.iconPath),
-                    child: Semantics( child:Container(
-                    child: Semantics(label: widget.semanticsLabel??"", button: true,
-                    child: GestureDetector(
-                        onTap: widget.onIconTap,
-                        child: Padding(
-                            padding: EdgeInsets.only(left: 10, top: 3),
-                            child: (StringUtils.isNotEmpty(widget.iconPath) ? Styles().images?.getImage(widget.iconPath!, excludeFromSemantics: true,) : Container())))))))
-              ]),
-              Row(
-                children: [
-                  Expanded(
-                      flex: 2,
-                      child: Container(
-                          child: Semantics( child:
-                          Padding(
-                              padding: EdgeInsets.only(top: 10),
-                              child:
-                              HtmlWidget(
-                                  StringUtils.ensureNotEmpty(bodyText),
-                                  onTapUrl : (url) {_onLinkTap(url); return true;},
-                                  textStyle:  TextStyle(color: Styles().colors!.fillColorPrimary, fontFamily: Styles().fontFamilies!.regular, fontSize: 16),
-                                  customStylesBuilder: (element) => (element.localName == "span") ? {"color": ColorUtils.toHex(Styles().colors!.disabledTextColor ?? Colors.blue)}: null //Not able to use Transparent colour, it's not parsed correctly
-                                  // customStylesBuilder: (element) => (element.localName == "a") ? {"color": ColorUtils.toHex(Styles().colors!.blackTransparent018 ?? Colors.blue)} : null
-                              )
-                              // Html(
-                              //   data: bodyText,
-                              //   style: {
-                              //   "body": Style(
-                              //       color: Styles().colors!.fillColorPrimary,
-                              //       fontFamily: Styles().fontFamilies!.regular,
-                              //       fontSize: FontSize(16),
-                              //       maxLines: 3000,
-                              //       textOverflow: TextOverflow.ellipsis,
-                              //       margin: EdgeInsets.zero
-                              //   ),
-                              //   "span": Style(
-                              //       color: Styles().colors!.blackTransparent018,
-                              //       fontFamily: Styles().fontFamilies!.regular,
-                              //       fontSize: FontSize(16),
-                              //       maxLines: 1,
-                              //       textOverflow: TextOverflow.ellipsis)
-                              //   },
-                              //   onLinkTap: (url, context, attributes, element) => _onLinkTap(url))
+         child: Material(elevation: 4, borderRadius: BorderRadius.circular(8),
+           child: Padding(
+               padding: EdgeInsets.all(12),
+               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                 Row(children: [
+                   Semantics( child:
+                     Text(StringUtils.ensureNotEmpty(widget.reply?.member?.displayShortName),
+                       style: Styles().textStyles?.getTextStyle("widget.card.title.small.fat")),
+                   ),
+                   Expanded(child: Container()),
+                   Visibility(
+                     visible: Config().showGroupPostReactions &&
+                         (widget.group?.currentUserHasPermissionToSendReactions == true),
+                     child: GroupPostReaction(
+                       groupID: widget.group?.id,
+                       post: widget.reply,
+                       reaction: thumbsUpReaction,
+                       accountIDs: widget.reply?.reactions[thumbsUpReaction],
+                       selectedIconKey: 'thumbs-up-filled',
+                       deselectedIconKey: 'thumbs-up-outline-gray',
+                     ),
+                   ),
+                   Visibility(
+                       visible: StringUtils.isNotEmpty(widget.iconPath),
+                       child: Semantics( child:Container(
+                       child: Semantics(label: widget.semanticsLabel??"", button: true,
+                       child: GestureDetector(
+                           onTap: widget.onIconTap,
+                           child: Padding(
+                               padding: EdgeInsets.only(left: 10, top: 3),
+                               child: (StringUtils.isNotEmpty(widget.iconPath) ? Styles().images?.getImage(widget.iconPath!, excludeFromSemantics: true,) : Container())))))))
+                 ]),
+                 Row(
+                   children: [
+                     Expanded(
+                         flex: 2,
+                         child: Container(
+                             child: Semantics( child:
+                             Padding(
+                                 padding: EdgeInsets.only(top: 10),
+                                 child:
+                                 HtmlWidget(
+                                     StringUtils.ensureNotEmpty(bodyText),
+                                     onTapUrl : (url) {_onLinkTap(url); return true;},
+                                     textStyle:  TextStyle(color: Styles().colors!.fillColorPrimary, fontFamily: Styles().fontFamilies!.regular, fontSize: 16),
+                                     customStylesBuilder: (element) => (element.localName == "span") ? {"color": ColorUtils.toHex(Styles().colors!.disabledTextColor ?? Colors.blue)}: null //Not able to use Transparent colour, it's not parsed correctly
+                                     // customStylesBuilder: (element) => (element.localName == "a") ? {"color": ColorUtils.toHex(Styles().colors!.blackTransparent018 ?? Colors.blue)} : null
+                                 )
+                                 // Html(
+                                 //   data: bodyText,
+                                 //   style: {
+                                 //   "body": Style(
+                                 //       color: Styles().colors!.fillColorPrimary,
+                                 //       fontFamily: Styles().fontFamilies!.regular,
+                                 //       fontSize: FontSize(16),
+                                 //       maxLines: 3000,
+                                 //       textOverflow: TextOverflow.ellipsis,
+                                 //       margin: EdgeInsets.zero
+                                 //   ),
+                                 //   "span": Style(
+                                 //       color: Styles().colors!.blackTransparent018,
+                                 //       fontFamily: Styles().fontFamilies!.regular,
+                                 //       fontSize: FontSize(16),
+                                 //       maxLines: 1,
+                                 //       textOverflow: TextOverflow.ellipsis)
+                                 //   },
+                                 //   onLinkTap: (url, context, attributes, element) => _onLinkTap(url))
 
-                          )))),
-                  StringUtils.isEmpty(widget.reply?.imageUrl)? Container() :
-                  Expanded(
-                      flex: 1,
-                      child: Semantics (
-                        button: true, label: "Image",
-                       child: Container(
-                          padding: EdgeInsets.only(left: 8, bottom: 8, top: 8),
-                          child: SizedBox(
-                          width: _smallImageSize,
-                          height: _smallImageSize,
-                           child: ModalImageHolder(child: Image.network(widget.reply!.imageUrl!, excludeFromSemantics: true, fit: BoxFit.fill,)),),))
-                  )
-                ],),
-              Container(
-                    padding: EdgeInsets.only(top: 12),
-                    child: Row(children: [
-                      Expanded(
+                             )))),
+                     StringUtils.isEmpty(widget.reply?.imageUrl)? Container() :
+                     Expanded(
+                         flex: 1,
+                         child: Semantics (
+                           button: true, label: "Image",
                           child: Container(
-                            child: Semantics(child: Text(StringUtils.ensureNotEmpty(widget.reply?.displayDateTime),
-                                semanticsLabel: "Updated ${widget.reply?.displayDateTime ?? ""} ago",
-                                style: Styles().textStyles?.getTextStyle('widget.description.small'))),)),
-                      Visibility(
-                        visible: isRepliesLabelVisible,
-                        child: Expanded(child: Container(
-                          child: Semantics(child: Text("$visibleRepliesCount $repliesLabel",
-                              textAlign: TextAlign.right,
-                              style: Styles().textStyles?.getTextStyle('widget.description.small_underline')
-                        ))),
-                      ))
-                ],),)
-            ])))));
+                             padding: EdgeInsets.only(left: 8, bottom: 8, top: 8),
+                             child: SizedBox(
+                             width: _smallImageSize,
+                             height: _smallImageSize,
+                              child: ModalImageHolder(child: Image.network(widget.reply!.imageUrl!, excludeFromSemantics: true, fit: BoxFit.fill,)),),))
+                     )
+                   ],),
+                 Container(
+                       padding: EdgeInsets.only(top: 12),
+                       child: Row(children: [
+                         Expanded(
+                             child: Container(
+                               child: Semantics(child: Text(StringUtils.ensureNotEmpty(widget.reply?.displayDateTime),
+                                   semanticsLabel: "Updated ${widget.reply?.displayDateTime ?? ""} ago",
+                                   style: Styles().textStyles?.getTextStyle('widget.description.small'))),)),
+                         Visibility(
+                           visible: isRepliesLabelVisible,
+                           child: Expanded(child: Container(
+                             child: Semantics(child: Text("$visibleRepliesCount $repliesLabel",
+                                 textAlign: TextAlign.right,
+                                 style: Styles().textStyles?.getTextStyle('widget.description.small_underline')
+                           ))),
+                         ))
+                   ],),)
+               ])),
+         )));
   }
 
   void _onLinkTap(String? url) {
