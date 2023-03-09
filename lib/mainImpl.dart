@@ -234,7 +234,6 @@ class _AppState extends State<App> with TickerProviderStateMixin implements Noti
       Auth2.notifyUserDeleted,
       Auth2UserPrefs.notifyPrivacyLevelChanged,
       AppLifecycle.notifyStateChanged,
-      Localization.notifyLocaleChanged,
     ]);
 
     _initializeError = widget.initializeError;
@@ -431,9 +430,6 @@ class _AppState extends State<App> with TickerProviderStateMixin implements Noti
       _resetUI();
     }
     else if (name == Auth2.notifyUserDeleted) {
-      _resetUI();
-    }
-    else if (name == Localization.notifyLocaleChanged) {
       _resetUI();
     }
     else if (name == Storage.notifySettingChanged) {

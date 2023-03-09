@@ -770,13 +770,8 @@ class _DebugHomePanelState extends State<DebugHomePanel> implements Notification
     return DropdownButton<String?>(
       value: Storage().appSelectedLanguage,
       onChanged: (String? value) {
-        setState(() {
-          Storage().appSelectedLanguage = value;
-          if (value != null) {
-            Localization().currentLocale = Locale(value);
-          } else {
-            Localization().currentLocale = null;
-          }
+        Localization().selectLanguage(value).then((_) {
+          NotificationService().notify(Config.notifyResetUI);
         });
       },
       items: options,
