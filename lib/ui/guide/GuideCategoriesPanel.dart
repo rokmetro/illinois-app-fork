@@ -117,10 +117,11 @@ class _GuideCategoriesPanelState extends State<GuideCategoriesPanel> implements 
     if ((_categories != null) && (0 < _categories!.length) && (_categorySections != null)) {
       List<Widget> contentList = <Widget>[];
       for (String category in _categories!) {
-        contentList.add(_buildHeading(category));
+        List<Widget> categorySections = <Widget>[];
         for (GuideSection section in _categorySections![category]!) {
-          contentList.add(_buildEntry(section, category: category));
+          categorySections.add(_buildEntry(section, category: category));
         }
+        contentList.add(_buildHeading(category, categorySections));
       }
 
       return SingleChildScrollView(child:
@@ -141,24 +142,54 @@ class _GuideCategoriesPanelState extends State<GuideCategoriesPanel> implements 
 
   }
 
-  Widget _buildHeading(String category) {
-    
-    return GestureDetector(onTap: () => _onTapCategory(category), child:
-      Padding(padding: EdgeInsets.only(left: 16, right: 16, top: 32, bottom: 4), child:
-      Semantics(hint: "Heading", child:
-        Row(children: [
-          Expanded(child:
-            Text(category, style: TextStyle(color: Styles().colors!.fillColorPrimary, fontSize: 20, fontFamily: Styles().fontFamilies!.bold),)
+  Widget _buildHeading(String category, List<Widget> children) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 16.0),
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: Stack(
+              children: [
+                Positioned(top: 0, left: 0, right: 0,
+                  child: Styles().images?.getImage('campus_guide.$category', height: 120, fit: BoxFit.cover) ??
+                      Container(color: Styles().colors?.fillColorSecondary),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 60),
+                  child: Container(height: 60, color: Styles().colors?.fillColorPrimary?.withOpacity(0.6)),
+                ),
+              ],
+            ),
           ),
-          ],),
-        )
+          Theme(
+            data: ThemeData().copyWith(dividerColor: Colors.transparent, unselectedWidgetColor: Styles().colors?.textLight),
+            child: ExpansionTile(
+              tilePadding: EdgeInsets.only(top: 60, left: 16, right: 16),
+              title: Text(category, style: TextStyle(color: Styles().colors?.textLight, fontSize: 20, fontFamily: Styles().fontFamilies?.bold)),
+              iconColor: Styles().colors?.fillColorSecondary,
+              childrenPadding: EdgeInsets.only(top: 8, bottom: 16),
+              children: children,
+            ),
+          ),
+        ],
       ),
     );
+    // return GestureDetector(onTap: () => _onTapCategory(category), child:
+    //   Padding(padding: EdgeInsets.only(left: 16, right: 16, top: 32, bottom: 4), child:
+    //     Semantics(hint: "Heading", child:
+    //       Row(children: [
+    //         Expanded(child:
+    //           Text(category, style: TextStyle(color: Styles().colors!.fillColorPrimary, fontSize: 20, fontFamily: Styles().fontFamilies!.bold),)
+    //         ),
+    //       ]),
+    //     )
+    //   ),
+    // );
   }
 
   Widget _buildEntry(GuideSection section, { String? category }) {
     return GestureDetector(onTap: () => _onTapSection(section, category: category), child:
-      Padding(padding: EdgeInsets.only(left:16, right: 16, top: 4), child:
+      Padding(padding: EdgeInsets.only(top: 4), child:
         Container(color: Styles().colors!.fillColorPrimary, child:
           Padding(padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16), child:
             Semantics(button: true, child:

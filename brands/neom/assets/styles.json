@@ -737,6 +737,23 @@
     "payment-credit-card": {"src": "images/icon-payment-type-credit-card.png", "type": "flutter.asset"},
     "payment-cash": {"src": "images/icon-payment-type-cache.png", "type": "flutter.asset"},
     "payment-google-pay": {"src": "images/icon-payment-type-google-pay.png", "type": "flutter.asset"},
-    "payment-apple-pay": {"src": "images/icon-payment-type-apple-pay.png", "type": "flutter.asset"}
+    "payment-apple-pay": {"src": "images/icon-payment-type-apple-pay.png", "type": "flutter.asset"},
+
+    "campus_guide.Academic Support": {"src": "https://dev-rokmetro-assets.s3.us-east-2.amazonaws.com/university/neom/images/guide/academics.jpg", "type": "flutter.network"},
+    "campus_guide.App Help": {"src": "https://dev-rokmetro-assets.s3.us-east-2.amazonaws.com/university/neom/images/guide/phone.jpg", "type": "flutter.network"},
+    "campus_guide.Campus Reminders": {"src": "https://dev-rokmetro-assets.s3.us-east-2.amazonaws.com/university/neom/images/guide/clock.jpg", "type": "flutter.network"},
+    "campus_guide.Campus Rules & Protocol": {"src": "https://dev-rokmetro-assets.s3.us-east-2.amazonaws.com/university/neom/images/guide/rules.jpg", "type": "flutter.network"},
+    "campus_guide.Career": {"src": "https://dev-rokmetro-assets.s3.us-east-2.amazonaws.com/university/neom/images/guide/career.jpg", "type": "flutter.network"},
+    "campus_guide.Diversity & Inclusion": {"src": "https://dev-rokmetro-assets.s3.us-east-2.amazonaws.com/university/neom/images/guide/diversity.jpg", "type": "flutter.network"},
+    "campus_guide.Finance & Legal": {"src": "https://dev-rokmetro-assets.s3.us-east-2.amazonaws.com/university/neom/images/guide/career.jpg", "type": "flutter.network"},
+    "campus_guide.Health & Wellness": {"src": "https://dev-rokmetro-assets.s3.us-east-2.amazonaws.com/university/neom/images/guide/health.jpg", "type": "flutter.network"},
+    "campus_guide.Involvement": {"src": "https://dev-rokmetro-assets.s3.us-east-2.amazonaws.com/university/neom/images/guide/involvement.jpg", "type": "flutter.network"},
+    "campus_guide.Living Spaces": {"src": "https://dev-rokmetro-assets.s3.us-east-2.amazonaws.com/university/neom/images/guide/room.jpg", "type": "flutter.network"},
+    "campus_guide.Maps": {"src": "https://dev-rokmetro-assets.s3.us-east-2.amazonaws.com/university/neom/images/guide/map.jpg", "type": "flutter.network"},
+    "campus_guide.Neom U": {"src": "https://dev-rokmetro-assets.s3.us-east-2.amazonaws.com/university/neom/images/guide/book.jpg", "type": "flutter.network"},
+    "campus_guide.Religion & Spirituality": {"src": "https://dev-rokmetro-assets.s3.us-east-2.amazonaws.com/university/neom/images/guide/religion.jpg", "type": "flutter.network"},
+    "campus_guide.Safety": {"src": "https://dev-rokmetro-assets.s3.us-east-2.amazonaws.com/university/neom/images/guide/safety.jpg", "type": "flutter.network"},
+    "campus_guide.Technology": {"src": "https://dev-rokmetro-assets.s3.us-east-2.amazonaws.com/university/neom/images/guide/technology.jpg", "type": "flutter.network"},
+    "campus_guide.Transportation": {"src": "https://dev-rokmetro-assets.s3.us-east-2.amazonaws.com/university/neom/images/guide/car.jpg", "type": "flutter.network"}
   }
 }

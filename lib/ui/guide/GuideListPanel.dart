@@ -245,6 +245,10 @@ class _GuideListPanelState extends State<GuideListPanel> implements Notification
         colWidgets.add(Row(children: rowWidgets));
       }
 
+      if (rowWidgets.isEmpty && colWidgets.isEmpty) {
+        return Container();
+      }
+
       return Container(height: (32 * 2 + (12 * 3 + 50 + 16)).toDouble(), child:
         SingleChildScrollView(child:
           Padding(padding: EdgeInsets.symmetric(horizontal: 16, vertical: 32), child:

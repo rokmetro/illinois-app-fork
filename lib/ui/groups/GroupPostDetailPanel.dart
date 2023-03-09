@@ -214,100 +214,102 @@ class _GroupPostDetailPanelState extends State<GroupPostDetailPanel> implements 
                       left: _outerPadding,
                       top: 0,
                       right: _outerPadding),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Visibility(visible: !_isEditMainPost,
-                          child: Semantics(
-                              container: true,
-                              child:
-                              HtmlWidget(
-                                  StringUtils.ensureNotEmpty(_post?.body),
-                                  onTapUrl : (url) {_onTapPostLink(url); return true;},
-                                  textStyle:  TextStyle(color: Styles().colors!.fillColorPrimary, fontFamily: Styles().fontFamilies!.regular, fontSize: 20),
-                              )
-                          )),
-                      Visibility(
-                          visible: _isEditMainPost,
-                          child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Container(
-                                    padding: EdgeInsets.only(top: 8, bottom: _outerPadding),
-                                    child: TextField(
-                                        onChanged: (txt) => _mainPostUpdateData?.body = txt,
-                                        controller: bodyController,
-                                        maxLines: null,
-                                        autofocus: true,
-                                        decoration: InputDecoration(
-                                            hintText: Localization().getStringEx("panel.group.detail.post.edit.hint", "Edit the post"),
-                                            border: OutlineInputBorder(
-                                                borderSide: BorderSide(
-                                                    color: Styles().colors!.mediumGray!,
-                                                    width: 0.0))),
-                                        style: TextStyle(
-                                            color: Styles().colors!.textBackground,
-                                            fontSize: 16,
-                                            fontFamily: Styles().fontFamilies!.regular))),
-                                Row(children: [
-                                  Flexible(
-                                      flex: 1,
-                                      child: RoundedButton(
-                                          label:
-                                          Localization().getStringEx('panel.group.detail.post.update.button.update.title', 'Update'),
-                                          borderColor: Styles().colors!.fillColorSecondary,
-                                          textColor: Styles().colors!.fillColorPrimary,
-                                          backgroundColor: Styles().colors!.white,
-                                          onTap: _onTapUpdateMainPost)),
-                                ])
+                  child: Card(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Visibility(visible: !_isEditMainPost,
+                            child: Semantics(
+                                container: true,
+                                child:
+                                HtmlWidget(
+                                    StringUtils.ensureNotEmpty(_post?.body),
+                                    onTapUrl : (url) {_onTapPostLink(url); return true;},
+                                    textStyle:  TextStyle(color: Styles().colors!.fillColorPrimary, fontFamily: Styles().fontFamilies!.regular, fontSize: 20),
+                                )
+                            )),
+                        Visibility(
+                            visible: _isEditMainPost,
+                            child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                      padding: EdgeInsets.only(top: 8, bottom: _outerPadding),
+                                      child: TextField(
+                                          onChanged: (txt) => _mainPostUpdateData?.body = txt,
+                                          controller: bodyController,
+                                          maxLines: null,
+                                          autofocus: true,
+                                          decoration: InputDecoration(
+                                              hintText: Localization().getStringEx("panel.group.detail.post.edit.hint", "Edit the post"),
+                                              border: OutlineInputBorder(
+                                                  borderSide: BorderSide(
+                                                      color: Styles().colors!.mediumGray!,
+                                                      width: 0.0))),
+                                          style: TextStyle(
+                                              color: Styles().colors!.textBackground,
+                                              fontSize: 16,
+                                              fontFamily: Styles().fontFamilies!.regular))),
+                                  Row(children: [
+                                    Flexible(
+                                        flex: 1,
+                                        child: RoundedButton(
+                                            label:
+                                            Localization().getStringEx('panel.group.detail.post.update.button.update.title', 'Update'),
+                                            borderColor: Styles().colors!.fillColorSecondary,
+                                            textColor: Styles().colors!.fillColorPrimary,
+                                            backgroundColor: Styles().colors!.white,
+                                            onTap: _onTapUpdateMainPost)),
+                                  ])
 
 
-                              ])),
-                      Semantics(
-                          sortKey: OrdinalSortKey(2),
-                          container: true,
-                          child: Padding(
-                              padding: EdgeInsets.only(top: 4, right: _outerPadding),
-                              child: Text(
-                                  StringUtils.ensureNotEmpty(
-                                      _post?.member?.displayShortName ),
-                                  style: TextStyle(
-                                      fontFamily:
-                                      Styles().fontFamilies!.medium,
-                                      fontSize: 20,
-                                      color: Styles()
-                                          .colors!
-                                          .fillColorPrimary)))),
-                      Semantics(
-                          sortKey: OrdinalSortKey(3),
-                          container: true,
-                          child: Padding(
-                              padding: EdgeInsets.only(top: 3, right: _outerPadding),
-                              child: Text(
-                                  StringUtils.ensureNotEmpty(
-                                      _post?.displayDateTime),
-                                  semanticsLabel:  sprintf(Localization().getStringEx("panel.group.detail.post.updated.ago.format", "Updated %s ago"),[widget.post?.displayDateTime ?? ""]),
-                                  style: TextStyle(
-                                      fontFamily:
-                                      Styles().fontFamilies!.medium,
-                                      fontSize: 16,
-                                      color: Styles()
-                                          .colors!
-                                          .fillColorPrimary)))),
-                      Container(height: 6,),
-                      GroupMembersSelectionWidget(
-                        selectedMembers: GroupMembersSelectionWidget.constructUpdatedMembersList(selection:(_isEditMainPost ? _mainPostUpdateData?.members : _post?.members), upToDateMembers: _allMembersAllowedToPost),
-                        allMembers: _allMembersAllowedToPost,
-                        enabled: _isEditMainPost,
-                        groupId: widget.group?.id,
-                        groupPrivacy: widget.group?.privacy,
-                        onSelectionChanged: (members){
-                          setStateIfMounted(() {
-                            _mainPostUpdateData?.members = members;
-                          });
-                        },)
-                    ],
+                                ])),
+                        Semantics(
+                            sortKey: OrdinalSortKey(2),
+                            container: true,
+                            child: Padding(
+                                padding: EdgeInsets.only(top: 4, right: _outerPadding),
+                                child: Text(
+                                    StringUtils.ensureNotEmpty(
+                                        _post?.member?.displayShortName ),
+                                    style: TextStyle(
+                                        fontFamily:
+                                        Styles().fontFamilies!.medium,
+                                        fontSize: 20,
+                                        color: Styles()
+                                            .colors!
+                                            .fillColorPrimary)))),
+                        Semantics(
+                            sortKey: OrdinalSortKey(3),
+                            container: true,
+                            child: Padding(
+                                padding: EdgeInsets.only(top: 3, right: _outerPadding),
+                                child: Text(
+                                    StringUtils.ensureNotEmpty(
+                                        _post?.displayDateTime),
+                                    semanticsLabel:  sprintf(Localization().getStringEx("panel.group.detail.post.updated.ago.format", "Updated %s ago"),[widget.post?.displayDateTime ?? ""]),
+                                    style: TextStyle(
+                                        fontFamily:
+                                        Styles().fontFamilies!.medium,
+                                        fontSize: 16,
+                                        color: Styles()
+                                            .colors!
+                                            .fillColorPrimary)))),
+                        Container(height: 6,),
+                        GroupMembersSelectionWidget(
+                          selectedMembers: GroupMembersSelectionWidget.constructUpdatedMembersList(selection:(_isEditMainPost ? _mainPostUpdateData?.members : _post?.members), upToDateMembers: _allMembersAllowedToPost),
+                          allMembers: _allMembersAllowedToPost,
+                          enabled: _isEditMainPost,
+                          groupId: widget.group?.id,
+                          groupPrivacy: widget.group?.privacy,
+                          onSelectionChanged: (members){
+                            setStateIfMounted(() {
+                              _mainPostUpdateData?.members = members;
+                            });
+                          },)
+                      ],
+                    ),
                   )),
 
             ]));
